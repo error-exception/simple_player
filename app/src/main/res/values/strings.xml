@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Simple Player</string>
+    <string name="settings">设置</string>
+    <string name="sound_rode">佩戴检查</string>
+    <string name="scan_music">扫描歌曲</string>
+    <string name="player_list">播放列表</string>
+    <string name="scan_music_setting">扫描设置</string>
+    <string name="music_info">歌曲信息</string>
+    <string name="edit_mp3_tag">编辑标签</string>
+    <string name="save">保存</string>
+    <string name="default_background">默认背景</string>
+    <string name="browse">浏览</string>
+    <string name="title">标题</string>
+    <string name="artist">艺术家</string>
+    <string name="unlock">解锁 >>></string>
+    <string name="play">播放</string>
+    <string name="ok">确定</string>
+    <string name="input_lyrics_here">在此输入歌词</string>
+    <string name="chat">抓取</string>
+    <string name="local_music">本地音乐</string>
+    <string name="recent_play">最近播放</string>
+    <string name="exit">退出</string>
+    <string name="cancel">取消</string>
+    <string name="album">专辑</string>
+    <string name="album_artist">专辑艺术家</string>
+    <string name="export">导出</string>
+    <string name="exchange">交换</string>
+    <string name="web_tip">在同一网络环境下访问：</string>
+    <string name="music">音乐</string>
+    <string name="music_title">音乐标题</string>
+    <string name="music_artist">音乐艺术家</string>
+    <string name="player">播放器</string>
+    <string name="about">关于</string>
+    <string name="volume_shuffle">音量键切歌</string>
+    <string name="volume_shuffle_summary">在息屏状态下，音量+切换为上一首，音量-切换为下一曲，切歌过程中不改变音量。注：本软件识别屏幕是否息屏有一定的延迟，请自行把握</string>
+    <string name="play_fade">播放淡出淡入</string>
+    <string name="second_volume">二级音量</string>
+    <string name="system_source">启用系统播放源</string>
+    <string name="system_source_summary">启用后，将使用系统提供的歌曲列表</string>
+    <string name="enable_second_volume">启用二级音量</string>
+    <string name="headset_autoplay">插入耳机自动播放</string>
+    <string name="create_play_list">创建播放列表</string>
+    <string name="list_name">列表名称</string>
+    <string name="error">错误</string>
+    <string name="wrong_name">错误名称!</string>
+    <string name="tips">提示</string>
+    <string name="the_list_existed">该列表已存在！</string>
+    <string name="create_list_failed">列表创建失败</string>
+    <string name="cache_cleared">缓存已清除</string>
+    <string name="no_cache_found">尚未发现缓存</string>
+    <string name="rename">重命名</string>
+    <string name="no">否</string>
+    <string name="yes">是</string>
+    <string name="local_list">本地列表</string>
+    <string name="i_like">我喜欢</string>
+    <string name="title_activity_music_info2">MusicInfo2</string>
+    <string name="developing">开发中…</string>
+    <string name="pause">暂停</string>
+    <string name="play_history">播放历史</string>
+    <string name="previous">上一曲</string>
+    <string name="next">下一曲</string>
+    <string name="change_music_source">切换音乐源</string>
+    <string name="title_activity_settings2">SettingsActivity2</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="option">选项</string>
+    <string name="developer">开发者</string>
+    <string name="clear_id_path">清空 id_path 表</string>
+    <string name="export_id_path">导出 id_path</string>
+    <string name="export_song_table">导出 song 表</string>
+</resources>

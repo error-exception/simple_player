@@ -1,0 +1,211 @@
+package com.simple.player.activity
+
+import android.net.Uri
+import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
+import com.simple.player.ui.theme.ComposeTestTheme
+import com.simple.player.R
+import com.simple.player.model.Song
+import com.simple.player.playlist.PlaylistManager
+import com.simple.player.ui.theme.windowBackground
+import com.simple.player.util.ArtworkProvider
+
+class MusicInfo2: AppCompatActivity() {
+
+    private var title = mutableStateOf("歌曲信息")
+    private var backIcon = mutableStateOf(R.drawable.ic_baseline_arrow_back_24)
+    private lateinit var song: Song
+    private var isAlbumExist = true
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        initData()
+        setContent {
+            ComposeTestTheme {
+                Surface (modifier = Modifier.background(windowBackground)) {
+                    Column (modifier = Modifier
+                        .fillMaxSize()
+                        .background(windowBackground)) {
+                        Toolbar(title, backIcon = backIcon, backClick = { finish() })
+                        SongInfo()
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun SongInfo() {
+
+        Column (modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()) {
+            Surface(shape = RoundedCornerShape(12.dp)) {
+                Row (modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(ArtworkProvider.getArtworkUri(song))
+                            .allowHardware(true)
+                            .allowConversionToBitmap(true)
+                            .transformations(CircleCropTransformation())
+                            .build(),
+                        modifier = Modifier.size(80.dp),
+                        contentDescription = "专辑图片",
+                        onError = {
+                            isAlbumExist = false
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column (modifier = Modifier.height(80.dp), verticalArrangement = Arrangement.Center) {
+                        Text(text = song.title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = song.artist)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Surface(shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1F)) {
+                Column (modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .weight(1F)) {
+                    for (pair in info) {
+                        Row {
+                            Text(modifier = Modifier.weight(1F), text = pair.first)
+                            Text(modifier = Modifier.weight(4F), text = pair.second)
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Surface(shape = RoundedCornerShape(12.dp)) {
+                Row (modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)) {
+                    Button(modifier = Modifier.weight(1F), onClick = edit) {
+                        Text(text = "修改封面")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(modifier = Modifier.weight(1F), onClick = export) {
+                        Text(text = "导出封面")
+                    }
+                }
+            }
+        }
+    }
+
+    private val edit = {
+
+    }
+
+    private val export: () -> Unit = {
+//        if (!isAlbumExist) {
+//            Toast.makeText(this, "当前歌曲的专辑图片不存在", Toast.LENGTH_LONG).show()
+//        }
+//        var outFile: File? = null
+//        var bit: Bitmap? = null
+//        ProgressHandler.handle(
+//            before = {
+//                Util.showProgressDialog(this, 69, "正在导出……")
+//            },
+//            after = {
+//                Util.closeProgressDialog(69)
+//                if (outFile!!.exists())
+//                    android.app.AlertDialog.Builder(this)
+//                        .setTitle("保存成功")
+//                        .setMessage("当前歌曲的专辑图片已保存在" + outFile.absolutePath + "中")
+//                        .setPositiveButton("确定", null)
+//                        .show()
+//            },
+//            handle = {
+//                val uri = ArtworkProvider.getArtworkUriString(song)
+//                if (uri != null) {
+//                    val data = FileUtil.readBytes(uri)
+//                    FileUtil.writeBytes(FileUtil.mDataDirectory, data)
+//                }
+//            }
+//        )
+    }
+
+    private var info: ArrayList<Pair<String, String>> = ArrayList()
+
+    private fun initData() {
+        val songId = intent.getLongExtra(EXTRA_MUSIC_ID, -1)
+        song = PlaylistManager.localPlaylist[songId]!!
+        info.apply {
+            this += "标题：" to song.title
+            this += "艺术家：" to song.artist
+            this += "ID：" to song.id.toString(10)
+            this += "Uri：" to Uri.decode(song.path)
+            this += "比特率：" to song.bitrate.toString(10)
+            this += "类型：" to song.type
+        }
+    }
+
+    companion object {
+        const val EXTRA_MUSIC_ID = "music_id"
+    }
+
+}
+
+
+
+@Composable
+fun Toolbar(title: MutableState<String>, optionIcon: MutableState<Int> = mutableStateOf(0), backIcon: MutableState<Int> = mutableStateOf(0), backClick: (() -> Unit)? = null, optionClick: (() -> Unit)? = null) {
+    val t by remember { title }
+    val option by remember { optionIcon }
+    val back by remember { backIcon }
+    val elevation = 8.dp
+    if (back != 0) {
+        TopAppBar(
+            elevation = elevation,
+            title = {
+                Text(text = t)
+            },
+            navigationIcon = {
+                IconButton(onClick = { backClick?.invoke() }) {
+                    Icon(painter = painterResource(id = back), contentDescription = "返回")
+                }
+            },
+            actions = {
+                if (option != 0) {
+                    IconButton(onClick = { optionClick?.invoke() }) {
+                        Icon(painter = painterResource(id = option), contentDescription = "选项", tint = Color.White)
+                    }
+                }
+            }
+        )
+    } else {
+        TopAppBar(
+            elevation = elevation,
+            title = {
+                Text(text = t)
+            },
+            actions = {
+                if (option != 0) {
+                    IconButton(onClick = { optionClick?.invoke() }) {
+                        Icon(painter = painterResource(id = option), contentDescription = "选项", tint = Color.White)
+                    }
+                }
+            }
+        )
+    }
+}

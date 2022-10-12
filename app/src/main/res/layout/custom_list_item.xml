@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:background="@drawable/custom_list_item_click">
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:id="@+id/custom_list_icon"
+        android:layout_marginLeft="8dp"
+        android:src="@drawable/ic_launcher"/>
+
+    <TextView
+        android:id="@+id/custom_list_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/custom_list_icon"
+        android:layout_weight="1.0"
+        android:padding="8dp"
+        android:text="文本"
+        android:paddingBottom="2dp"
+        android:textColor="#000000"
+        android:textSize="18sp" />
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:text="文本"
+        android:layout_width="wrap_content"
+        android:id="@+id/custom_list_song_count"
+        android:textColor="#808080"
+        android:layout_toRightOf="@id/custom_list_icon"
+        android:layout_below="@id/custom_list_name"
+        android:paddingLeft="8dp"
+        android:textSize="14sp"
+        android:layout_marginTop="6dp"/>
+
+</RelativeLayout>
+

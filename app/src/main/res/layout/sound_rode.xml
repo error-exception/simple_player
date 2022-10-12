@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"
+	android:id="@+id/sound_rode_bg"
+	android:orientation="vertical"
+	android:padding="16dp"
+	android:gravity="center">
+
+	<LinearLayout
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:orientation="horizontal"
+		android:background="@drawable/shape_corner_white_12dp"
+		android:padding="16dp">
+
+		<com.simple.player.view.IconButton
+			android:layout_width="96dp"
+			android:layout_height="96dp"
+			android:text="\ue5c4"
+            android:textSize="32dp"
+            android:textColor="#ffffff"
+            android:id="@+id/sound_rode_left_btn"
+			android:background="@drawable/ripple_round_n_red"/>
+
+		<com.simple.player.view.IconButton
+			android:layout_width="0dp"
+			android:layout_height="96dp"
+			style="?android:attr/buttonBarButtonStyle"
+			android:text="\ue310"
+            android:textSize="32dp"
+            android:textColor="#808080"
+			android:layout_weight="1.0"
+            android:id="@+id/sound_rode_balance_btn"/>
+
+		<com.simple.player.view.IconButton
+			android:layout_width="96dp"
+
+			android:layout_height="96dp"
+			android:text="\ue5c8"
+            android:textSize="32dp"
+            android:textColor="#ffffff"
+            android:id="@+id/sound_rode_right_btn"
+			android:background="@drawable/ripple_round_n_red"/>
+
+	</LinearLayout>
+
+</LinearLayout>
+

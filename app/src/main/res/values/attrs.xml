@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="RoundProgressBar">
+        <attr name="barWidth" format="dimension"/>
+        <attr name="barColor" format="reference|color"/>
+        <attr name="barBackgroundColor" format="reference|color"/>
+    </declare-styleable>
+
+    
+    <declare-styleable name="SimpleSeekBar">
+        <attr name="progressColor" format="color|reference"/>
+        <attr name="progressBgColor" format="color|reference"/>
+        <attr name="minHeight" format="dimension|reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="RotationProgressBar">
+        <attr name="bar_width" format="dimension"/>
+        <attr name="bar_color" format="reference|color"/>
+    </declare-styleable>
+
+</resources>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical"
+	android:background="#80000000"
+	android:paddingTop="24dp">
+
+	<LinearLayout
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:orientation="vertical"
+		android:layout_marginTop="16dp"
+		android:layout_marginStart="16dp">
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:text="00:00"
+			android:id="@+id/lock_screen_time"
+			android:layout_width="wrap_content"
+			android:typeface="monospace"
+			android:textColor="#FFFFFF"
+			android:textSize="50sp"/>
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:text="2019年6月15日"
+			android:id="@+id/lock_screen_date"
+			android:layout_width="wrap_content"
+			android:textSize="20sp"
+			android:textColor="#FFFFFF"/>
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:text="标题"
+			android:id="@+id/lock_screen_title"
+			android:layout_width="wrap_content"
+			android:textColor="#FFFFFF"
+			android:layout_marginTop="10dp"/>
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:text="艺术家"
+			android:id="@+id/lock_screen_artist"
+			android:layout_width="wrap_content"
+			android:textColor="#FFFFFF"/>
+
+	</LinearLayout>
+
+	<TextView
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:text="@string/unlock"
+		android:textSize="16sp"
+		android:typeface="monospace"
+		android:layout_marginBottom="10dp"
+		android:layout_gravity="bottom|center"
+		android:textColor="#bfFFFFFF"/>
+
+</FrameLayout>
+

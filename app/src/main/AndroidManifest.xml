@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.simple.player">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:name=".SimpleApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
+        android:theme="@style/MD.Light">
+        <activity
+            android:name=".activity.PlayHistoryActivity"
+            android:exported="true"
+            android:label="@string/play_history" />
+        <activity
+            android:name=".activity.DeveloperActivity"
+            android:exported="true"
+            android:label="@string/developer" />
+        <activity
+            android:name=".activity.SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings"
+            android:theme="@style/SettingsTheme" />
+        <activity
+            android:name=".activity.HomeActivity"
+            android:exported="true"
+            android:launchMode="singleTask" />
+        <activity
+            android:name=".activity.CheckHeadset"
+            android:exported="true"
+            android:label="@string/settings" />
+        <activity
+            android:name=".activity.PlayerContentNew"
+            android:exported="true"
+            android:label="@string/settings"
+            android:theme="@style/PlayerContentNew" />
+        <activity
+            android:name=".web.WebPlayerActivity"
+            android:exported="true"
+            android:label="@string/settings" />
+        <activity
+            android:name=".activity.ScanMusicResult"
+            android:exported="true"
+            android:label="@string/scan_music_setting" />
+        <activity
+            android:name=".activity.SplashActivity"
+            android:allowTaskReparenting="true"
+            android:alwaysRetainTaskState="true"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.PlaylistActivity"
+            android:exported="true"
+            android:label="@string/player_list" />
+        <activity
+            android:name=".activity.ScanMusicActivity"
+            android:exported="true"
+            android:label="@string/scan_music"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.MusicInfo"
+            android:exported="true"
+            android:label="@string/music_info"
+            android:theme="@style/MD.NoActionBar" />
+        <activity
+            android:name=".activity.MusicInfo2"
+            android:exported="true"
+            android:label="@string/music_info"
+            android:theme="@style/MD.NoActionBar" />
+        <activity
+            android:name=".activity.LockscreenActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:launchMode="singleInstance"
+            android:noHistory="true"
+            android:screenOrientation="portrait"
+            android:showWhenLocked="true"
+            android:taskAffinity="com.simple.player.lockscreen"
+            android:theme="@style/LockScreenBase"
+            tools:targetApi="o_mr1" />
+
+        <service
+            android:name=".service.SimpleService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection">
+            <intent-filter>
+                <action android:name="com.simple.player.SIMPLE_SERVICE" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".SimpleBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

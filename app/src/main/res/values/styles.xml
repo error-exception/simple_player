@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/n_red</item>
+        <item name="colorPrimaryDark">#cccccc</item>
+        <item name="colorAccent">#FF4081</item>
+    </style>>
+
+    <style name="Theme.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/n_red</item>
+        <item name="colorPrimaryDark">@color/n_red_darker</item>
+        <item name="colorAccent">@color/n_red</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <!-- Customize your theme here. -->
+
+    </style>
+
+    <style name="AppTheme" parent="Theme">
+        <item name="colorPrimary">#00000000</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:fitsSystemWindows">true</item>
+        <!--  <item name="android:typeface">monospace</item>  -->
+    </style>
+
+    <style name="MD.Light" parent="Theme.Light">
+
+        <item name="android:windowAnimationStyle">@style/anim_activity</item>
+        <!--<item name="android:colorButtonNormal">#ff009688</item>-->
+    </style>
+
+    <style name="MD.Dark" parent="Theme">
+
+        <item name="android:windowAnimationStyle">@style/anim_activity</item>
+        <!--<item name="android:colorButtonNormal">#ff009688</item>-->
+    </style>
+
+    <style name="MD.NoActionBar" parent="MD.Light">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="MD.NoActionBar.TransparentStateBar" parent="MD.NoActionBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:fitsSystemWindows">true</item>
+    </style>
+
+    <style name="LockScreenBase" parent="Theme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+<!--        <item name="android:windowNoTitle">true</item>-->
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:windowExitTransition">@null</item>
+        <item name="android:windowSharedElementExitTransition">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+    </style>
+
+    <style name="VideoTheme" parent="Theme">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--<item name="android:typeface">monospace</item>-->
+    </style>
+
+    <style name="SplashTheme" parent="Theme">
+        <item name="android:windowBackground">@color/n_red</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="NoTitle" parent="MD.Light">
+        <item name="android:windowNoTitle">true</item>
+        <!--<item name="android:typeface">monospace</item>-->
+    </style>
+
+    <style name="anim_activity" mce_bogus="1" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/b_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/a_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/a_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/b_out</item>
+    </style>
+
+    <style name="anim_enter_player" mce_bogus="1" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/b_up_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/a_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/a_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/b_down_out</item>
+    </style>
+
+    <style name="PlayerContent" parent="MD.Light">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+
+        <!--<item name="android:statusBarColor">@android:color/black</item>-->
+        <item name="android:windowAnimationStyle">@style/anim_enter_player</item>
+    </style>
+
+    <style name="HomeActivity" parent="MD.Light">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <!--<item name="android:statusBarColor">@android:color/black</item>-->
+    </style>
+
+    <style name="PlayerContentNew" parent="MD.Light">
+        <item name="android:windowAnimationStyle">@style/anim_enter_player</item>
+        <item name="colorPrimaryDark">#cccccc</item>
+    </style>
+
+    <style name="SettingsTheme" parent="Theme.Light">
+        <item name="colorPrimary">@color/n_red</item>
+        <item name="colorPrimaryDark">@color/n_red_darker</item>
+        <item name="colorAccent">@color/n_red</item>
+        <item name="android:textColorPrimary">@color/black</item>
+    </style>
+
+    <style name="Widget.MD.Light.MyView" parent="">
+        <item name="android:background">@color/gray_400</item>
+        <item name="exampleColor">@color/light_blue_400</item>
+    </style>
+
+
+</resources>

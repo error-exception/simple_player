@@ -1,0 +1,27 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="reply_entries">
+        <item>Reply</item>
+        <item>Reply to all</item>
+    </string-array>
+
+    <string-array name="reply_values">
+        <item>reply</item>
+        <item>reply_all</item>
+    </string-array>
+
+    <string-array name="other_playing_entries">
+        <item>无</item>
+        <item>暂停</item>
+        <item>减小音量</item>
+    </string-array>
+    <string-array name="other_playing_values">
+        <item>none</item>
+        <item>pause</item>
+        <item>vol_down</item>
+    </string-array>
+    <string-array name="music_source_entries">
+        <item>MediaStore</item>
+        <item>ExternalStorage</item>
+    </string-array>
+</resources>

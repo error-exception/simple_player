@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:descendantFocusability="blocksDescendants"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingLeft="8dp">
+
+    <com.simple.player.view.Icon
+        android:layout_height="@dimen/action_bar_height"
+        android:layout_width="@dimen/action_bar_height"
+        android:textColor="@color/n_red"
+        android:textSize="26sp"
+        android:id="@+id/optional_list_item_icon"/>
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:text="中文本"
+        android:layout_width="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingLeft="8dp"
+        android:id="@+id/optional_list_item_name"
+        android:textColor="#ff000000"
+        android:textSize="16sp"/>
+
+</LinearLayout>
+

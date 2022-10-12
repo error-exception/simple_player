@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:id="@+id/player_list_adapter_bg"
+    android:descendantFocusability="blocksDescendants"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_height="72dp"
+            android:layout_width="72dp"
+            android:scaleType="fitXY"
+            android:id="@+id/player_list_adapter_album"/>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/player_list_adapter_text"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:gravity="center_vertical"
+            android:layout_weight="1.0">
+
+            <TextView
+                android:textSize="17sp"
+                android:textColor="#000000"
+                android:id="@+id/player_list_adapter_title"
+                android:paddingLeft="10dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Time Leaper"
+                android:singleLine="true"/>
+
+            <TextView
+                android:textSize="15sp"
+                android:textColor="#808080"
+                android:id="@+id/player_list_adapter_artist"
+                android:paddingLeft="10dp"
+                android:paddingBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hinkik"
+                android:singleLine="true"/>
+
+        </LinearLayout>
+
+        <com.simple.player.view.IconButton
+            android:layout_height="match_parent"
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="\ue5d4"
+            android:textColor="#808080"
+            android:layout_width="56dp"
+            android:id="@+id/player_list_adapter_more"/>
+
+        <com.simple.player.view.SimpleCheckBox
+            android:layout_height="match_parent"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="56dp"
+            android:textSize="24sp"
+            android:id="@+id/player_list_adapter_check"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:id="@+id/player_list_adapter_button_1"
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="72dp">
+
+            <com.simple.player.view.IconButton
+                android:textSize="28sp"
+                android:textColor="#ff000000"
+                android:id="@+id/player_list_adapter_play"
+                android:background="@drawable/gray_round_item"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:text="\ue037"/>
+
+            <com.simple.player.view.IconButton
+                android:textSize="28sp"
+                android:textColor="#ff000000"
+                android:id="@+id/player_list_adapter_remove"
+                android:background="@drawable/gray_round_item"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:text="\ue15b"/>
+
+            <com.simple.player.view.IconButton
+                android:textSize="28sp"
+                android:textColor="#ff000000"
+                android:id="@+id/player_list_adapter_info"
+                android:background="@drawable/gray_round_item"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginRight="24dp"
+                android:text="\ue88f"/>
+
+            <com.simple.player.view.IconButton
+                android:textSize="28sp"
+                android:textColor="#ff000000"
+                android:id="@+id/player_list_adapter_expand"
+                android:background="@drawable/gray_round_item"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:text="\ue313"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:id="@+id/player_list_adapter_button_2"
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="72dp">
+
+            <com.simple.player.view.IconButton
+                android:textSize="28sp"
+                android:textColor="#ff000000"
+                android:id="@+id/player_list_adapter_edit"
+                android:background="@drawable/gray_round_item"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:text="\ue3c9"/>
+
+            <com.simple.player.view.IconButton
+                android:textSize="28sp"
+                android:textColor="#ff000000"
+                android:id="@+id/player_list_adapter_rename"
+                android:background="@drawable/gray_round_item"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:text="\ue165"/>
+
+            <com.simple.player.view.IconButton
+                android:textSize="28sp"
+                android:textColor="#ff000000"
+                android:id="@+id/player_list_adapter_delete"
+                android:background="@drawable/gray_round_item"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginRight="24dp"
+                android:text="\ue872"/>
+
+            <com.simple.player.view.IconButton
+                android:textSize="28sp"
+                android:textColor="#ff000000"
+                android:id="@+id/player_list_adapter_add_to"
+                android:background="@drawable/gray_round_item"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:text="\ue145"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
+

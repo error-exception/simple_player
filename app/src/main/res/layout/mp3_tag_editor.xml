@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:orientation="horizontal">
+
+		<Button
+			android:layout_height="wrap_content"
+			style="?android:attr/buttonBarButtonStyle"
+			android:text="Gallery"
+			android:id="@+id/mp3_tag_editor_gallery"
+			android:layout_width="0dp"
+			android:textSize="18sp"
+			android:layout_weight="1.0"
+			android:textColor="#FFFFFF"/>
+
+		<Button
+			android:layout_height="wrap_content"
+			style="?android:attr/buttonBarButtonStyle"
+			android:text="KuGou Music"
+			android:id="@+id/mp3_tag_editor_kugou"
+			android:layout_width="0dp"
+			android:textSize="18sp"
+			android:layout_weight="1.0"
+			android:textColor="#FFFFFF"/>
+
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_height="0dp"
+		android:layout_width="match_parent"
+		android:orientation="vertical"
+		android:layout_weight="1.0"
+		android:gravity="center">
+
+		<ImageView
+			android:layout_height="220dp"
+			android:layout_width="220dp"
+			android:src="@drawable/player_content_art_work"
+			android:id="@+id/mp3_tag_editor_artwork"
+			android:layout_gravity="center_horizontal"/>
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_margin="10dp"
+			android:textColor="#B2B2B2"
+			android:id="@+id/mp3_tag_editor_info"/>
+
+	</LinearLayout>
+
+	<TextView
+		android:layout_height="wrap_content"
+		android:text="第 6 首，共 20 首"
+		android:layout_width="match_parent"
+		android:textSize="18sp"
+		android:gravity="center"
+		android:id="@+id/mp3_tag_editor_progress"
+		android:textColor="#FFFFFF"/>
+
+	<LinearLayout
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:orientation="horizontal">
+
+		<Button
+			android:layout_height="wrap_content"
+			style="?android:attr/buttonBarButtonStyle"
+			android:text="Previous"
+			android:id="@+id/mp3_tag_editor_open_previous"
+			android:layout_width="0dp"
+			android:textSize="18sp"
+			android:layout_weight="1.0"
+			android:textColor="#FFFFFF"/>
+
+		<Button
+			android:layout_height="wrap_content"
+			style="?android:attr/buttonBarButtonStyle"
+			android:text="Next"
+			android:id="@+id/mp3_tag_editor_open_next"
+			android:layout_width="0dp"
+			android:textSize="18sp"
+			android:layout_weight="1.0"
+			android:textColor="#FFFFFF"/>
+
+	</LinearLayout>
+
+</LinearLayout>
+

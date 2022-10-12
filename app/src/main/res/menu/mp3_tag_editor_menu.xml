@@ -1,0 +1,10 @@
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <item
+        android:id="@+id/mp3_tag_editor_menu_save"
+        android:title="Save"
+        android:icon="@drawable/ic_save_white"
+        app:showAsAction="ifRoom|withText" />
+    
+</menu>

@@ -1,0 +1,11 @@
+<resources>
+
+    <style name="MD.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="MD.Light.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="MD.Light.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+</resources>

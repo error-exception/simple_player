@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="match_parent"
+	android:layout_width="match_parent"
+	android:orientation="horizontal"
+	android:id="@+id/scan_music_bg">
+
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/shape_corner_white_12dp"
+		android:layout_gravity="center"
+		android:gravity="center"
+		android:layout_margin="16dp">
+
+		<com.simple.player.view.IconButton
+			android:layout_height="128dp"
+			android:layout_width="128dp"
+			android:text="\ue8b6"
+			android:textColor="#FFFFFFFF"
+			android:id="@+id/scan_music_btn"
+			android:background="@drawable/ripple_round_n_red"
+			android:textSize="48sp"
+			android:layout_margin="32dp"/>
+
+		<LinearLayout
+			android:orientation="vertical"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="bottom|center_horizontal"
+			android:layout_marginEnd="32dp">
+
+			<TextView
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:textColor="#FF000000"
+				android:textSize="32sp"
+				android:gravity="center"
+				android:id="@+id/scan_music_count"
+				android:background="@drawable/shape_corner_white_12dp"
+				android:text="0"
+				android:textStyle="bold"/>
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="歌曲数量"
+				android:textSize="13sp"
+				android:textColor="#FF808080"
+				android:paddingTop="8dp" />
+
+		</LinearLayout>
+
+	</LinearLayout>
+
+</FrameLayout>
+
