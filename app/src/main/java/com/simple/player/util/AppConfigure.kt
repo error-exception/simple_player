@@ -19,6 +19,8 @@ object AppConfigure {
 
     object Settings {
 
+        private var comfortableVolumes: IntArray? = null
+
         var isSecondVolumeOn: Boolean
             get() = settings.getBoolean(PreferencesData.SETTINGS_ENABLE_SECOND_VOLUME, false)
             set(value) = settings.edit().putBoolean(PreferencesData.SETTINGS_ENABLE_SECOND_VOLUME, value).apply()
@@ -54,6 +56,12 @@ object AppConfigure {
         var excludePath: String
             get() = settings.getString(PreferencesData.SETTINGS_EXCLUDE_PATH, "")!!
             set(value) = settings.edit().putString(PreferencesData.SETTINGS_EXCLUDE_PATH, value).apply()
+
+        var comfortableVolume: IntArray
+            get() {
+                return intArrayOf(1)
+            }
+            set(value) = TODO()
     }
 
     object Player {

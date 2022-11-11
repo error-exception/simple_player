@@ -56,6 +56,10 @@
             android:exported="true"
             android:label="@string/scan_music_setting" />
         <activity
+            android:name=".activity.NewSettingsActivity"
+            android:label="@string/settings"
+            android:exported="true" />
+        <activity
             android:name=".activity.SplashActivity"
             android:allowTaskReparenting="true"
             android:alwaysRetainTaskState="true"

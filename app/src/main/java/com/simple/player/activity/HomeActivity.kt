@@ -101,6 +101,10 @@ class HomeActivity : BaseActivity(),
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         },
+        Item(R.drawable.ic_baseline_settings_24, "新设置") { ->
+            val intent = Intent(this, NewSettingsActivity::class.java)
+            startActivity(intent)
+        },
         Item(R.drawable.ic_baseline_exit_to_app_24, "退出") {exit()}
     )
 
