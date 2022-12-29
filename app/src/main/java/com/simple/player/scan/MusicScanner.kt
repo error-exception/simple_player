@@ -12,11 +12,11 @@ abstract class MusicScanner {
 
     abstract fun scan()
 
-    fun onEach(listener: (Long, Uri, Cursor?, String) -> Unit) {
+    open fun onEach(listener: (Long, Uri, Cursor?, String) -> Unit) {
         this.onEachMusic = listener
     }
 
-    fun onComplete(listener: () -> Unit) {
+    open fun onComplete(listener: () -> Unit) {
         onComplete = listener
     }
 

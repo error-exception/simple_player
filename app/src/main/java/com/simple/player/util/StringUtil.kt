@@ -1,8 +1,6 @@
 package com.simple.player.util
 
-import java.io.CharArrayReader
 import java.lang.StringBuilder
-import java.security.InvalidParameterException
 
 object StringUtil {
 

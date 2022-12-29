@@ -39,7 +39,7 @@ class MusicFadeAnimation2 (private val simplePlayer: SimplePlayer): AnimatorList
         }
     }
 
-    override fun onAnimationEnd(animation: Animator?) {
+    override fun onAnimationEnd(animation: Animator) {
         animator?.cancel()
         animator = null
         if (!isPlay) {
@@ -47,7 +47,7 @@ class MusicFadeAnimation2 (private val simplePlayer: SimplePlayer): AnimatorList
         }
     }
 
-    override fun onAnimationStart(animation: Animator?) {
+    override fun onAnimationStart(animation: Animator) {
         if (isPlay) {
             start()
         }

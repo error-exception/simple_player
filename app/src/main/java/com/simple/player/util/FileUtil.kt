@@ -14,15 +14,18 @@ object FileUtil {
         private set
 
     fun writeTextUTF8(file: File, t: String) {
+        var output: FileOutputStream? = null
+        var writer: OutputStreamWriter? = null
         try {
-            var output = FileOutputStream(file)
-            var writer = OutputStreamWriter(output, "UTF-8")
+            output = FileOutputStream(file)
+            writer = OutputStreamWriter(output, "UTF-8")
             writer.write(t)
             writer.flush()
-            writer.close()
-            output.close()
         } catch (e: IOException) {
             e.printStackTrace()
+        } finally {
+            writer?.close()
+            output?.close()
         }
     }
 
@@ -45,7 +48,7 @@ object FileUtil {
             outputStream.flush()
             outputStream.close()
             inputStream.close()
-        } catch (e: IOException) {
+        } catch (_: IOException) {
         }
     }
 
@@ -88,6 +91,7 @@ object FileUtil {
         var data = ByteArray(0)
         openInputStream(uri)?.apply {
             data = readBytes(this)
+            closeStream(this)
         }
         return data
     }
@@ -96,6 +100,7 @@ object FileUtil {
         var data = ByteArray(0)
         openInputStream(file)?.apply {
             data = readBytes(this)
+            closeStream(this)
         }
         return data
     }
@@ -104,6 +109,7 @@ object FileUtil {
         var data = ByteArray(0)
         openInputStream(path)?.apply {
             data = readBytes(this)
+            closeStream(this)
         }
         return data
     }
@@ -117,6 +123,40 @@ object FileUtil {
             var len: Int
             while (inputStream.read(a).also { len = it } != -1) {
                 byteOutput.write(a, 0, len)
+            }
+            byteOutput.flush()
+            data = byteOutput.toByteArray()
+        } catch (e: IOException) {
+            data = ByteArray(0)
+        } finally {
+            closeStream(byteOutput)
+            closeStream(inputStream)
+        }
+        return data
+    }
+
+    fun readNBytes(inputStream: InputStream, count: Int): ByteArray {
+        var data: ByteArray
+        var byteOutput: ByteArrayOutputStream? = null
+        try {
+            byteOutput = ByteArrayOutputStream()
+            if (count < 1024) {
+                val a = ByteArray(count)
+                val len = inputStream.read(a)
+                byteOutput.write(a, 0, len)
+            } else {
+                var a = ByteArray(1024)
+                var len: Int
+                var length = count
+                while (inputStream.read(a).also { len = it } != -1 && length >= 1024) {
+                    byteOutput.write(a, 0, len)
+                    length -= len
+                }
+                if (len > 0 && length > 0) {
+                    a = ByteArray(length)
+                    len = inputStream.read(a)
+                    byteOutput.write(a, 0, len)
+                }
             }
             byteOutput.flush()
             data = byteOutput.toByteArray()
@@ -160,6 +200,7 @@ object FileUtil {
         var content = ""
         openInputStream(path)?.apply {
             content = readTextUTF8(this)
+            closeStream(this)
         }
         return content
     }
@@ -169,6 +210,7 @@ object FileUtil {
         val inputStream = openInputStream(uri)
         if (inputStream != null) {
             content = readTextUTF8(inputStream)
+            closeStream(inputStream)
         }
         return content
     }
@@ -188,7 +230,7 @@ object FileUtil {
         } finally {
             try {
                 reader?.close()
-            } catch (e: Exception) {}
+            } catch (_: Exception) {}
         }
         return s.toString()
     }
@@ -218,8 +260,7 @@ object FileUtil {
     }
 
     fun getAssetInputStream(filename: String?): InputStream? {
-        var inputStream: InputStream? = null
-        inputStream = try {
+        val inputStream: InputStream? = try {
             Util.mContext.assets.open(filename!!)
         } catch (e: FileNotFoundException) {
             return null
@@ -240,22 +281,60 @@ object FileUtil {
         return outputStream
     }
 
-    private fun closeStream(vararg inputStream: InputStream?) {
+    fun openOutputStream(file: File): OutputStream? {
+        var outputStream: OutputStream? = null
+        try {
+            outputStream = FileOutputStream(file)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return outputStream
+    }
+
+    fun closeStream(vararg inputStream: InputStream?) {
         try {
             for (stream in inputStream) {
                 stream?.close()
             }
-        } catch (e: Exception){}
+        } catch (_: Exception){}
     }
 
-    private fun closeStream(vararg outputStream: OutputStream?) {
+    fun closeStream(vararg outputStream: OutputStream?) {
         try {
             for (stream in outputStream) {
                 stream?.close()
             }
-        } catch (e: Exception){}
+        } catch (_: Exception){}
     }
 
+    inline fun inputStreamScope(path: String, inputScope: InputStream.() -> Unit) {
+        val inputStream = openInputStream(path)
+        inputStream?.inputScope()
+        closeStream(inputStream)
+    }
 
+    inline fun inputStreamScope(uri: Uri, inputScope: InputStream.() -> Unit) {
+        val inputStream = openInputStream(uri)
+        inputStream?.inputScope()
+        closeStream(inputStream)
+    }
+
+    inline fun inputStreamScope(file: File, inputScope: InputStream.() -> Unit) {
+        val inputStream = openInputStream(file)
+        inputStream?.inputScope()
+        closeStream(inputStream)
+    }
+
+    inline fun outputStreamScope(path: String, outputScope: OutputStream.() -> Unit) {
+        val inputStream = openOutputStream(path)
+        inputStream?.outputScope()
+        closeStream(inputStream)
+    }
+
+    inline fun outputStreamScope(file: File, outputScope: OutputStream.() -> Unit) {
+        val inputStream = openOutputStream(file)
+        inputStream?.outputScope()
+        closeStream(inputStream)
+    }
 
 }

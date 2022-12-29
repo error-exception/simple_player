@@ -33,7 +33,7 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, "mainPlayer.db"
             );""")
             execSQL("""
                 create table play_history(
-                    id bigint primary key not null,
+                    id bigint not null,
                     play_time bigint not null
                 );
             """.trimIndent())
@@ -44,15 +44,35 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, "mainPlayer.db"
                     valid int default 1
                 );
             """.trimIndent())
+//            execSQL("""
+//                create table config(
+//                    _key text not null,
+//                    _value text default ''
+//                );
+//            """.trimIndent())
         }
     }
     override fun onUpgrade(p1: SQLiteDatabase, p2: Int, p3: Int) {
-        p1.execSQL("""
-                create table id_path(
-                    id integer primary key autoincrement not null,
-                    uri text not null,
-                    valid int default 1
-                );
-            """.trimIndent())
+//        p1.execSQL("""
+//                create table config(
+//                    _key text not null,
+//                    _value text default ''
+//                );
+//            """.trimIndent())
     }
+
+    /**
+     * TODO: song info
+     * main_color: for artwork
+     * artwork_type:
+     *     1 内嵌
+     *     2 相邻
+     *     3 指定目录
+     *     4 无专辑
+     * artwork_cache:
+     *     1 有
+     *     0 没有
+     * artwork_src: 专辑图片 uri
+     *
+     */
 }

@@ -18,10 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.simple.player.MusicEvent
-import com.simple.player.MusicEventHandler
 import com.simple.player.R
 import com.simple.player.Util
+import com.simple.player.event.MusicEvent2
+import com.simple.player.event.MusicEventListener
 import com.simple.player.model.Song
 import com.simple.player.playlist.HistoryListManager
 import com.simple.player.playlist.PlaylistManager
@@ -31,7 +31,7 @@ import com.simple.player.ui.theme.windowBackground
 import com.simple.player.util.DialogUtil
 import com.simple.player.util.ProgressHandler
 
-class PlayHistoryActivity: AppCompatActivity(), MusicEvent.OnHistoryChangedListener {
+class PlayHistoryActivity: BaseActivity2() {
 
     private var isListLoaded = false
 //    private lateinit var recyclerView: RecyclerView
@@ -39,11 +39,10 @@ class PlayHistoryActivity: AppCompatActivity(), MusicEvent.OnHistoryChangedListe
     private var backIcon = mutableStateOf(R.drawable.ic_baseline_arrow_back_24)
     private var optionIcon = mutableStateOf(R.drawable.ic_baseline_delete_24)
     private var title = mutableStateOf("播放历史")
-    private var list = mutableStateListOf<Song>(*(ArrayList<Song>().toTypedArray()))
+    private var list = mutableStateListOf(*(ArrayList<Song>().toTypedArray()))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MusicEventHandler.register(this)
         updateHistoryList()
         setContent {
             ComposeTestTheme {
@@ -107,15 +106,13 @@ class PlayHistoryActivity: AppCompatActivity(), MusicEvent.OnHistoryChangedListe
             )
         }, negative = null)
     }
-
     // 添加历史记录是异步的，建议用此回调来更新历史记录
-    override fun onHistoryChangedListener(newSongId: Long) {
+    override fun onHistoryChanged(newSongId: Long) {
         updateHistoryList()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        MusicEventHandler.unregister(this)
     }
 
     private fun updateHistoryList() {

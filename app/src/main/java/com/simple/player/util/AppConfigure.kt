@@ -20,6 +20,12 @@ object AppConfigure {
     object Settings {
 
         private var comfortableVolumes: IntArray? = null
+        private val defaultExcludePath = mutableSetOf(
+            "${FileUtil.defaultPath}/Android"
+        )
+        private val defaultAccessExtension = mutableSetOf(
+            "mp3", "flac"
+        )
 
         var isSecondVolumeOn: Boolean
             get() = settings.getBoolean(PreferencesData.SETTINGS_ENABLE_SECOND_VOLUME, false)
@@ -45,23 +51,44 @@ object AppConfigure {
             get() = settings.getString(PreferencesData.SETTINGS_OTHER_PLAYING, PreferencesData.SETTINGS_VALUE_OTHER_PLAYING_PAUSE)!!
             set(value) = settings.edit().putString(PreferencesData.SETTINGS_OTHER_PLAYING, value).apply()
 
-        var accessExtension: String
-            get() = settings.getString(PreferencesData.SETTINGS_ACCESS_EXTENSION, ".mp3,.flac,.ogg")!!
-            set(value) = settings.edit().putString(PreferencesData.SETTINGS_ACCESS_EXTENSION, value).apply()
+        var accessExtension: MutableSet<String>
+            get() = settings.getStringSet(PreferencesData.SETTINGS_ACCESS_EXTENSION, defaultAccessExtension)!!
+            set(value) = settings.edit().putStringSet(PreferencesData.SETTINGS_ACCESS_EXTENSION, value).apply()
 
         var musicSource: String
             get() = settings.getString(PreferencesData.SETTINGS_MUSIC_SOURCE, "MediaStore")!!
             set(value) = settings.edit().putString(PreferencesData.SETTINGS_MUSIC_SOURCE, value).apply()
 
-        var excludePath: String
-            get() = settings.getString(PreferencesData.SETTINGS_EXCLUDE_PATH, "")!!
-            set(value) = settings.edit().putString(PreferencesData.SETTINGS_EXCLUDE_PATH, value).apply()
+        var excludePath: MutableSet<String>
+            get() = settings.getStringSet(PreferencesData.SETTINGS_EXCLUDE_PATH, defaultExcludePath)!!
+            set(value) = settings.edit().putStringSet(PreferencesData.SETTINGS_EXCLUDE_PATH, value).apply()
+
+        var includePath: MutableSet<String>
+            get() = settings.getStringSet(PreferencesData.SETTINGS_INCLUDE_PATH, emptySet<String>())!!
+            set(value) = settings.edit().putStringSet(PreferencesData.SETTINGS_INCLUDE_PATH, value).apply()
 
         var comfortableVolume: IntArray
             get() {
                 return intArrayOf(1)
             }
             set(value) = TODO()
+
+        var showLockScreen: Boolean
+            get() = settings.getBoolean(PreferencesData.SETTINGS_SHOW_LOCKSCREEN, false)
+            set(value) = settings.edit().putBoolean(PreferencesData.SETTINGS_SHOW_LOCKSCREEN, value).apply()
+
+        var showHeadImage: Boolean
+            get() = settings.getBoolean(PreferencesData.SETTINGS_SHOW_HEAD_IMAGE, false)
+            set(value) = settings.edit().putBoolean(PreferencesData.SETTINGS_SHOW_HEAD_IMAGE, value).apply()
+
+        var bottomPlayerBar: String
+            get() = settings.getString(PreferencesData.SETTINGS_BUTTON_PLAYER_BAR, PreferencesData.SETTINGS_VALUE_BUTTON_PLAYER_BAR_SIMPLE)!!
+            set(value) = settings.edit().putString(PreferencesData.SETTINGS_BUTTON_PLAYER_BAR, value).apply()
+
+        var enableNewPlaylist: Boolean
+            get() = settings.getBoolean(PreferencesData.SETTINGS_ENABLE_NEW_PLAYLIST, false)
+            set(value) = settings.edit().putBoolean(PreferencesData.SETTINGS_ENABLE_NEW_PLAYLIST, value).apply()
+
     }
 
     object Player {
@@ -78,44 +105,16 @@ object AppConfigure {
             get() = player.getString(PreferencesData.PLAYER_PLAYLIST, PlaylistManager.LOCAL_LIST)!!
             set(value) = player.edit().putString(PreferencesData.PLAYER_PLAYLIST, value).apply()
 
+        var rememberProgress: Long
+            get() = player.getLong(PreferencesData.PLAYER_REMEMBER_PROGRESS, 0L)
+            set(value) = player.edit().putLong(PreferencesData.PLAYER_REMEMBER_PROGRESS, value).apply()
+
+        var rememberId: Long
+            get() = player.getLong(PreferencesData.PLAYER_REMEMBER_SONG_ID, -1L)
+            set(value) = player.edit().putLong(PreferencesData.PLAYER_REMEMBER_SONG_ID, value).apply()
+
+        var musicDirectories: MutableSet<String>
+            get() = player.getStringSet(PreferencesData.PLAYER_MUSIC_DIRECTORIES, emptySet())!!
+            set(value) = player.edit().putStringSet(PreferencesData.PLAYER_MUSIC_DIRECTORIES, value).apply()
     }
-
-    object Web {
-        var backgroundMove: Boolean
-            get() = web.getBoolean(PreferencesData.WEB_BACKGROUND_MOTIVATION, true)
-            set(value) = web.edit().putBoolean(PreferencesData.WEB_BACKGROUND_MOTIVATION, value).apply()
-
-        var backgroundType: Int
-            get() = web.getInt(PreferencesData.WEB_BACKGROUND_TYPE, 0)
-            set(value) = web.edit().putInt(PreferencesData.WEB_BACKGROUND_TYPE, value).apply()
-
-        var visualizeSmooth: Int
-            get() = web.getInt(PreferencesData.WEB_VISUALIZATION_SMOOTH, 80)
-            set(value) = web.edit().putInt(PreferencesData.WEB_VISUALIZATION_SMOOTH, value).apply()
-
-        var visualizeHeight: Int
-            get() = web.getInt(PreferencesData.WEB_VISUALIZATION_HEIGHT, 40)
-            set(value) = web.edit().putInt(PreferencesData.WEB_VISUALIZATION_HEIGHT, value).apply()
-
-        var visualizeColor: String?
-            get() = web.getString(PreferencesData.WEB_VISUALIZATION_COLOR, "#0000ff")
-            set(value) = web.edit().putString(PreferencesData.WEB_VISUALIZATION_COLOR, value).apply()
-
-        var showVisualizer: Boolean
-            get() = web.getBoolean(PreferencesData.WEB_SHOW_VISUALIZATION, true)
-            set(value) = web.edit().putBoolean(PreferencesData.WEB_SHOW_VISUALIZATION, value).apply()
-
-        var showLogo: Boolean
-            get() = web.getBoolean(PreferencesData.WEB_SHOW_LOGO, true)
-            set(value) = web.edit().putBoolean(PreferencesData.WEB_SHOW_LOGO, value).apply()
-
-        var logoBeat: Boolean
-            get() = web.getBoolean(PreferencesData.WEB_LOGO_BEAT, true)
-            set(value) = web.edit().putBoolean(PreferencesData.WEB_LOGO_BEAT, value).apply()
-
-        var showWhiteBar: Boolean
-            get() = web.getBoolean(PreferencesData.WEB_WHITE_BAR, true)
-            set(value) = web.edit().putBoolean(PreferencesData.WEB_WHITE_BAR, value).apply()
-    }
-
 }

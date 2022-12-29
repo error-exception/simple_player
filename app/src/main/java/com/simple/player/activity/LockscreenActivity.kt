@@ -41,11 +41,11 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.viewpager.widget.ViewPager
-import com.simple.player.MusicEvent
-import com.simple.player.MusicEventHandler
 import com.simple.player.R
 import com.simple.player.Store
 import com.simple.player.adapter.LockScreenViewPagerAdapter
+import com.simple.player.event.MusicEvent2
+import com.simple.player.event.MusicEventListener
 import com.simple.player.model.LockscreenModel
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.service.SimplePlayer
@@ -55,7 +55,7 @@ import java.util.ArrayList
 
 class LockscreenActivity : AppCompatActivity(),
     ViewPager.OnPageChangeListener,
-        MusicEvent.OnSongChangedListener
+        MusicEventListener
 {
 
     private var views: ArrayList<View> = ArrayList(2);
@@ -88,7 +88,7 @@ class LockscreenActivity : AppCompatActivity(),
         pager.currentItem = 2
         pager.addOnPageChangeListener(this)
 
-        MusicEventHandler.register(this)
+        MusicEvent2.register(this)
 
         contentView(views[1])
     }
@@ -132,7 +132,7 @@ class LockscreenActivity : AppCompatActivity(),
 
     override fun onDestroy() {
         super.onDestroy()
-        MusicEventHandler.unregister(this)
+        MusicEvent2.unregister(this)
         pager.removeOnPageChangeListener(this)
     }
 }

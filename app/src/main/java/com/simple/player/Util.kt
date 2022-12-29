@@ -25,6 +25,8 @@ import java.lang.StringBuilder
 import java.lang.reflect.Field
 import java.net.Inet4Address
 import java.net.NetworkInterface
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 import java.util.HashMap
 import kotlin.math.abs
 import kotlin.math.max
@@ -32,8 +34,6 @@ import kotlin.math.max
 @SuppressLint("StaticFieldLeak")
 object Util {
     lateinit var mContext: Context
-    var width = 0
-    var height = 0
 
     fun dpToPx(dp: Float): Int {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
@@ -290,4 +290,33 @@ object Util {
         return abs(0F - value) <= 0.0000001F
     }
 
+    fun md5Sum(data: ByteArray): ByteArray {
+        return try {
+            val messageDigest = MessageDigest.getInstance("MD5")
+            messageDigest.digest(data)
+        } catch (e: NoSuchAlgorithmException) {
+            e.printStackTrace()
+            ByteArray(0)
+        }
+    }
+
+    private val hexChars = arrayOf(
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+    )
+
+    fun ByteArray.toHexString(): String {
+        val b = StringBuilder()
+        for (byte in this) {
+            b.append(byte.toHexString())
+        }
+        return b.toString()
+    }
+
+    fun Byte.toHexString(): String {
+        val a = this.toUInt().toInt()
+        val last = a and 0xf
+        val first = (a shr 4) and 0xf
+        return "${hexChars[first]}${hexChars[last]}"
+    }
 }

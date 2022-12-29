@@ -12,9 +12,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import com.simple.player.MusicEvent
-import com.simple.player.MusicEventHandler
 import com.simple.player.Store
+import com.simple.player.event.MusicEvent2
+import com.simple.player.event.MusicEventListener
 import com.simple.player.service.SimplePlayer
 import com.simple.player.util.ProgressHandler
 
@@ -23,7 +23,7 @@ import com.simple.player.util.ProgressHandler
  * 2. 可设置圆角
  * 3. 可显示中间裁剪的图片
  */
-class PaletteView: View, MusicEvent.OnSongChangedListener, LifecycleObserver {
+class PaletteView: View, MusicEventListener, LifecycleObserver {
 
     private var displaySongId: Long = SimplePlayer.currentSong.id
     private var newSongId: Long = SimplePlayer.currentSong.id
@@ -38,7 +38,7 @@ class PaletteView: View, MusicEvent.OnSongChangedListener, LifecycleObserver {
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int): super(context, attrs, defStyleAttr)
 
     init {
-        MusicEventHandler.register(this)
+        MusicEvent2.register(this)
         val outRadius = floatArrayOf(8f, 8f, 8f, 8f, 8f, 8f, 8f, 8f)
         val shape = RoundRectShape(outRadius, null, null)
         normalDrawable = ShapeDrawable(shape).apply {

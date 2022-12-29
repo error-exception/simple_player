@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
 import android.widget.*
-import com.bumptech.glide.Glide
 import com.simple.player.R
 import com.simple.player.model.Song
 import com.simple.player.Util
@@ -49,13 +48,14 @@ class MusicInfo : BaseActivity(), View.OnClickListener {
         var bitmap: Bitmap? = null
         ProgressHandler.handle (handle = {
             bitmap = try {
-                Glide.with(album)
-                    .asBitmap()
-                    .load(ArtworkProvider.getArtworkUri(PlaylistManager.localPlaylist[songId]!!))
-                    .placeholder(R.drawable.default_artwork)
-                    .skipMemoryCache(true)
-                    .submit(album.width, album.height)
-                    .get()
+                null
+//                Glide.with(album)
+//                    .asBitmap()
+//                    .load(ArtworkProvider.getArtworkUri(PlaylistManager.localPlaylist[songId]!!))
+//                    .placeholder(R.drawable.default_artwork)
+//                    .skipMemoryCache(true)
+//                    .submit(album.width, album.height)
+//                    .get()
             } catch (e: Exception) {
                 null
             }

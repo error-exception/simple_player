@@ -38,4 +38,17 @@ object ColorUtil {
         return c in '0'..'9' || c in 'a'..'f' || c in 'A'..'F'
     }
 
+    fun toComposeColor(androidColor: android.graphics.Color): androidx.compose.ui.graphics.Color {
+        return androidx.compose.ui.graphics.Color(
+            alpha = androidColor.alpha(),
+            blue = androidColor.blue(),
+            red = androidColor.red(),
+            green = androidColor.green(),
+        )
+    }
+
+    fun toAndroidColor(composeColor: androidx.compose.ui.graphics.Color): android.graphics.Color {
+        return Color.valueOf(composeColor.red, composeColor.green, composeColor.blue, composeColor.alpha)
+    }
+
 }

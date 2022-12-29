@@ -1,8 +1,6 @@
 package com.simple.player.playlist
 
-import android.util.Log
 import androidx.core.content.contentValuesOf
-import com.simple.player.MusicEventHandler
 import com.simple.player.database.SQLiteDatabaseHelper
 import com.simple.player.model.Song
 import kotlin.collections.ArrayList

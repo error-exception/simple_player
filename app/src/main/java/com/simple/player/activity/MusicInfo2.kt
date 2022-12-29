@@ -16,17 +16,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toFile
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.R
+import com.simple.player.constant.PreferencesData
 import com.simple.player.model.Song
 import com.simple.player.playlist.PlaylistManager
+import com.simple.player.service.SimplePlayer
 import com.simple.player.ui.theme.windowBackground
+import com.simple.player.util.AppConfigure
 import com.simple.player.util.ArtworkProvider
 
-class MusicInfo2: AppCompatActivity() {
+class MusicInfo2: BaseActivity2() {
 
     private var title = mutableStateOf("歌曲信息")
     private var backIcon = mutableStateOf(R.drawable.ic_baseline_arrow_back_24)
@@ -149,7 +153,7 @@ class MusicInfo2: AppCompatActivity() {
 
     private fun initData() {
         val songId = intent.getLongExtra(EXTRA_MUSIC_ID, -1)
-        song = PlaylistManager.localPlaylist[songId]!!
+        song = SimplePlayer.activePlaylist[songId]!!
         info.apply {
             this += "标题：" to song.title
             this += "艺术家：" to song.artist
@@ -157,6 +161,9 @@ class MusicInfo2: AppCompatActivity() {
             this += "Uri：" to Uri.decode(song.path)
             this += "比特率：" to song.bitrate.toString(10)
             this += "类型：" to song.type
+            if (AppConfigure.Settings.musicSource == PreferencesData.SETTINGS_VALUE_MUSIC_SOURCE_EXTERNAL_STORAGE) {
+                this += "大小" to (Uri.parse(song.path).toFile().length() / (1024 * 1024.0)).toString() + "MB"
+            }
         }
     }
 

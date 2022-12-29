@@ -4,15 +4,10 @@ import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import android.app.*
 import android.content.*
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
 import android.os.*
 import android.util.Log
 import com.simple.player.*
-import com.simple.player.constant.PreferencesData
 import com.simple.player.handler.SimpleHandler
-import com.simple.player.playlist.PlaylistManager
-import com.simple.player.util.AppConfigure
 import org.jetbrains.annotations.NotNull
 
 
@@ -64,7 +59,6 @@ class SimpleService : Service() {
         bin.initNotification()
         return bin
     }
-
 
     companion object {
         const val ACTION_NOTIFY_MOVE_TO_FRONT = "com.simple.player.NOTIFY_MOVE_TO_FRONT"
@@ -125,4 +119,3 @@ class SimpleService : Service() {
         }
     }
 }
-

@@ -44,7 +44,7 @@ internal class MusicFadeAnimation(private val binder: PlayBinder): Animator.Anim
         animator!!.start()
     }
 
-    override fun onAnimationEnd(animation: Animator?) {
+    override fun onAnimationEnd(animation: Animator) {
         animator?.cancel()
         animator = null
         if (!isPlay) {
@@ -53,16 +53,16 @@ internal class MusicFadeAnimation(private val binder: PlayBinder): Animator.Anim
         }
     }
 
-    override fun onAnimationStart(animation: Animator?) {
+    override fun onAnimationStart(animation: Animator) {
         if (isPlay) {
             start()
 
         }
     }
 
-    override fun onAnimationCancel(animation: Animator?) {}
+    override fun onAnimationCancel(animation: Animator) {}
 
-    override fun onAnimationRepeat(animation: Animator?) {}
+    override fun onAnimationRepeat(animation: Animator) {}
 
     fun onEnd(end: () -> Unit) {
         this.end = end

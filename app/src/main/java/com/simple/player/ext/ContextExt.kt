@@ -1,6 +1,8 @@
 package com.simple.player.ext
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -12,4 +14,14 @@ fun Context.toast(any: Any) {
 
 fun Context.checkPermission(permission: String): Boolean {
     return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+}
+
+fun <T: Activity> Context.startActivity(clazz: Class<T>) {
+    val intent = Intent(this, clazz)
+    intent.setPackage(packageName)
+    startActivity(intent)
+}
+
+fun Context.usePermission(permission: String) {
+
 }

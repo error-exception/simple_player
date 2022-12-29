@@ -15,6 +15,8 @@ import com.simple.player.Util.toast
 import com.simple.player.adapter.DialogListAdapter
 import com.simple.player.adapter.PlaylistAdapter2
 import com.simple.player.constant.IconCode
+import com.simple.player.event.MusicEvent2
+import com.simple.player.event.MusicEventListener
 import com.simple.player.model.IconWithText
 import com.simple.player.model.Song
 import com.simple.player.playlist.AbsPlaylist
@@ -26,7 +28,9 @@ import com.simple.player.view.FastScroller2
 
 class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListener,
     PlaylistAdapter2.OnItemClickListener,
-    MusicEvent.OnSongChangedListener {
+    MusicEventListener {
+
+    private val TAG = "PlaylistActivity"
 
     private lateinit var mList: RecyclerView
     private lateinit var mPlaylist: AbsPlaylist
@@ -72,7 +76,7 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
             mAdapter.setPlayingPosition(position)
             mList.scrollToPosition(if (position - 3 < 0) 0 else position - 3)
         }
-        MusicEventHandler.register(this)
+        MusicEvent2.register(this)
         isInitialed = true
     }
 
@@ -86,6 +90,7 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
     override fun onCreate(savedInstanceState: Bundle?) {
         val name = intent.getStringExtra(EXTRA_LIST_NAME)
         mPlaylist = PlaylistManager.getList(name!!)!!
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_list)
 
@@ -115,11 +120,6 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
         )
         mAdapter = PlaylistAdapter2(mPlaylist)
 
-        val serviceIntent = Intent()
-        serviceIntent.action = SimpleService.ACTION_SIMPLE_SERVICE
-        serviceIntent.setPackage(packageName)
-        bindService(serviceIntent, this, BIND_AUTO_CREATE)
-
         findViewById<View>(R.id.play_list_fragment_play_position).setOnClickListener {
             val first = linearLayoutManager.findFirstVisibleItemPosition()
             val last = linearLayoutManager.findLastVisibleItemPosition()
@@ -137,6 +137,9 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
     override fun onSongChanged(newSongId: Long) {
         if (mAdapter.isSelectionState) {
             isNewSong = true
+            return
+        }
+        if (mPlaylist.id != SimplePlayer.activePlaylist.id) {
             return
         }
         clearItemView()
@@ -349,7 +352,7 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
         super.onDestroy()
         clearItemView()
 
-        MusicEventHandler.unregister(this)
+        MusicEvent2.unregister(this)
         System.gc()
     }
 }

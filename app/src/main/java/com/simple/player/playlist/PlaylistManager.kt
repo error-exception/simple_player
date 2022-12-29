@@ -1,25 +1,31 @@
 package com.simple.player.playlist
 
-import android.content.ContentValues
 import android.util.Log
 import android.util.LongSparseArray
 import androidx.core.util.forEach
-import com.simple.player.MusicEvent
-import com.simple.player.MusicEventHandler
+import com.simple.player.database.PlaylistDao
 import com.simple.player.database.SQLiteDatabaseHelper
 import com.simple.player.model.Song
 import com.simple.player.database.SongDao
+import com.simple.player.database.SongInListDao
+import com.simple.player.event.MusicEvent2
+import com.simple.player.event.MusicEventListener
 import com.simple.player.util.AppConfigure
-import com.simple.player.util.ProgressHandler
-import com.simple.player.util.StringUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.ArrayList
 import java.util.HashMap
 
-object PlaylistManager : MusicEvent.OnSongChangedListener{
+object PlaylistManager :MusicEventListener {
 
     private const val TAG = "PlaylistManager"
     const val FAVORITE_LIST = "_favorite_"
     const val LOCAL_LIST = "_local_"
+
+    const val LOCAL_LIST_ID = 2L
+    const val FAVORITE_LIST_ID = 1L
 
     private var listMap: HashMap<String, AbsPlaylist> = HashMap()
     lateinit var localPlaylist: Playlist
@@ -35,12 +41,25 @@ object PlaylistManager : MusicEvent.OnSongChangedListener{
      */
     private var bufferList = ArrayList<AbsPlaylist>()
 
-    fun load() {
-        MusicEventHandler.register(this)
+    private val songMap = LongSparseArray<Song>()
+
+    init {
+        MusicEvent2.register(this)
+    }
+
+    fun load(): Boolean {
+        if (hasInitialed) {
+            return true
+        }
+        songMap.clear()
         val database = SQLiteDatabaseHelper.database
-        val map = LongSparseArray<Song>()
+        val map = songMap
         val songCursor = database.rawQuery("select * from song;", null)
         songCursor.moveToFirst()
+        if (songCursor.count <= 0) {
+            songCursor.close()
+            return false
+        }
         do {
             with (songCursor) {
                 val id = getLong(getColumnIndexOrThrow(SongDao.ID))
@@ -55,72 +74,47 @@ object PlaylistManager : MusicEvent.OnSongChangedListener{
             }
         } while (songCursor.moveToNext())
         songCursor.close()
-
-        val playlistCursor = database.rawQuery("select * from playlist;", null)
-        playlistCursor.moveToFirst()
-        do {
-            val listId = playlistCursor.getLong(playlistCursor.getColumnIndexOrThrow("id"))
-            val nameCode = playlistCursor.getString(playlistCursor.getColumnIndexOrThrow("name_code"))
-            val desc = playlistCursor.getString(playlistCursor.getColumnIndexOrThrow("description"))
-            val playlist = Playlist(StringUtil.codeToString(nameCode))
-            playlist.description = desc
-            playlist.id = listId
-            val playlistSongsCursor = database.rawQuery("select * from song_in_list where list_id = ?;", arrayOf(playlist.id.toString()))
-            playlistSongsCursor.moveToFirst()
-            if (playlist.name == LOCAL_LIST && playlistSongsCursor.count <= 0) {
-                database.beginTransaction()
-                map.forEach { key, _ ->
-                    val contentValues = ContentValues().apply {
-                        put("song_id", key)
-                        put("list_id", playlist.id)
-                    }
-                    database.insertOrThrow("song_in_list", null, contentValues)
-                    playlist += map.get(key)
-                }
-                database.setTransactionSuccessful()
-                database.endTransaction()
-
+        if (!SongInListDao.has(LOCAL_LIST_ID)) {
+            songMap.forEach { key, _ ->
+                SongInListDao.insert(LOCAL_LIST_ID, key)
             }
-            if (playlistSongsCursor.count != 0) {
-                do {
-                    val id = playlistSongsCursor.getLong(playlistSongsCursor.getColumnIndexOrThrow("song_id"))
-                    val song = map.get(id)
-                    if (song != null) {
-                        playlist += song
-                    }
-                } while (playlistSongsCursor.moveToNext())
+        }
+        PlaylistDao.queryAll { id, name, description ->
+            val playlist = Playlist(name)
+            playlist.id = id
+            playlist.description = description
+            val idList = SongInListDao.queryAll(id)
+            for (idElement in idList) {
+                playlist += songMap[idElement]
             }
-            playlistSongsCursor.close()
             listMap[playlist.name] = playlist
-        } while (playlistCursor.moveToNext())
-        playlistCursor.close()
-
-        favoriteList = listMap[FAVORITE_LIST] as Playlist
-        localPlaylist = listMap[LOCAL_LIST] as Playlist
-        map.clear()
+            when (id) {
+                LOCAL_LIST_ID -> localPlaylist = playlist
+                FAVORITE_LIST_ID -> favoriteList = playlist
+            }
+        }
         hasInitialed = true
-        MusicEventHandler.executeOnPlaylistInitialFinishedListener()
+        MusicEvent2.fireOnPlaylistInitialized()
+        return true
     }
 
     fun create(name: String, desc: String = ""): Playlist? {
         if (name == LOCAL_LIST || name == FAVORITE_LIST) {
             return null
         }
-        val list = Playlist(name)
-        list.description = desc
-//        list.id = System.currentTimeMillis()
-        val contentValues = ContentValues().apply {
-//            put("id", list.id)
-            put("name_code", StringUtil.stringToCode(list.name))
-            put("description", list.description)
-        }
-        val code = SQLiteDatabaseHelper.database.insert("playlist", null, contentValues)
-        if (code == -1L) {
-            Log.e(TAG, "create list filed: ${list.name}")
+        val success = PlaylistDao.insertPlaylist(
+            name = name,
+            description = desc
+        )
+        if (success) {
+            Log.e(TAG, "create list filed: $name")
             return null
         }
+        val list = Playlist(name)
+        list.description = desc
+        list.id = PlaylistDao.queryIdByName(name = name)
         listMap[name] = list
-        MusicEventHandler.executeOnPlaylistCreatedListener(name)
+        MusicEvent2.fireOnPlaylistCreated(name)
         return list
     }
 
@@ -129,29 +123,31 @@ object PlaylistManager : MusicEvent.OnSongChangedListener{
             return false
         }
         val list = listMap[name]
-        list ?: return false
-        val count = SQLiteDatabaseHelper.database.delete("playlist", "id = ?", arrayOf(list.id.toString()))
-        if (count == 0) {
+        list ?: return true
+        val success = PlaylistDao.deletePlaylist(list.id)
+        if (!success) {
             Log.e(TAG, "delete - the playlist not found in table playlist, name = $name")
             return false
         }
-        SQLiteDatabaseHelper.database.delete("song_in_list", "list_id = ?", arrayOf(list.id.toString()))
+        SongInListDao.delete(listId = list.id)
         val isDone2 = listMap.remove(name)
         if (isDone2 == null) {
             Log.e(TAG, "delete - the playlist not found in map, name = $name")
             return false
         }
-        MusicEventHandler.executeOnPlaylistDeletedListener(name)
+        MusicEvent2.fireOnPlaylistDeleted(name)
         return true
     }
 
     fun rename(oldName: String, newName: String) {
         val list = getList(oldName) ?: return
         list.name = newName
-        val contentValues = ContentValues()
-        contentValues.put("name_code", StringUtil.stringToCode(newName))
-        val count = SQLiteDatabaseHelper.database.update("playlist", contentValues, "id = ?", arrayOf(list.id.toString()))
-        if (count == 0) {
+        val success = PlaylistDao.updatePlaylist(
+            listId = list.id,
+            columnName = PlaylistDao.NAME_CODE,
+            newValue = newName
+        )
+        if (!success) {
             Log.e(TAG, "rename - the playlist not found in table playlist, name = $oldName")
             return
         }
@@ -165,7 +161,7 @@ object PlaylistManager : MusicEvent.OnSongChangedListener{
         if (oldName == AppConfigure.Player.playlist) {
             AppConfigure.Player.playlist = newName
         }
-        MusicEventHandler.executeOnPlaylistRenamedListener(oldName, newName)
+        MusicEvent2.fireOnPlaylistRenamed(oldName, newName)
     }
 
     fun clear() {
@@ -173,7 +169,9 @@ object PlaylistManager : MusicEvent.OnSongChangedListener{
             value.clear()
         }
         listMap.clear()
-        MusicEventHandler.unregister(this)
+        songMap.clear()
+        MusicEvent2.unregister(this)
+        hasInitialed = false
     }
 
     fun hasList(listName: String?): Boolean {
@@ -190,6 +188,15 @@ object PlaylistManager : MusicEvent.OnSongChangedListener{
      */
     fun getList(name: String): AbsPlaylist? {
         return listMap[name]
+    }
+
+    fun getList(id: Long): AbsPlaylist? {
+        for (entry in listMap) {
+            if (entry.value.id == id) {
+                return entry.value
+            }
+        }
+        return null
     }
 
     /**
@@ -225,62 +232,75 @@ object PlaylistManager : MusicEvent.OnSongChangedListener{
         val list = listMap[listName]
         list ?: return
         list += song
-        val contentValues = ContentValues().apply {
-            put("list_id", list.id)
-            put("song_id", song.id)
-        }
-        SQLiteDatabaseHelper.database.insertOrThrow("song_in_list", null, contentValues)
-        MusicEventHandler.executeOnSongAddToListListener(song.id, listName)
+        SongInListDao.insert(
+            listId = list.id,
+            songId = song.id
+        )
+//        val contentValues = ContentValues().apply {
+//            put("list_id", list.id)
+//            put("song_id", song.id)
+//        }
+//        SQLiteDatabaseHelper.database.insertOrThrow("song_in_list", null, contentValues)
+        MusicEvent2.fireOnSongAddToList(song.id, listName)
     }
 
     fun addSongs(listName: String, songArray: Array<Song>) {
         val list = listMap[listName]
+        if (list == null)
+            Log.e(TAG, "addSongs: playlist not found name=$listName")
         list ?: return
-        val database = SQLiteDatabaseHelper.database
-        database.beginTransaction()
+//        val database = SQLiteDatabaseHelper.database
+//        database.beginTransaction()
+//        for (song in songArray) {
+//            val contentValues = ContentValues()
+//            with (contentValues) {
+//                put("list_id", list.id)
+//                put("song_id", song.id)
+//            }
+//            val id = SQLiteDatabaseHelper.database.insertOrThrow("song_in_list", null, contentValues)
+//            if (id == -1L) {
+//                Log.e(TAG, "addSongs: add failed song id=${song.id}, title=${song.title}, artist=${song.artist}")
+//            }
+//        }
+//        database.setTransactionSuccessful()
+//        database.endTransaction()
         for (song in songArray) {
-            val contentValues = ContentValues()
-            with (contentValues) {
-                put("list_id", list.id)
-                put("song_id", song.id)
+            val success = SongInListDao.insert(
+                listId = list.id,
+                songId = song.id
+            )
+            if (!success) {
+                Log.e(TAG, "addSongs: add failed song id=${song.id}, title=${song.title}, artist=${song.artist}")
             }
-            SQLiteDatabaseHelper.database.insertOrThrow("song_in_list", null, contentValues)
-            MusicEventHandler.executeOnSongAddToListListener(song.id, listName)
         }
-        database.setTransactionSuccessful()
-        database.endTransaction()
         list += songArray
+        MusicEvent2.fireOnSongsAddToList(LongArray(songArray.size) {i -> songArray[i].id }, listName)
     }
 
     fun removeSong(listName: String, song: Song) {
         val list = listMap[listName]
         list ?: return
         list -= song
-        val count = SQLiteDatabaseHelper.database.delete("song_in_list", "list_id = ? and song_id = ?", arrayOf(list.id.toString(), song.id.toString()))
-        if (count == 0) {
+        val success = SongInListDao.delete(listId = list.id, songId = song.id)
+        if (!success) {
             Log.e(TAG, "delete error in table song_in_list, song_id = ${song.id}, list_id = ${list.id}")
             return
         }
-        MusicEventHandler.executeOnSongRemovedFromListListener(song.id, listName)
+        MusicEvent2.fireOnSongRemovedFromList(song.id, listName)
     }
 
     fun removeSongs(listName: String, songArray: Array<Song>) {
         val list = listMap[listName]
         list ?: return
-        val database = SQLiteDatabaseHelper.database
-        database.beginTransaction()
         for (song in songArray) {
-            val count = database.delete("song_in_list", "list_id = ? and song_id = ?", arrayOf(list.id.toString(), song.id.toString()))
-            if (count == 0) {
+            val success = SongInListDao.delete(listId = list.id, songId = song.id)
+            if (!success) {
                 Log.e(TAG, "delete error in table song_in_list, song_id = ${song.id}, list_id = ${list.id}, list_name = ${list.name}")
-                database.endTransaction()
                 return
             }
-            MusicEventHandler.executeOnSongRemovedFromListListener(song.id, listName)
         }
-        database.setTransactionSuccessful()
-        database.endTransaction()
         list -= songArray
+        MusicEvent2.fireOnSongsRemovedFromList(LongArray(songArray.size) {i -> songArray[i].id }, listName)
     }
 
     fun getHistoryList(): AbsPlaylist {
@@ -294,11 +314,12 @@ object PlaylistManager : MusicEvent.OnSongChangedListener{
     }
 
     override fun onSongChanged(newSongId: Long) {
-        ProgressHandler.handle(handle = {
-            HistoryListManager.addHistory(newSongId)
-        }, after = {
-            MusicEventHandler.executeOnHistoryChangedListener(newSongId)
-        })
+        MainScope().launch {
+            withContext(Dispatchers.IO) {
+                HistoryListManager.addHistory(newSongId)
+                MusicEvent2.fireOnHistoryChanged(newSongId)
+            }
+        }
     }
 
 }

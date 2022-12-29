@@ -1,41 +1,32 @@
 package com.simple.player.service
 
 import android.app.*
-import android.content.ComponentName
 import android.content.Intent
-import android.media.MediaPlayer
+import android.graphics.Bitmap
 import android.media.audiofx.AudioEffect
-import android.net.Uri
 import android.os.Binder
 import android.os.Build
-import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.TaskStackBuilder
-import com.bumptech.glide.Glide
+import androidx.core.graphics.drawable.toBitmap
+import coil.Coil
+import coil.request.ImageRequest
 import com.simple.player.*
-import com.simple.player.activity.HomeActivity
 import com.simple.player.database.SQLiteDatabaseHelper
-import com.simple.player.model.MutablePair
-import com.simple.player.model.Song
-import com.simple.player.playlist.AbsPlaylist
-import com.simple.player.playlist.PlaylistManager
+import com.simple.player.event.MusicEvent2
+import com.simple.player.event.MusicEventListener
 import com.simple.player.util.AppConfigure
-import java.lang.Exception
+import com.simple.player.util.ArtworkProvider
 
-class PlayBinder(private val service: SimpleService):
-    Binder(),
-    MusicEvent.OnMusicPauseListener,
-    MusicEvent.OnMusicPlayListener,
-    MusicEvent.OnSongChangedListener
-{
+class PlayBinder(private val service: SimpleService): Binder(), MusicEventListener {
+
     private lateinit var mNotification: Notification
-    init {
-        MusicEventHandler.register(this)
-    }
-
     private lateinit var notificationIntent: PendingIntent
+
+    init {
+        MusicEvent2.register(this)
+    }
 
     fun initNotification() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -49,7 +40,6 @@ class PlayBinder(private val service: SimpleService):
             val notificationManager = service.getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
-        val (smallLayout, bigLayout) = updateNotificationView()
 
 //        val intent = Intent(service, HomeActivity::class.java).apply {
 //            addCategory(Intent.CATEGORY_LAUNCHER)
@@ -58,12 +48,16 @@ class PlayBinder(private val service: SimpleService):
 //        }
 //        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
         val intent = Intent(SimpleService.ACTION_NOTIFY_MOVE_TO_FRONT)
-        notificationIntent = PendingIntent.getBroadcast(service, 0, intent, 0)
+        notificationIntent = PendingIntent.getBroadcast(service, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        updateNotification(updateImage = true)
+    }
+
+    private fun pushNotification(notificationViews: Pair<RemoteViews, RemoteViews>) {
         mNotification = NotificationCompat.Builder(service, "simple_player").run {
             setSmallIcon(R.drawable.ic_launcher)
             setContentIntent(notificationIntent)
-            setCustomContentView(smallLayout)
-            setCustomBigContentView(bigLayout)
+            setCustomContentView(notificationViews.first)
+            setCustomBigContentView(notificationViews.second)
             priority = NotificationCompat.PRIORITY_MAX
             build()
         }
@@ -72,29 +66,13 @@ class PlayBinder(private val service: SimpleService):
         service.startForeground(1, mNotification)
     }
 
-    fun updateNotification() {
-        val (smallLayout, bigLayout) = updateNotificationView()
-        mNotification = NotificationCompat.Builder(service, "simple_player").run {
-            setSmallIcon(R.drawable.ic_launcher)
-            setContentIntent(notificationIntent)
-            setCustomContentView(smallLayout)
-            setCustomBigContentView(bigLayout)
-            priority = NotificationCompat.PRIORITY_MAX
-            build()
-        }
-        val managerCompat = NotificationManagerCompat.from(service)
-        managerCompat.notify(1, mNotification)
-        service.startForeground(1, mNotification)
-
-    }
-
-    private val previousIntent = PendingIntent.getBroadcast(service, 0, Intent(SimpleService.ACTION_NOTIFY_PREVIOUS), 0)
-    private val playIntent = PendingIntent.getBroadcast(service, 0, Intent(SimpleService.ACTION_NOTIFY_PLAY), 0)
-    private val nextIntent = PendingIntent.getBroadcast(service, 0, Intent(SimpleService.ACTION_NOTIFY_NEXT), 0)
+    private val previousIntent = PendingIntent.getBroadcast(service, 0, Intent(SimpleService.ACTION_NOTIFY_PREVIOUS), PendingIntent.FLAG_IMMUTABLE)
+    private val playIntent = PendingIntent.getBroadcast(service, 0, Intent(SimpleService.ACTION_NOTIFY_PLAY), PendingIntent.FLAG_IMMUTABLE)
+    private val nextIntent = PendingIntent.getBroadcast(service, 0, Intent(SimpleService.ACTION_NOTIFY_NEXT), PendingIntent.FLAG_IMMUTABLE)
 
     private val smallLayout = RemoteViews(service.packageName, R.layout.notification_small_music)
     private val bigLayout = RemoteViews(service.packageName, R.layout.notification_big_music)
-    private fun updateNotificationView(): Pair<RemoteViews, RemoteViews> {
+    private fun updateRemoteViews(bitmap: Bitmap? = null): Pair<RemoteViews, RemoteViews> {
 
         smallLayout.setOnClickPendingIntent(R.id.notification_play, playIntent)
         smallLayout.setOnClickPendingIntent(R.id.notification_next, nextIntent)
@@ -121,6 +99,14 @@ class PlayBinder(private val service: SimpleService):
         bigLayout.setTextViewText(R.id.notification_title, SimplePlayer.currentSong.title)
         bigLayout.setTextViewText(R.id.notification_artist, SimplePlayer.currentSong.artist)
 
+        if (bitmap != null) {
+            smallLayout.setImageViewBitmap(R.id.notification_artwork, bitmap)
+            bigLayout.setImageViewBitmap(R.id.notification_artwork, bitmap)
+        } else {
+            smallLayout.setImageViewResource(R.id.notification_artwork, R.drawable.ic_launcher)
+            bigLayout.setImageViewResource(R.id.notification_artwork, R.drawable.ic_launcher)
+        }
+
         return Pair(smallLayout, bigLayout)
     }
 
@@ -136,7 +122,7 @@ class PlayBinder(private val service: SimpleService):
         service.mHandler.removeCallbacksAndMessages(null)
         SQLiteDatabaseHelper.close()
         Util.release()
-        MusicEventHandler.unregister(this)
+        MusicEvent2.unregister(this)
     }
 
     override fun onMusicPause() {
@@ -148,7 +134,37 @@ class PlayBinder(private val service: SimpleService):
     }
 
     override fun onSongChanged(newSongId: Long) {
-        updateNotification()
+        updateNotification(updateImage = true)
+    }
+
+    fun updateNotification(updateImage: Boolean = false) {
+        if (!updateImage) {
+            val notificationViews = updateRemoteViews()
+            pushNotification(notificationViews)
+            return
+        }
+        val notificationViews = updateRemoteViews(null)
+        pushNotification(notificationViews)
+//        val request = ImageRequest.Builder(service.applicationContext)
+//            .data(ArtworkProvider.getArtworkDataForCoil(SimplePlayer.currentSong))
+//            .size(256)
+//            .allowRgb565(true)
+//            .allowHardware(true)
+//            .error(R.drawable.default_artwork)
+//            .target(
+//                onSuccess = {
+//                    val bitmap = it.toBitmap()
+//                    val notificationViews = updateRemoteViews(bitmap)
+//                    pushNotification(notificationViews)
+//                },
+//                onError = {
+//                    val notificationViews = updateRemoteViews(null)
+//                    pushNotification(notificationViews)
+//                }
+//            )
+//            .build()
+//
+//        Coil.imageLoader(service.applicationContext).enqueue(request)
     }
 
     companion object {

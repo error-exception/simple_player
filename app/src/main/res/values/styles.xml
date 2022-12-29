@@ -5,7 +5,8 @@
         <item name="colorPrimary">@color/n_red</item>
         <item name="colorPrimaryDark">#cccccc</item>
         <item name="colorAccent">#FF4081</item>
-    </style>>
+    </style>
+    >
 
     <style name="Theme.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/n_red</item>
@@ -51,7 +52,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
-<!--        <item name="android:windowNoTitle">true</item>-->
+        <!--        <item name="android:windowNoTitle">true</item>-->
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -116,11 +117,6 @@
         <item name="colorPrimaryDark">@color/n_red_darker</item>
         <item name="colorAccent">@color/n_red</item>
         <item name="android:textColorPrimary">@color/black</item>
-    </style>
-
-    <style name="Widget.MD.Light.MyView" parent="">
-        <item name="android:background">@color/gray_400</item>
-        <item name="exampleColor">@color/light_blue_400</item>
     </style>
 
 

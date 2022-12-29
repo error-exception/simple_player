@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -24,11 +25,13 @@ import com.simple.player.service.SimplePlayer
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.ui.theme.NRed
 import com.simple.player.ui.theme.windowBackground
+import com.simple.player.ui.theme.windowBackgroundAlpha
 
-class CheckHeadset : AppCompatActivity() {
+class CheckHeadset : BaseActivity2() {
 
     private var title = mutableStateOf("佩戴检查")
     private var backIcon = mutableStateOf(R.drawable.ic_baseline_arrow_back_24)
+    private var primaryColor = NRed
     private var leftColor = mutableStateOf(NRed)
     private var rightColor = mutableStateOf(NRed)
 
@@ -37,6 +40,9 @@ class CheckHeadset : AppCompatActivity() {
 
         setContent {
             ComposeTestTheme {
+                primaryColor = MaterialTheme.colors.primary
+                leftColor.value = primaryColor
+                rightColor.value = primaryColor
                 Column (modifier = Modifier.fillMaxSize()) {
                     Toolbar(title = title, backIcon = backIcon, backClick = { finish() })
                     CheckHeadsetCompose(
@@ -54,7 +60,7 @@ class CheckHeadset : AppCompatActivity() {
 
     private val soundLeft: () -> Unit = {
         playMusic()
-        leftColor.value = NRed
+        leftColor.value = primaryColor
         rightColor.value = windowBackground
         SimplePlayer.setVolume(1F, 0f)
     }
@@ -62,14 +68,14 @@ class CheckHeadset : AppCompatActivity() {
     private val soundRight: () -> Unit = {
         playMusic()
         leftColor.value = windowBackground
-        rightColor.value = NRed
+        rightColor.value = primaryColor
         SimplePlayer.setVolume(0f, 1F)
     }
 
     private val balance: () -> Unit = {
         playMusic()
-        leftColor.value = NRed
-        rightColor.value = NRed
+        leftColor.value = primaryColor
+        rightColor.value = primaryColor
         SimplePlayer.setVolume(1F, 1F)
     }
 
@@ -97,12 +103,12 @@ fun CheckHeadsetCompose(leftColor: MutableState<Color>, rightColor: MutableState
     }
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(windowBackground)
+        .background(MaterialTheme.colors.background)
         .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Surface (shape = RoundedCornerShape(12.dp)) {
+        Surface (shape = RoundedCornerShape(12.dp), color = windowBackgroundAlpha) {
             Row (modifier = Modifier
                 .padding(16.dp)
-                .background(Color.White)
+//                .background(windowBackgroundAlpha)
                 .fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 Surface (shape = CircleShape) {
                     IconButton(modifier = Modifier

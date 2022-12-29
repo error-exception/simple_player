@@ -3,7 +3,7 @@ package com.simple.player.activity
 import android.os.Bundle
 import androidx.appcompat.widget.AppCompatButton
 import com.simple.player.R
-import com.simple.player.database.IdPathManager
+import com.simple.player.database.IdPathDao
 import com.simple.player.database.SQLiteDatabaseHelper
 import com.simple.player.database.SongDao
 import com.simple.player.ext.toast
@@ -15,14 +15,14 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class DeveloperActivity: BaseActivity() {
+class DeveloperActivity: BaseActivity2() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.developer)
 
         findViewById<AppCompatButton>(R.id.clear_id_path).setOnClickListener {
-            IdPathManager.clear()
+            IdPathDao.clear()
             toast("完成")
         }
 

@@ -1,15 +1,26 @@
 package com.simple.player.util
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import androidx.compose.ui.platform.AndroidUiDispatcher
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toFile
-import com.bumptech.glide.Glide
+import coil.request.ImageRequest
+import coil.size.Size
+import com.simple.player.Store
+import com.simple.player.model.MutablePair
 import com.simple.player.model.Song
 import com.simple.player.util.tree.StringPrefixTree
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.coroutines.EmptyCoroutineContext
 
 object ArtworkProvider {
+
+    private const val TAG = "ArtworkProvider"
 
     private val artworkCacheDirectory: File = FileUtil.mArtworkDirectory
 
@@ -21,37 +32,70 @@ object ArtworkProvider {
         add("jpeg")
     }
 
-    @Deprecated(level = DeprecationLevel.WARNING, message = "use getArtworkUri(song: Song)")
-    fun getArtworkBytes(song: Song): ByteArray {
-        if (AppConfigure.Settings.musicSource == "MediaStore") {
-            return getArtworkFromUri(song)
-        }
-        if (AppConfigure.Settings.musicSource == "ExternalStorage") {
-            return getArtworkFromFile(song)
-        }
-        return emptyByteArray
-    }
+    /**
+     * 缓存当前专辑 URI
+     */
+    private val currentState = MutablePair<Long, Uri?>(0, null)
+
+//    @Deprecated(level = DeprecationLevel.WARNING, message = "use getArtworkUri(song: Song)")
+//    fun getArtworkBytes(song: Song): ByteArray {
+//        if (AppConfigure.Settings.musicSource == "MediaStore") {
+//            return getArtworkFromUri(song)
+//        }
+//        if (AppConfigure.Settings.musicSource == "ExternalStorage") {
+//            return getArtworkFromFile(song)
+//        }
+//        return emptyByteArray
+//    }
 
     fun getArtworkUri(song: Song): Uri? {
+        if (song.id == currentState.first) {
+            Log.e(TAG, "getArtworkUri: mem-cache=${currentState.second}-----${song.id}")
+            return currentState.second
+        }
+        currentState.first = song.id
         if (hasArtworkCache(song)) {
-            return Uri.fromFile(cacheArtworkFile)
+            currentState.second = Uri.fromFile(cacheArtworkFile)
+            Log.e(TAG, "getArtworkUri: cache=${currentState.second}")
+            return currentState.second
         } else {
             val target = File(artworkCacheDirectory.absolutePath + "/${song.id}.png")
             if (AppConfigure.Settings.musicSource == "MediaStore") {
                 val data = MusicUtil.getArtworkBytes(song.id)
-                data ?: return null
+                if (data == null) {
+                    currentState.second = null
+                    return null
+                }
                 FileUtil.writeBytes(target, data)
-                return Uri.fromFile(target)
+                currentState.second = Uri.fromFile(target)
             } else {
                 val file = getImageFileInSameDirectory(song)
                 if (file == null) {
                     val data = MusicUtil.getArtworkBytes(song.id)
-                    data ?: return null
+                    if (data == null) {
+                        currentState.second = null
+                        return null
+                    }
                     FileUtil.writeBytes(target, data)
-                    return Uri.fromFile(target)
+                    currentState.second = Uri.fromFile(target)
+                } else {
+                   currentState.second =  Uri.fromFile(file)
                 }
-                return Uri.fromFile(file)
             }
+            Log.e(TAG, "getArtworkUri: ${currentState.second}")
+            return currentState.second
+        }
+    }
+
+    /**
+     * 对 Coil 特殊对待，coil 的 compose api 并没有对以 file 协议的非 ascii 的 uri 做转化处理
+     */
+    fun getArtworkDataForCoil(song: Song): Any? {
+        val uri = getArtworkUri(song)
+        return try {
+            uri?.toFile()
+        } catch (_: Exception) {
+            uri
         }
     }
 
@@ -66,7 +110,7 @@ object ArtworkProvider {
             file.delete()
             isEmpty = false
         }
-        Glide.get(context).clearDiskCache()
+//        Glide.get(context).clearDiskCache()
         return isEmpty
     }
 
@@ -141,5 +185,18 @@ object ArtworkProvider {
         }
         val extension = filename.substring(i + 1)
         return imageFormats.contains(extension)
+    }
+
+    private inline fun resizeImage(data: Any?, targetSize: Size, crossinline onBitmap: (Bitmap) -> Unit) {
+        ImageRequest.Builder(Store.applicationContext)
+            .data(data = data)
+            .size(targetSize)
+            .allowHardware(true)
+            .allowRgb565(true)
+            .target(
+                onSuccess = {
+                    onBitmap(it.toBitmap())
+                }
+            )
     }
 }

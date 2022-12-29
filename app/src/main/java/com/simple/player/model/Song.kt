@@ -1,7 +1,5 @@
 package com.simple.player.model
 
-import android.net.Uri
-
 class Song(songId: Long){
 
     lateinit var title: String

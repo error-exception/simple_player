@@ -8,14 +8,12 @@ import android.os.IBinder
 import android.os.Parcel
 import android.view.*
 import android.widget.LinearLayout
-import android.widget.TextView
+import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.appbar.AppBarLayout
 import com.simple.player.R
-import com.simple.player.Store
-import com.simple.player.view.IconButton
 
 open class BaseActivity() : AppCompatActivity(), ServiceConnection {
 

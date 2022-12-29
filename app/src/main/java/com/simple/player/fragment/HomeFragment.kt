@@ -7,13 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
-import com.simple.player.MusicEvent
-import com.simple.player.MusicEventHandler
 import com.simple.player.R
 import com.simple.player.Util
 import com.simple.player.activity.*
 import com.simple.player.adapter.DialogListAdapter
 import com.simple.player.constant.IconCode
+import com.simple.player.event.MusicEvent2
+import com.simple.player.event.MusicEventListener
 import com.simple.player.model.CustomListItemModel
 import com.simple.player.model.HomeModel
 import com.simple.player.model.IconWithText
@@ -24,12 +24,7 @@ import com.simple.player.util.DialogUtil
 
 class HomeFragment: Fragment(),
     View.OnClickListener,
-    MusicEvent.OnMusicPlayListener,
-    MusicEvent.OnMusicPauseListener,
-    MusicEvent.OnSongAddToListListener,
-    MusicEvent.OnSongRemovedFromListListener,
-    MusicEvent.OnSongChangedListener,
-    MusicEvent.OnPlayModeChangedListener {
+    MusicEventListener {
 
     companion object {
         const val TAG = "HomeFragment"
@@ -53,7 +48,7 @@ class HomeFragment: Fragment(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        MusicEventHandler.register(this)
+        MusicEvent2.register(this)
         model = HomeModel(view)
         initView()
 
@@ -295,7 +290,7 @@ class HomeFragment: Fragment(),
     }
 
     override fun onDestroy() {
-        MusicEventHandler.unregister(this)
+        MusicEvent2.unregister(this)
         super.onDestroy()
     }
 

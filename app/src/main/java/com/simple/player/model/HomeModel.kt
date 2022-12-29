@@ -6,13 +6,10 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.bumptech.glide.Glide
 import com.simple.player.R
 import com.simple.player.Util.dps
 import com.simple.player.constant.IconCode
 import com.simple.player.drawable.RoundBitmapDrawable2
-import com.simple.player.playlist.PlaylistManager
-import com.simple.player.util.ArtworkProvider
 import com.simple.player.util.ProgressHandler
 import com.simple.player.view.IconButton
 import java.lang.Exception
@@ -68,13 +65,14 @@ class HomeModel(private val view: View){
             //var color = Color.WHITE
             ProgressHandler.handle (handle = {
                 bitmap = try {
-                    Glide.with(holder.artwork)
-                        .asBitmap()
-                        .load(ArtworkProvider.getArtworkUri(PlaylistManager.localPlaylist[value]!!))
-                        .placeholder(R.drawable.default_artwork)
-                        .skipMemoryCache(true)
-                        .submit(holder.artwork.width, holder.artwork.height)
-                        .get()
+                    null
+//                    Glide.with(holder.artwork)
+//                        .asBitmap()
+//                        .load(ArtworkProvider.getArtworkUri(PlaylistManager.localPlaylist[value]!!))
+//                        .placeholder(R.drawable.default_artwork)
+//                        .skipMemoryCache(true)
+//                        .submit(holder.artwork.width, holder.artwork.height)
+//                        .get()
                 } catch (e: Exception) {
                     null
                 }

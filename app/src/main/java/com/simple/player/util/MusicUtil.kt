@@ -1,13 +1,10 @@
 package com.simple.player.util
 
-import android.app.Activity
 import android.content.ContentUris
-import android.graphics.Bitmap
-import android.graphics.Rect
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.MediaStore
-import com.bumptech.glide.Glide
+import androidx.compose.material.rememberBottomSheetState
 import com.simple.player.model.Song
 import com.simple.player.Util
 import com.simple.player.playlist.PlaylistManager
@@ -51,18 +48,21 @@ object MusicUtil {
     }
 
     private fun getArtworkBytes(song: Song): ByteArray? {
+        var mmr: MediaMetadataRetriever? = null
         return try {
-            val data: ByteArray
-            val mmr = MediaMetadataRetriever()
+            mmr = MediaMetadataRetriever()
             val r = Util.mContext.contentResolver?.openFileDescriptor(Uri.parse(song.path), "r")
             mmr.setDataSource(r?.fileDescriptor)
-            data = mmr.embeddedPicture!!
-            mmr.release()
+            val data: ByteArray = mmr.embeddedPicture ?: return null
             fixArtwork(data) ?: data
+//            data
         } catch (e: Exception) {
             null
         } catch (e: Error) {
             null
+        } finally {
+            mmr?.release()
+            mmr = null
         }
     }
 
@@ -84,6 +84,7 @@ object MusicUtil {
         )
         cursor ?: return null
         if (cursor.count <= 0) {
+            cursor.close()
             return null
         }
         cursor.moveToFirst()
@@ -92,13 +93,13 @@ object MusicUtil {
         return ContentUris.withAppendedId(artworkUri, albumId)
     }
 
-    fun getArtworkBitmap(activity: Activity, songId: Long, rect: Rect): Bitmap? {
-        val uri = getArtworkUri(songId)
-        uri ?: return null
-
-        val asBitmap = Glide.with(activity).asBitmap()
-        return asBitmap.load(uri).submit(rect.width(), rect.height()).get()
-    }
+//    fun getArtworkBitmap(activity: Activity, songId: Long, rect: Rect): Bitmap? {
+//        val uri = getArtworkUri(songId)
+//        uri ?: return null
+//
+//        val asBitmap = Glide.with(activity).asBitmap()
+//        return asBitmap.load(uri).submit(rect.width(), rect.height()).get()
+//    }
 
     /**
      * 主要解决MP3tagger的问题，类似补丁
@@ -109,9 +110,27 @@ object MusicUtil {
         }
         for (index in MP3_TAGGER_HEADER.indices) {
             if (data[index] != MP3_TAGGER_HEADER[index]) {
-                return null
+                return data
             }
         }
-        return data.sliceArray((MP3_TAGGER_HEADER.size - 1) until data.size)
+        return data.sliceArray((MP3_TAGGER_HEADER.size) until data.size)
+    }
+
+    fun getBitrate(path: String): Int {
+        try {
+            val mediaMetadataRetriever = MediaMetadataRetriever()
+            val r = Util.mContext.contentResolver?.openFileDescriptor(Uri.parse(path), "r")
+            mediaMetadataRetriever.setDataSource(r?.fileDescriptor)
+            val bitrate = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)
+            mediaMetadataRetriever.release()
+            if (bitrate == null) {
+                return 0
+            }
+            return bitrate.toInt()
+        } catch (_: Exception) {
+            return 0
+        } catch (_: Error) {
+            return 0
+        }
     }
 }

@@ -55,9 +55,11 @@ internal class PlayActionReceiver(private val service: SimpleService): Broadcast
     }
 
     private fun handleScreenOff() {
-        val intent = Intent(service.applicationContext, LockscreenActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        service.applicationContext.startActivity(intent)
+        if (AppConfigure.Settings.showLockScreen) {
+            val intent = Intent(service.applicationContext, LockscreenActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            service.applicationContext.startActivity(intent)
+        }
         isScreenOn = false
     }
 

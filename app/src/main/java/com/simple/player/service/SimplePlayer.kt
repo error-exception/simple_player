@@ -4,14 +4,18 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.media.MediaDataSource
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import com.simple.player.MusicEvent
-import com.simple.player.MusicEventHandler
+import androidx.core.net.toFile
+import com.simple.player.Store
 import com.simple.player.Util
+import com.simple.player.activity.KgListActivity
 import com.simple.player.constant.PreferencesData
+import com.simple.player.event.MusicEvent2
+import com.simple.player.event.MusicEventListener
 import com.simple.player.model.MutablePair
 import com.simple.player.model.Song
 import com.simple.player.playlist.AbsPlaylist
@@ -20,7 +24,7 @@ import com.simple.player.util.AppConfigure
 import java.io.Closeable
 import java.lang.Exception
 
-object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, AudioManager.OnAudioFocusChangeListener {
+object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEventListener {
 
     const val TAG = "SimplePlayer"
 
@@ -57,7 +61,10 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
         set(value) {
             if (value.name != field.name) {
                 field = value
-                AppConfigure.Player.playlist = activePlaylist.name
+                if (KgListActivity.LIST_NAME != value.name) {
+                    AppConfigure.Player.playlist = activePlaylist.name
+                }
+                MusicEvent2.fireOnPlayingPlaylistChanged(value.id)
             }
         }
 
@@ -79,7 +86,8 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
             if (value != old) {
                 AppConfigure.Player.playMode = value
                 field = value
-                MusicEventHandler.executeOnPlayModeChangedListener(old, value)
+//                MusicEventHandler.executeOnPlayModeChangedListener(old, value)
+                MusicEvent2.fireOnPlayModeChanged(old, value)
             }
         }
 
@@ -104,16 +112,91 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
     /**
      * 该方法仅为启动 SimplePlayer
      */
-    fun launch() {}
-
-    init {
-        MusicEventHandler.register(this)
+    fun launch() {
         if (PlaylistManager.hasInitialed && PlaylistManager.localPlaylist.count != 0) {
             initPlayer()
         }
     }
 
+    override fun onPlaylistDeleted(listName: String) {
+        if (activePlaylist.name == listName) {
+            activePlaylist = PlaylistManager.localPlaylist
+        }
+    }
+
+    override fun onPlaylistInitialized() {
+        if (PlaylistManager.localPlaylist.count == 0) {
+            return
+        }
+        initPlayer()
+    }
+
+    override fun onMusicPause() {
+        Store.state.playState.value = false
+    }
+
+    override fun onMusicPlay() {
+        Store.state.playState.value = true
+    }
+
+    override fun onSongChanged(newSongId: Long) {
+        with(Store.state) {
+            isCurrentSongLike.value = SimplePlayer.isCurrentSongLike
+            songTitle.value = currentSong.title
+            songArtist.value = currentSong.artist
+            songUriString.value = currentSong.path
+            playState.value = isPlaying
+            duration.value = this@SimplePlayer.duration
+        }
+    }
+
+    override fun onPlayModeChanged(oldMode: Int, newMode: Int) {
+        Store.state.currentPlayMode.value = newMode
+    }
+
+    override fun onSongAddToList(songId: Long, listName: String) {
+        if (listName == PlaylistManager.FAVORITE_LIST) {
+            if (songId == currentSong.id) {
+                Store.state.isCurrentSongLike.value = true
+            }
+        }
+    }
+
+    override fun onSongRemovedFromList(songId: Long, listName: String) {
+        if (listName == PlaylistManager.FAVORITE_LIST) {
+            if (songId == currentSong.id) {
+                Store.state.isCurrentSongLike.value = false
+            }
+        }
+    }
+
+    override fun onSongsAddToList(songIds: LongArray, listName: String) {
+        if (listName == PlaylistManager.FAVORITE_LIST) {
+            for (songId in songIds) {
+                if (songId == currentSong.id) {
+                    Store.state.isCurrentSongLike.value = true
+                    break
+                }
+            }
+        }
+    }
+
+    override fun onSongsRemovedFromList(songIds: LongArray, listName: String) {
+        if (listName == PlaylistManager.FAVORITE_LIST) {
+            for (songId in songIds) {
+                if (songId == currentSong.id) {
+                    Store.state.isCurrentSongLike.value = false
+                    break
+                }
+            }
+        }
+    }
+
     private fun initPlayer() {
+        if (isPlayerAvailable) {
+            return
+        }
+        Log.d(TAG, "initPlayer: ")
         with(player) {
             audioAttributes = AudioAttributes.Builder().run {
                 setUsage(AudioAttributes.USAGE_MEDIA)
@@ -138,21 +221,25 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
                 synchronized(prepareLock) {
                     if (prepareLock.first) {
                         Log.e(TAG, "prepared next")
-                        AppConfigure.Player.songId = currentSong.id
+                        if (activePlaylist.name != KgListActivity.LIST_NAME) {
+                            AppConfigure.Player.songId = currentSong.id
+                        }
                         start(isNoFade = prepareLock.second, isListener = false)
-                        MusicEventHandler.executeOnSongChangedListener(currentSong.id)
+//                        MusicEventHandler.executeOnSongChangedListener(currentSong.id)
+                        MusicEvent2.fireOnSongChanged(currentSong.id)
                     }
                 }
             }
         }
-        volume = 1F
         musicFader.onStart {
             player.start()
-            MusicEventHandler.executeOnPlayListener()
+//            MusicEventHandler.executeOnPlayListener()
+            MusicEvent2.fireOnMusicPlay()
         }
         musicFader.onEnd {
             player.pause()
-            MusicEventHandler.executeOnPauseListener()
+//            MusicEventHandler.executeOnPauseListener()
+            MusicEvent2.fireOnMusicPause()
         }
         // 获取确切的播放列表
         var playlist = PlaylistManager.getList(AppConfigure.Player.playlist)
@@ -175,6 +262,20 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
         initAudioFocus()
         isPlayerAvailable = true
         loadMusicOrStart(currentSong, isStart = false)
+        if (AppConfigure.Player.rememberId == song.id) {
+            seekTo(AppConfigure.Player.rememberProgress.toInt())
+        }
+        volume = 1F
+        with(Store.state) {
+            isCurrentSongLike.value = SimplePlayer.isCurrentSongLike
+            songTitle.value = currentSong.title
+            songArtist.value = currentSong.artist
+            songUriString.value = currentSong.path
+            playState.value = isPlaying
+            duration.value = this@SimplePlayer.duration
+        }
+
+        MusicEvent2.register(this)
     }
 
     /**
@@ -225,7 +326,8 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
             }
             player.start()
             if (isListener) {
-                MusicEventHandler.executeOnPlayListener()
+//                MusicEventHandler.executeOnPlayListener()
+                MusicEvent2.fireOnMusicPlay()
             }
         }
     }
@@ -239,7 +341,8 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
         } else {
             player.pause()
             if (isListener) {
-                MusicEventHandler.executeOnPauseListener()
+//                MusicEventHandler.executeOnPauseListener()
+                MusicEvent2.fireOnMusicPause()
             }
         }
     }
@@ -293,8 +396,7 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
         currentIndex = activePlaylist.position(song)
         try {
             player.reset()
-            val uri = Uri.parse(song.path)
-            player.setDataSource(Util.mContext, uri)
+            setDataSource(song)
             synchronized(prepareLock) {
                 prepareLock.first = isStart
                 prepareLock.second = isNoFade
@@ -302,11 +404,36 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
                     player.prepareAsync()
                 } else {
                     player.prepare()
-                    AppConfigure.Player.songId = song.id
-                    MusicEventHandler.executeOnSongChangedListener(song.id)
+                    if (activePlaylist.name != KgListActivity.LIST_NAME) {
+                        AppConfigure.Player.songId = song.id
+                    }
+                    MusicEvent2.fireOnSongChanged(song.id)
                 }
             }
-        } catch (e: Exception) {}
+        } catch (_: Exception) {}
+    }
+
+    private fun setDataSource(song: Song) {
+        val uri = Uri.parse(song.path)
+        if (AppConfigure.Settings.musicSource == PreferencesData.SETTINGS_VALUE_MUSIC_SOURCE_MEDIA_STORE) {
+            player.setDataSource(Util.mContext, uri)
+            return
+        }
+        val mediaDataSource: MediaDataSource? = try {
+            when (song.type) {
+                "kge", "kgm" -> KgmMediaDataSourceTest(uri.toFile())
+                "uc", "uc!" -> UCMediaDataSource(uri.toFile())
+                "ncm" -> NCMMediaDataSource(uri.toFile())
+                else -> null
+            }
+        } catch (e: Exception) {
+            null
+        }
+        if (mediaDataSource != null) {
+            player.setDataSource(mediaDataSource)
+        } else {
+            player.setDataSource(Util.mContext, uri)
+        }
     }
 
     private fun abandonAudioFocus() {
@@ -378,13 +505,6 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
         }
     }
 
-    override fun onPlaylistInitialFinished() {
-        if (PlaylistManager.localPlaylist.count == 0) {
-            return
-        }
-        initPlayer()
-    }
-
     private var resumeIfPaused = false
     override fun onAudioFocusChange(focusChange: Int) {
         when (focusChange) {
@@ -435,7 +555,7 @@ object SimplePlayer: MusicEvent.OnPlaylistInitialFinishedListener, Closeable, Au
             abandonAudioFocus()
             isPlayerAvailable = false
         }
-        MusicEventHandler.unregister(this)
+        MusicEvent2.unregister(this)
     }
 
 }
