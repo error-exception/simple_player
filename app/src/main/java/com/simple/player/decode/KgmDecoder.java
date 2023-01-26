@@ -5,7 +5,9 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.simple.player.util.AppConfigure;
 import com.simple.player.util.FileUtil;
+import com.simple.player.util.ProgressHandler;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+
+import kotlin.Unit;
 
 public class KgmDecoder {
 
@@ -106,7 +110,13 @@ public class KgmDecoder {
 
     public static void initMask() {
         // for test
-        InputStream inputStream = FileUtil.INSTANCE.getAssetInputStream("mask/kgm.v2.mask");
+        InputStream inputStream = null;
+        if (FileUtil.mMaskFile.exists()) {
+//            inputStream = FileUtil.INSTANCE.openInputStream(FileUtil.mMaskFile);
+            mask = FileUtil.INSTANCE.readBytes(FileUtil.mMaskFile);
+        } else {
+            inputStream = FileUtil.INSTANCE.getAssetInputStream("mask/kgm.v2.mask");
+        }
 //        InputStream inputStream = FileUtil.INSTANCE.openInputStream("C:\\Users\\HP\\Desktop\\unlock_music\\unlock_music\\cli\\algo\\kgm\\kgm.v2.mask");
         if (inputStream == null) {
             return;
@@ -127,7 +137,16 @@ public class KgmDecoder {
             FileUtil.INSTANCE.closeStream(xzInputStream, inputStream);
             FileUtil.INSTANCE.closeStream(byteArrayOutputStream);
         }
-        mask = byteArrayOutputStream.toByteArray();
+        byte[] maskData = byteArrayOutputStream.toByteArray();
+        long maskSize = (AppConfigure.Player.INSTANCE.getMaxSongSize() >> 4);
+        if (maskData.length > maskSize) {
+            mask = Arrays.copyOfRange(maskData, 0, (int) maskSize);
+            Log.e(TAG, "initMask:" + mask.length );
+            ProgressHandler.INSTANCE.handle(null, null, () -> {
+                FileUtil.INSTANCE.writeBytes(FileUtil.mMaskFile, mask);
+                return Unit.INSTANCE;
+            });
+        }
     }
 
     // Test

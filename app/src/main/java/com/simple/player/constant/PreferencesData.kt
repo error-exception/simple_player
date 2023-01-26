@@ -20,6 +20,8 @@ object PreferencesData {
     const val PLAYER_REMEMBER_SONG_ID = "remember_song_id"
     /* 含有音乐文件的路径 */
     const val PLAYER_MUSIC_DIRECTORIES = "music_dirs"
+    /* 最大歌曲大小，决定使用多大的 mask */
+    const val PLAYER_MAX_SONG_SIZE = "max_song_size"
     /* 当其他媒体播放器播放时 */
     const val SETTINGS_OTHER_PLAYING = "other_playing"
     /* 当其他媒体播放器播放时，暂停播放 */

@@ -129,6 +129,12 @@ object MusicEvent2 {
         }
     }
 
+    fun fireOnPlayerInitialized() {
+        loopList {
+            it.onPlaylistInitialized()
+        }
+    }
+
     fun close() {
         events.clear()
     }

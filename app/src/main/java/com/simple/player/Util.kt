@@ -1,8 +1,11 @@
 package com.simple.player
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.ProgressDialog
 import android.app.Service
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
@@ -13,6 +16,8 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.DisplayMetrics
 import android.util.TypedValue
+import android.view.View
+import android.view.WindowInsetsController
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.customview.widget.ViewDragHelper
@@ -36,8 +41,10 @@ object Util {
     lateinit var mContext: Context
 
     fun dpToPx(dp: Float): Int {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
-            mContext.resources.displayMetrics).toInt()
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, dp,
+            mContext.resources.displayMetrics
+        ).toInt()
     }
 
     fun setContext(context: Context) {
@@ -233,12 +240,14 @@ object Util {
 
     var Int.dps: Int
         get() {
-            return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(),
-                Resources.getSystem().displayMetrics).toInt()
+            return TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, this.toFloat(),
+                Resources.getSystem().displayMetrics
+            ).toInt()
         }
         private set(value) {}
 
-    fun AppCompatActivity.getScreenRect(): Rect {
+    fun Activity.getScreenRect(): Rect {
         val rect = Rect()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             val metric = DisplayMetrics()
@@ -251,7 +260,11 @@ object Util {
         return rect
     }
 
-    fun setCustomLeftEdgeSize(activity: AppCompatActivity, drawerLayout: DrawerLayout, displayWidthPercentage: Float) {
+    fun setCustomLeftEdgeSize(
+        activity: AppCompatActivity,
+        drawerLayout: DrawerLayout,
+        displayWidthPercentage: Float
+    ) {
         try {
             // find ViewDragHelper and set it accessible
             val leftDraggerField = drawerLayout.javaClass.getDeclaredField("mRightDragger")
@@ -274,7 +287,7 @@ object Util {
             val leftCallback = leftCallbackField.get(drawerLayout) as ViewDragHelper.Callback
             val peekRunnableField = leftCallback.javaClass.getDeclaredField("mPeekRunnable")
             peekRunnableField.isAccessible = true
-            peekRunnableField.set(leftCallback, Runnable {  })
+            peekRunnableField.set(leftCallback, Runnable { })
 
 
         } catch (e: NoSuchFieldException) {
@@ -318,5 +331,39 @@ object Util {
         val last = a and 0xf
         val first = (a shr 4) and 0xf
         return "${hexChars[first]}${hexChars[last]}"
+    }
+
+    fun Activity.setStatusBarStyle(isDark: Boolean) {
+        if (isDark) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.decorView.windowInsetsController?.setSystemBarsAppearance(
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                )
+            } else {
+                val systemUiVisibility = window.decorView.systemUiVisibility
+                window.decorView.systemUiVisibility =
+                    systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.decorView.windowInsetsController?.setSystemBarsAppearance(
+                    0,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                )
+            } else {
+                val systemUiVisibility = window.decorView.systemUiVisibility or
+                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                window.decorView.systemUiVisibility =
+                    systemUiVisibility xor View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            }
+        }
+    }
+
+    fun Context.copyText(text: String) {
+        val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = ClipData.newPlainText("simple player", text)
+        clipboardManager.setPrimaryClip(clipData)
+        toast("复制成功")
     }
 }

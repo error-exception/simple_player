@@ -123,7 +123,22 @@ class HomeContentScreen(private val context: Context) {
 
             Column (modifier = Modifier.fillMaxSize()) {
 
-                TopAppBar(title = { Text(text = "Simple Player") })
+                TopAppBar(
+                    title = { Text(text = "Simple Player") },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                onAddCustomListClick?.invoke()
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_baseline_add_24),
+                                contentDescription = "create list",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                )
 
                 Column(modifier = Modifier
                     .weight(1F)
@@ -165,24 +180,26 @@ class HomeContentScreen(private val context: Context) {
                             }
                         }
                         item {
-                            CustomPlaylistArea()
+//                            CustomPlaylistArea()
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(windowBackgroundAlpha))
                         }
                         itemsIndexed(list) { _, item ->
-                            AnimatedVisibility(visible = customPlaylistShowState.value) {
-                                CustomPlaylistItem(
-                                    item = item,
-                                    onClick = {
-                                        onOpenCustomListClick?.invoke(item)
-                                    },
-                                    onItemClick = { index ->
-                                        when (index) {
-                                            0 -> onPlayCustomListClick?.invoke(item)
-                                            1 -> onRenameCustomListClick?.invoke(item)
-                                            2 -> onDeleteCustomListClick?.invoke(item)
-                                        }
+                            CustomPlaylistItem(
+                                item = item,
+                                onClick = {
+                                    onOpenCustomListClick?.invoke(item)
+                                },
+                                onItemClick = { index ->
+                                    when (index) {
+                                        0 -> onPlayCustomListClick?.invoke(item)
+                                        1 -> onRenameCustomListClick?.invoke(item)
+                                        2 -> onDeleteCustomListClick?.invoke(item)
                                     }
-                                )
-                            }
+                                }
+                            )
                         }
                     }
                     BottomPlayerBar()

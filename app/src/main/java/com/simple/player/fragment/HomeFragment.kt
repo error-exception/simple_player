@@ -146,7 +146,7 @@ class HomeFragment: Fragment(),
 //                val drawer: DrawerLayout = findViewById(R.id.drawer_layout)
 //                drawer.openDrawer(GravityCompat.START)
             }
-            R.id.home_player -> startActivity(Intent(context, PlayerContentNew::class.java))
+//            R.id.home_player -> startActivity(Intent(context, PlayerContentNew::class.java))
             R.id.home_playlist -> {
                 val intent = Intent(context, PlaylistActivity::class.java)
                 intent.putExtra(PlaylistActivity.EXTRA_LIST_NAME, PlaylistManager.LOCAL_LIST)

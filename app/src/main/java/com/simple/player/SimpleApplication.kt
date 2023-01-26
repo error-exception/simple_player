@@ -36,6 +36,7 @@ class SimpleApplication : Application() {
             mArtworkDirectory = getExternalFilesDir("artworks")!!
             mWebRoot = getExternalFilesDir("web")!!
             mListDirectory = getExternalFilesDir("list")!!
+            mMaskFile = File(getExternalFilesDir("mask")!!.absolutePath + "/mask")
         }
 
 //        if (FileUtil.mWebRoot.listFiles().isEmpty()) {

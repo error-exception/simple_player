@@ -276,6 +276,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
         }
 
         MusicEvent2.register(this)
+        MusicEvent2.fireOnPlaylistInitialized()
     }
 
     /**

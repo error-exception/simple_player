@@ -57,6 +57,7 @@ object FileUtil {
     lateinit var mWebRoot: File
     lateinit var mListDirectory: File
     lateinit var mDataDirectory: File
+    lateinit var mMaskFile: File
 
     fun getFileType(path: String): String {
         return path.substring(path.lastIndexOf('.') + 1).lowercase()

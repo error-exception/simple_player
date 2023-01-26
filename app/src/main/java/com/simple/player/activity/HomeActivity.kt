@@ -1,6 +1,9 @@
 package com.simple.player.activity
 
-import android.content.*
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -9,31 +12,44 @@ import android.os.IBinder
 import android.os.Process
 import android.provider.MediaStore
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.DrawerValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalDrawer
+import androidx.compose.material.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.simple.player.*
-import com.simple.player.service.SimpleService
+import com.simple.player.BuildConfig
+import com.simple.player.Store
 import com.simple.player.Util.dps
 import com.simple.player.constant.PreferencesData
-import com.simple.player.event.MusicEvent2
-import com.simple.player.event.MusicEventListener
 import com.simple.player.ext.startActivity
 import com.simple.player.ext.toast
 import com.simple.player.playlist.PlaylistManager
-import com.simple.player.screen.*
+import com.simple.player.screen.HomeContentScreen
+import com.simple.player.screen.HomeDrawerScreen
+import com.simple.player.screen.PlayerContentScreen
+import com.simple.player.screen.SplashScreen
 import com.simple.player.service.PlayBinder
 import com.simple.player.service.SimplePlayer
-import com.simple.player.ui.theme.*
-import com.simple.player.util.*
+import com.simple.player.service.SimpleService
+import com.simple.player.ui.theme.ComposeTestTheme
+import com.simple.player.ui.theme.SlideDrawer
+import com.simple.player.ui.theme.SlideDrawerValue
+import com.simple.player.ui.theme.rememberSlideDrawerState
+import com.simple.player.util.AppConfigure
+import com.simple.player.util.ArtworkProvider
+import com.simple.player.util.DialogUtil
+import com.simple.player.util.FileUtil
+import com.simple.player.util.ProgressHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
@@ -51,6 +67,7 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
     private val homeContentScreen = HomeContentScreen(this)
     private val homeDrawerScreen = HomeDrawerScreen()
     private val splashScreen = SplashScreen(this)
+    private var playerContentScreen: PlayerContentScreen? = null
 
 //    private val customList = mutableStateListOf<PlayListItem>()
 
@@ -69,6 +86,7 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
 
     override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
         bin = iBinder as PlayBinder
+        playerContentScreen = PlayerContentScreen(this)
     }
 
     override fun onServiceDisconnected(p0: ComponentName?) {}
@@ -81,6 +99,7 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
         setContent {
             ComposeTestTheme {
                 val navController = rememberNavController()
+                navController.enableOnBackPressed(true)
                 NavHost(navController = navController, startDestination = "splash") {
                     composable("splash") {
                         Splash {navController}
@@ -116,26 +135,62 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
 
     }
 
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     private fun Main() {
         val state = rememberDrawerState(DrawerValue.Closed)
         val scope = rememberCoroutineScope()
+        val slideDrawerState = rememberSlideDrawerState(initialValue = SlideDrawerValue.Close)
+//        val bottomDrawerState = rememberBottomDrawerState(initialValue = BottomDrawerValue.Closed) { it != BottomDrawerValue.Open }
         backClick = {
             val isClosed = state.isClosed
+            val slideIsClosed = slideDrawerState.isClose
             scope.launch {
-                state.close()
+                if (!state.isClosed) {
+                    state.close()
+                }
+                if (!slideDrawerState.isClose) {
+                    slideDrawerState.close()
+                }
             }
-            isClosed
+            isClosed && slideIsClosed
         }
         ComposeTestTheme {
-            ModalDrawer(
-                drawerShape = RectangleShape,
-                drawerState = state,
-                drawerContent = { homeDrawerScreen.ComposeContent() },
+            SlideDrawer(
+                drawerContent = {
+                    playerContentScreen?.ComposeContent { slideDrawerState }
+                },
+                drawerState = slideDrawerState,
                 content = {
-                    homeContentScreen.ComposeContent()
+                    ModalDrawer(
+                        drawerShape = RectangleShape,
+                        drawerState = state,
+                        drawerContent = { homeDrawerScreen.ComposeContent() },
+                        content = {
+                            homeContentScreen.ComposeContent()
+                            homeContentScreen.onPlayerBarClick = {
+                                scope.launch {
+                                    slideDrawerState.open()
+                                }
+                            }
+
+                        }
+                    )
                 }
             )
+
+//            BottomDrawer(
+//                drawerState = bottomDrawerState,
+//                drawerShape = RectangleShape,
+//                gesturesEnabled = bottomDrawerState.isOpen,
+//                drawerContent = {
+//                    playerContentScreen?.ComposeContent { bottomDrawerState }
+//                },
+//                content = {
+//
+//                }
+//            )
+
         }
 
     }
@@ -166,6 +221,7 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
         isStarted = true
         initHomeContentScreen()
         initHomeDrawerScreen()
+
     }
 
     private fun initHomeDrawerScreen() {
@@ -191,9 +247,6 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
 
     private fun initHomeContentScreen() {
         homeContentScreen.apply {
-            onPlayerBarClick = {
-                startActivity(PlayerContentNew::class.java)
-            }
             onNextButtonClick = {
                 SimplePlayer.playNext()
             }

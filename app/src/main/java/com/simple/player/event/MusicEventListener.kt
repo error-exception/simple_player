@@ -38,4 +38,6 @@ interface MusicEventListener {
 
     fun onThemeChanged(newColors: Colors) {}
 
+    fun onPlayerInitialized() {}
+
 }

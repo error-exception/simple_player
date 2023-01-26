@@ -5,11 +5,15 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -22,11 +26,14 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.R
+import com.simple.player.Util.copyText
 import com.simple.player.constant.PreferencesData
 import com.simple.player.model.Song
 import com.simple.player.playlist.PlaylistManager
+import com.simple.player.screen.SettingsItem
 import com.simple.player.service.SimplePlayer
 import com.simple.player.ui.theme.windowBackground
+import com.simple.player.ui.theme.windowBackgroundAlpha
 import com.simple.player.util.AppConfigure
 import com.simple.player.util.ArtworkProvider
 
@@ -42,10 +49,10 @@ class MusicInfo2: BaseActivity2() {
         initData()
         setContent {
             ComposeTestTheme {
-                Surface (modifier = Modifier.background(windowBackground)) {
+                Surface {
                     Column (modifier = Modifier
                         .fillMaxSize()
-                        .background(windowBackground)) {
+                    ) {
                         Toolbar(title, backIcon = backIcon, backClick = { finish() })
                         SongInfo()
                     }
@@ -59,57 +66,84 @@ class MusicInfo2: BaseActivity2() {
 
         Column (modifier = Modifier
             .padding(16.dp)
-            .fillMaxWidth()) {
-            Surface(shape = RoundedCornerShape(12.dp)) {
+            .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Surface(shape = RoundedCornerShape(12.dp), color = windowBackgroundAlpha) {
                 Row (modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(ArtworkProvider.getArtworkUri(song))
+                            .data(ArtworkProvider.getArtworkDataForCoil(song))
                             .allowHardware(true)
-                            .allowConversionToBitmap(true)
-                            .transformations(CircleCropTransformation())
                             .build(),
-                        modifier = Modifier.size(80.dp),
+                        modifier = Modifier
+                            .size(80.dp)
+                            .border(2.dp, color = Color.Black, shape = RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp)),
                         contentDescription = "专辑图片",
                         onError = {
                             isAlbumExist = false
                         }
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Column (modifier = Modifier.height(80.dp), verticalArrangement = Arrangement.Center) {
-                        Text(text = song.title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = song.artist)
+                    Column (modifier = Modifier.height(80.dp), verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)) {
+                        Text(
+                            text = song.title,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = song.artist,
+                            fontSize = 14.sp,
+                            maxLines = 1
+                        )
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Surface(shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1F)) {
+            Surface(shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1F), color = windowBackgroundAlpha) {
                 Column (modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
                     .weight(1F)) {
                     for (pair in info) {
                         Row {
-                            Text(modifier = Modifier.weight(1F), text = pair.first)
-                            Text(modifier = Modifier.weight(4F), text = pair.second)
+                            Text(modifier = Modifier.weight(1F), text = pair.first, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                modifier = Modifier.weight(4F)
+                                    .clickable {
+                                        copyText(pair.second)
+                                    },
+                                text = pair.second
+                            )
                         }
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Surface(shape = RoundedCornerShape(12.dp)) {
-                Row (modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)) {
-                    Button(modifier = Modifier.weight(1F), onClick = edit) {
-                        Text(text = "修改封面")
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Surface(
+                    modifier = Modifier
+                        .weight(1F)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = edit),
+                    color = windowBackgroundAlpha
+                ) {
+                    Box(modifier = Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
+                        Text(text = "修改封面", fontWeight = FontWeight.Bold)
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(modifier = Modifier.weight(1F), onClick = export) {
-                        Text(text = "导出封面")
+                }
+                Surface(
+                    modifier = Modifier
+                        .weight(1F)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = export),
+                    color = windowBackgroundAlpha
+                ) {
+                    Box(modifier = Modifier.padding(16.dp), contentAlignment = Alignment.Center) {
+                        Text(text = "导出封面", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -153,7 +187,7 @@ class MusicInfo2: BaseActivity2() {
 
     private fun initData() {
         val songId = intent.getLongExtra(EXTRA_MUSIC_ID, -1)
-        song = SimplePlayer.activePlaylist[songId]!!
+        song = PlaylistManager.localPlaylist[songId]!!
         info.apply {
             this += "标题：" to song.title
             this += "艺术家：" to song.artist
@@ -162,7 +196,7 @@ class MusicInfo2: BaseActivity2() {
             this += "比特率：" to song.bitrate.toString(10)
             this += "类型：" to song.type
             if (AppConfigure.Settings.musicSource == PreferencesData.SETTINGS_VALUE_MUSIC_SOURCE_EXTERNAL_STORAGE) {
-                this += "大小" to (Uri.parse(song.path).toFile().length() / (1024 * 1024.0)).toString() + "MB"
+                this += "大小：" to "%.2fMB".format(Uri.parse(song.path).toFile().length() / (1024 * 1024.0))
             }
         }
     }

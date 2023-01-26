@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +40,8 @@ import com.simple.player.ui.theme.NRed
 import com.simple.player.ui.theme.RoundIcon
 import com.simple.player.ui.theme.RowSpace
 import com.simple.player.util.ArtworkProvider
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 class HomeDrawerScreen {
 
@@ -64,7 +68,7 @@ class HomeDrawerScreen {
     fun ComposeContent() {
         HomeDrawerSongInfo()
         Column(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             for ((i, item) in drawerList.withIndex()) {
@@ -122,39 +126,25 @@ class HomeDrawerScreen {
 
     @Composable
     private fun HomeDrawerListItem(item: Item, index: Int) {
-//        Row(modifier = Modifier
-//            .fillMaxWidth()
-//            .height(48.dp)
-//            .clickable(onClick = {
-//                onDrawerMenuItemClick?.invoke(item, index)
-//            }),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            RowSpace(width = 16.dp)
-//            RoundIcon(
-//                painter = painterResource(id = item.icon),
-//                contentPadding = 8.dp,
-//                iconSize = 22.dp,
-//                contentDescription = "",
-//                color = MaterialTheme.colors.primary,
-//                tint = Color.White
-//            )
-//            Text(text = item.text, modifier = Modifier.padding(start = 16.dp, end = 16.dp), fontSize = 16.sp)
-//        }
-        SettingsItem(onClick = { onDrawerMenuItemClick?.invoke(item, index) }) {
-//            Icon(
-//                painter = painterResource(id = item.icon),
-//                contentDescription = "icon",
-//                tint = MaterialTheme.colors.primary
-//            )
-//            RowSpace(width = 16.dp)
-            Text(
-                text = item.text,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(end = 16.dp),
-                fontSize = 16.sp
-            )
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onDrawerMenuItemClick?.invoke(item, index)
+                }
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Icon(painter = painterResource(id = item.icon), contentDescription = "icon", tint = MaterialTheme.colors.primary)
+                Text(
+                    text = item.text,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
         }
     }
-
 }
