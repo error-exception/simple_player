@@ -11,64 +11,55 @@
     <FrameLayout
         android:id="@+id/frameLayout"
         android:layout_width="56dp"
-        android:layout_height="64dp"
+        android:layout_height="match_parent"
+        android:clipChildren="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-
-        <com.simple.player.view.SimpleCheckBox
+        <androidx.appcompat.widget.AppCompatCheckBox
             android:id="@+id/playlist_adapter_normal_check"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textColor="@color/n_red"
-            android:textSize="24sp"/>
+            android:layout_width="56dp"
+            android:layout_marginStart="12dp"
+            android:layout_height="match_parent" />
 
         <TextView
             android:id="@+id/playlist_adapter_normal_position"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="56dp"
+            android:layout_height="64dp"
             android:gravity="center"
+            android:text="123"
             android:textColor="#FF808080"
             android:textSize="14sp" />
-
 
     </FrameLayout>
 
     <TextView
         android:id="@+id/playlist_adapter_normal_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="16dp"
+        android:layout_height="32dp"
+        android:gravity="bottom"
+        android:paddingBottom="3dp"
         android:singleLine="true"
         android:text="Time Leaper"
         android:textColor="#000000"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/frameLayout"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/playlist_adapter_normal_artist"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="16dp"
+        android:layout_height="32dp"
+        android:paddingTop="3dp"
         android:singleLine="true"
         android:text="Hinkik"
         android:textColor="#808080"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/frameLayout"
-        app:layout_constraintTop_toBottomOf="@+id/playlist_adapter_normal_title"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintStart_toEndOf="@+id/frameLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

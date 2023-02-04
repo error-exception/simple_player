@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="dialog_ok" type="id"/>
+    <item name="dialog_cancel" type="id"/>
+    <item name="dialog_title" type="id"/>
+    <item name="dialog_message" type="id"/>
+    <item name="dialog_input" type="id"/>
+    <item name="dialog_input2" type="id"/>
+</resources>

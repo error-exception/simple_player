@@ -41,11 +41,6 @@
             android:exported="false"
             android:label="@string/settings" />
         <activity
-            android:name=".activity.PlayerContentNew"
-            android:exported="false"
-            android:label="@string/settings"
-            android:theme="@style/PlayerContentNew" />
-        <activity
             android:name=".web.WebPlayerActivity"
             android:exported="false"
             android:label="@string/settings" />

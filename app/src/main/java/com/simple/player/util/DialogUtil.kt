@@ -58,7 +58,6 @@ object DialogUtil {
         builder.show()
     }
 
-
     fun <T> simpleList(
         context: Context,
         title: String,

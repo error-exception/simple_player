@@ -50,6 +50,7 @@ import com.simple.player.util.ArtworkProvider
 import com.simple.player.util.DialogUtil
 import com.simple.player.util.FileUtil
 import com.simple.player.util.ProgressHandler
+import com.simple.player.view.BottomSheetInputDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
@@ -283,18 +284,33 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
                 selectImageResult.launch("image/*")
             }
             onAddCustomListClick = {
-                DialogUtil.input(
-                    this@HomeActivity,
+                BottomSheetInputDialog.showDialog(
+                    context = this@HomeActivity,
                     title = "添加播放列表",
-                    hint = "列表名称"
-                ) { _, _, content ->
-                    content ?: return@input
-                    if (PlaylistManager.hasList(content)) {
-                        toast("该列表已存在")
-                    } else {
-                        PlaylistManager.create(content)
+                    hint = "列表名称",
+                    onPositive = { content ->
+                        if (content.isEmpty()) {
+                            return@showDialog
+                        }
+                        if (PlaylistManager.hasList(content)) {
+                            toast("该列表已存在")
+                        } else {
+                            PlaylistManager.create(content)
+                        }
                     }
-                }
+                )
+//                DialogUtil.input(
+//                    this@HomeActivity,
+//                    title = "添加播放列表",
+//                    hint = "列表名称"
+//                ) { _, _, content ->
+//                    content ?: return@input
+//                    if (PlaylistManager.hasList(content)) {
+//                        toast("该列表已存在")
+//                    } else {
+//                        PlaylistManager.create(content)
+//                    }
+//                }
             }
             onPlayModeButtonClick = {
                 SimplePlayer.nextPlayMode()

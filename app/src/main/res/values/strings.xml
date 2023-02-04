@@ -83,4 +83,5 @@
     <string name="export_id_path">导出 id_path</string>
     <string name="export_song_table">导出 song 表</string>
     <string name="title_activity_theme">ThemeActivity</string>
+    <string name="input_please">请输入…</string>
 </resources>

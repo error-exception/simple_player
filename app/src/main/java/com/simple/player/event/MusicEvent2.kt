@@ -107,7 +107,7 @@ object MusicEvent2 {
 
     fun fireOnSongsRemovedFromList(songIds: LongArray, listName: String) {
         loopList {
-            fireOnSongsRemovedFromList(songIds, listName)
+            it.onSongsRemovedFromList(songIds, listName)
         }
     }
 

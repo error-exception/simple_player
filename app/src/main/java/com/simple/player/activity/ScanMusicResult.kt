@@ -92,9 +92,6 @@ class ScanMusicResult : BaseActivity2() {
         private var mSongs: List<Song>? = null
         fun setResult(result: List<Song>?) {
             mSongs = result
-            for (song in mSongs!!) {
-                song.isChecked = true
-            }
         }
     }
 }

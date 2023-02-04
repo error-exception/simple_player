@@ -18,7 +18,6 @@ import com.simple.player.R
 open class BaseActivity() : AppCompatActivity(), ServiceConnection {
 
     private var mEvents: Events? = null
-    private var mCustomActionBar: View? = null
     private var mLayoutId = R.layout.back_action_bar
     @DrawableRes
     private var mOptionIcon = 0
@@ -26,10 +25,8 @@ open class BaseActivity() : AppCompatActivity(), ServiceConnection {
 
     companion object {
         const val ICON_BACK = "\ue314"
-        val windowBackground: ColorDrawable = ColorDrawable(0xFFEDEDED.toInt())
     }
     override fun onCreate(savedInstanceState: Bundle?) {
-        window.setBackgroundDrawable(windowBackground)
         mEvents = Events()
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)

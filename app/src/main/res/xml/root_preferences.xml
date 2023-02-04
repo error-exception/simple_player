@@ -1,12 +1,12 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory app:title="@string/player">
 
         <CheckBoxPreference
             app:key="volume_shuffle"
-            app:title="@string/volume_shuffle"
-            app:summary="@string/volume_shuffle_summary"/>
+            app:summary="@string/volume_shuffle_summary"
+            app:title="@string/volume_shuffle" />
 
         <CheckBoxPreference
             app:key="play_fade"
@@ -14,24 +14,24 @@
 
         <CheckBoxPreference
             app:key="headset_autoplay"
-            app:title="@string/headset_autoplay"/>
+            app:title="@string/headset_autoplay" />
 
         <CheckBoxPreference
             app:key="enable_second_volume"
-            app:title="@string/enable_second_volume"/>
+            app:title="@string/enable_second_volume" />
 
         <SeekBarPreference
             app:dependency="enable_second_volume"
             app:key="second_volume"
-            app:title="@string/second_volume"/>
+            app:title="@string/second_volume" />
 
         <ListPreference
-            app:key="music_source"
-            app:title="@string/change_music_source"
             app:defaultValue="MediaStore"
             app:entries="@array/music_source_entries"
             app:entryValues="@array/music_source_entries"
-            app:useSimpleSummaryProvider="true"/>
+            app:key="music_source"
+            app:title="@string/change_music_source"
+            app:useSimpleSummaryProvider="true" />
 
         <ListPreference
             app:defaultValue="pause"
@@ -39,22 +39,21 @@
             app:entryValues="@array/other_playing_values"
             app:key="other_playing"
             app:title="媒体播放冲突时"
-            app:useSimpleSummaryProvider="true"/>
+            app:useSimpleSummaryProvider="true" />
 
         <SeekBarPreference
             app:key="other_playing_volume"
-            app:title="要降低的音量值"
             app:summary="while other_playing = vol_down"
-            />
+            app:title="要降低的音量值" />
 
-<!--
+        <!--
         <CheckBoxPreference
             app:key="system_source"
             app:title="@string/system_source"
             app:summary="@string/system_source_summary"/>
 -->
     </PreferenceCategory>
-        <!--
+    <!--
         <ListPreference
             app:defaultValue="reply"
             app:entries="@array/reply_entries"
@@ -83,25 +82,24 @@
     <PreferenceCategory app:title="@string/scan_music_setting">
 
         <EditTextPreference
-            app:title="音乐拓展名"
-            app:key="access_extension"
+            app:defaultValue=".mp3,.flac"
             app:dialogMessage="拓展名以英文”,“隔开，每个拓展名前要加上”.“,如”.mp3,.flac"
-            app:useSimpleSummaryProvider="true"
-            app:defaultValue=".mp3,.flac"/>
+            app:key="access_extension"
+            app:title="音乐拓展名"
+            app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference
-            app:title="排除路径"
-            app:summary="添加后，扫描将自动跳过该路径"
             app:dialogMessage="多个路径换行输入"
             app:key="exclude_path"
-            />
+            app:summary="添加后，扫描将自动跳过该路径"
+            app:title="排除路径" />
 
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/about">
 
         <Preference
             android:title="@string/about"
-            app:iconSpaceReserved="true"/>
+            app:iconSpaceReserved="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>

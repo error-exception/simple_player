@@ -2,32 +2,36 @@ package com.simple.player.activity
 
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.simple.player.*
 import com.simple.player.Util.toast
-import com.simple.player.adapter.DialogListAdapter
 import com.simple.player.adapter.PlaylistAdapter2
 import com.simple.player.constant.IconCode
 import com.simple.player.event.MusicEvent2
 import com.simple.player.event.MusicEventListener
-import com.simple.player.model.IconWithText
 import com.simple.player.model.Song
 import com.simple.player.playlist.AbsPlaylist
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.service.SimplePlayer
-import com.simple.player.service.SimpleService
 import com.simple.player.util.DialogUtil
+import com.simple.player.view.BottomSheetConfirmDialog
+import com.simple.player.view.BottomSheetListDialog
+import com.simple.player.view.BottomSheetSimpleIconListAdapter
 import com.simple.player.view.FastScroller2
 
-class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListener,
-    PlaylistAdapter2.OnItemClickListener,
+class PlaylistActivity : BaseActivity(),
+//    PlaylistAdapter2.OnItemLongClickListener,
+//    PlaylistAdapter2.OnItemClickListener,
     MusicEventListener {
 
     private val TAG = "PlaylistActivity"
@@ -41,22 +45,28 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
 
     companion object {
         const val EXTRA_LIST_NAME = "list_name"
-        val MULTI_SELECT_MENU_IN_FAVORITE = arrayOf("移除", "添加至")
-        val MULTI_SELECT_MENU = arrayOf("移除", "添加到我喜欢", "添加至")
-        private val MENU_ITEMS = arrayListOf(
-            IconWithText(IconCode.ICON_PLAY_ARROW, "播放"),
-            IconWithText(IconCode.ICON_REMOVE, "移除"),
-            IconWithText(IconCode.ICON_INFO_OUTLINE, "信息"),
-            IconWithText(IconCode.ICON_CHECK, "多选"),
-            IconWithText(IconCode.ICON_FAVORITE, "添加到我喜欢"),
-            IconWithText(IconCode.ICON_ADD, "添加至"),
+        val MULTI_SELECT_MENU_IN_FAVORITE = arrayListOf(
+            IconWithText(R.drawable.baseline_remove_circle_24, "移除"),
+            IconWithText(R.drawable.ic_baseline_add_24, "添加至")
+        )
+        val MULTI_SELECT_MENU = arrayListOf(
+            IconWithText(R.drawable.baseline_remove_circle_24, "移除"),
+            IconWithText(R.drawable.ic_baseline_favorite_24, "添加到我喜欢"),
+            IconWithText(R.drawable.ic_baseline_add_24, "添加至")
+        )
+        val MENU = arrayListOf(
+            IconWithText(R.drawable.ic_play_dark, "播放"),
+            IconWithText(R.drawable.baseline_remove_circle_24, "移除"),
+            IconWithText(R.drawable.ic_outline_info_24, "信息"),
+            IconWithText(R.drawable.ic_baseline_check_24, "多选"),
+            IconWithText(R.drawable.ic_baseline_favorite_24, "添加到我喜欢"),
+            IconWithText(R.drawable.ic_baseline_add_24, "添加至"),
         )
 
-        private val MENU = MENU_ITEMS.toTypedArray()
-
-        private val MENU_IN_FAVORITE = ArrayList(MENU_ITEMS).apply {
-            remove(MENU_ITEMS[4])
-        }.toTypedArray()
+        val MENU_IN_FAVORITE = ArrayList<IconWithText>().apply {
+            addAll(MENU)
+            removeAt(4)
+        }
 
     }
 
@@ -69,11 +79,9 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
         }
         position = mPlaylist.position(player.currentSong)
         mList.adapter = mAdapter
-        mAdapter.setOnItemClickListener(this)
-        mAdapter.setOnItemLongClickListener(this)
-
+        setListListener()
         if (player.activePlaylist == mPlaylist) {
-            mAdapter.setPlayingPosition(position)
+            mAdapter.setPlayingPosition(lastPosition = -1, position)
             mList.scrollToPosition(if (position - 3 < 0) 0 else position - 3)
         }
         MusicEvent2.register(this)
@@ -109,6 +117,7 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
         val verticalTrackDrawable = ColorDrawable(Color.TRANSPARENT)
         val horizontalThumbDrawable = fastScrollbarThumb as StateListDrawable
         val horizontalTrackDrawable = ColorDrawable(Color.TRANSPARENT)
+        fastScrollbarThumb.setTint(BaseActivity2.primaryColor)
         mList.addItemDecoration(
             FastScroller2(
                 mList, fastScrollbarThumb, verticalTrackDrawable,
@@ -118,7 +127,9 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
                 resources.getDimensionPixelOffset(R.dimen.fastscroll_margin)
             )
         )
-        mAdapter = PlaylistAdapter2(mPlaylist)
+        mAdapter = PlaylistAdapter2(mPlaylist).apply {
+            setLinearLayoutManager(linearLayoutManager)
+        }
 
         findViewById<View>(R.id.play_list_fragment_play_position).setOnClickListener {
             val first = linearLayoutManager.findFirstVisibleItemPosition()
@@ -132,6 +143,10 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
                 mList.smoothScrollToPosition(if (position - 3 < 0) 0 else position + 4)
             }
         }
+        findViewById<FloatingActionButton>(R.id.play_list_fragment_to_top).setOnClickListener {
+            mList.scrollToPosition(0)
+        }
+        initTheme()
     }
 
     override fun onSongChanged(newSongId: Long) {
@@ -142,25 +157,46 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
         if (mPlaylist.id != SimplePlayer.activePlaylist.id) {
             return
         }
-        clearItemView()
-        position = mPlaylist.position(mPlaylist[newSongId]!!)
-        mAdapter.setPlayingPosition(position)
+        val newPosition = mPlaylist.position(mPlaylist[newSongId]!!)
+        mAdapter.setPlayingPosition(position, newPosition)
+        position = newPosition
+    }
+
+    private fun setListListener() {
+        mAdapter.onItemClick = {
+            val s = mPlaylist[it]!!
+            if (mAdapter.isSelectionState) {
+                mAdapter.select(it)
+            } else {
+                if (s == player.currentSong) {
+                    player.startOrPause(false)
+                } else {
+                    player.activePlaylist = mPlaylist
+                    player.loadMusicOrStart(s, isNoFade = true)
+                    mAdapter.setPlayingPosition(lastPosition = position, position = it)
+                    this.position = it
+                }
+            }
+        }
+        mAdapter.onItemLongClick = onItemLongClick@{
+            if (mAdapter.isSelectionState) {
+                handleMultiChecks()
+                return@onItemLongClick true
+            }
+            val list = if (mPlaylist.name == PlaylistManager.FAVORITE_LIST) {
+                MENU_IN_FAVORITE
+            } else {
+                MENU
+            }
+            createDialogAndShow(list) { _, index ->
+                handleOption(position = it, item = list[index])
+            }
+            return@onItemLongClick true
+        }
     }
 
     override fun onOptionPressed() {
         cancelSelection()
-        backIcon = R.drawable.ic_baseline_arrow_back_24
-        actionTitle = when (mPlaylist.name) {
-            PlaylistManager.LOCAL_LIST -> "播放列表"
-            PlaylistManager.FAVORITE_LIST -> "我喜欢"
-            else -> mPlaylist.name
-        }
-        // 重新定位歌曲
-        if (isNewSong) {
-            isNewSong = false
-            val position = mPlaylist.position(player.currentSong)
-            mAdapter.setPlayingPosition(position)
-        }
     }
 
     override fun onActionBarBackPressed() {
@@ -180,133 +216,108 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
     }
 
     private fun handleMultiChecks() {
-        val items: Array<String> = if (mPlaylist.name == PlaylistManager.FAVORITE_LIST) {
+        val items = if (mPlaylist.name == PlaylistManager.FAVORITE_LIST) {
             MULTI_SELECT_MENU_IN_FAVORITE
         } else {
             MULTI_SELECT_MENU
         }
-        DialogUtil.simpleList(this, items) { _, p2 ->
-            when (items[p2]) {
+        createDialogAndShow(items) { _, index ->
+            val selectedList = mAdapter.getSelectedSongList()
+            when (items[index].second) {
                 "移除" -> {
-                    if (mAdapter.selectedSongList.size == 0) {
+                    if (selectedList.isEmpty()) {
                         toast("无已选择的歌曲")
-                        return@simpleList
+                    } else {
+                        showRemoveDialog(selectedList = selectedList)
                     }
-                    showRemoveDialog()
                 }
                 "添加至" -> {
-                    if (mAdapter.selectedSongList.size == 0) {
+                    if (selectedList.isEmpty()) {
                         toast("无已选择的歌曲")
-                        return@simpleList
+                    } else {
+                        addToList(selectedList.toTypedArray())
                     }
-                    val selectedList: ArrayList<Song> = mAdapter.selectedSongList
-                    addToList(selectedList.toTypedArray())
                 }
                 "添加到我喜欢" -> {
-                    if (mAdapter.selectedSongList.size == 0) {
+                    if (selectedList.isEmpty()) {
                         toast("无已选择的歌曲")
-                        return@simpleList
+                    } else {
+                        PlaylistManager.addSongs(
+                            PlaylistManager.FAVORITE_LIST,
+                            selectedList.toTypedArray()
+                        )
+                        toast("已添加")
+                        onOptionPressed()
                     }
-                    val selectedList: ArrayList<Song> = mAdapter.selectedSongList
-                    with (PlaylistManager) {
-                        addSongs(FAVORITE_LIST, selectedList.toTypedArray())
-                    }
-                    toast("已添加")
-                    onOptionPressed()
                 }
             }
+
         }
     }
 
     private fun cancelSelection() {
         mAdapter.isSelectionState = false
-        mAdapter.selectedSongList.clear()
         optionIcon = null
-    }
-
-    private fun showRemoveDialog() {
-        DialogUtil.confirm(this,
-            "提示",
-            "将要移除已选的 ${mAdapter.selectedSongList.size} 首歌曲",
-            null
-        ) { _, _ ->
-            val data = mAdapter.selectedSongList
-            mAdapter.remove(data.toTypedArray())
-            onOptionPressed()
-            toast("已移除")
+        backIcon = R.drawable.ic_baseline_arrow_back_24
+        actionTitle = when (mPlaylist.name) {
+            PlaylistManager.LOCAL_LIST -> "播放列表"
+            PlaylistManager.FAVORITE_LIST -> "我喜欢"
+            else -> mPlaylist.name
+        }
+        // 重新定位歌曲
+        if (isNewSong) {
+            isNewSong = false
+            val position = mPlaylist.position(player.currentSong)
+            mAdapter.setPlayingPosition(lastPosition = -1, position)
         }
     }
 
-    override fun onItemClick(view: View?, position: Int) {
-        val s = mPlaylist[position]!!
-        if (mAdapter.isSelectionState) {
-            mAdapter.select(position)
-            return
-        }
-        if (s == player.currentSong) {
-            player.startOrPause(false)
-        } else {
-            player.activePlaylist = mPlaylist
-            player.loadMusicOrStart(s, isNoFade = true)
-            mAdapter.setPlayingPosition(position)
-            this.position = position
-        }
-    }
-
-    override fun onItemLongClick(view: View?, position: Int): Boolean {
-        if (mAdapter.isSelectionState) {
-            handleMultiChecks()
-            return true
-        }
-        val arr: Array<IconWithText> =
-            if (mPlaylist.name == PlaylistManager.FAVORITE_LIST) {
-                MENU_IN_FAVORITE
-            } else {
-                MENU
+    private fun showRemoveDialog(selectedList: ArrayList<Song>) {
+        BottomSheetConfirmDialog.showDialog(
+            context = this,
+            title = "提示",
+            message = "将要移除已选的 ${selectedList.size} 首歌曲",
+            onPositive = {
+                if (selectedList.size == 1) {
+                    mAdapter.remove(selectedList[0])
+                } else {
+                    mAdapter.remove(selectedList)
+                }
+                onOptionPressed()
+                toast("已移除")
             }
-        val adapter = DialogListAdapter(this, arr)
-        DialogUtil.list(this, adapter) { p11, p21 -> handleOption(position, arr[p21]) }
-        return true
+        )
     }
 
     private fun handleOption(position: Int, item: IconWithText) {
         val song: Song = mAdapter.getItem(position)
-        when (item.text) {
+        when (item.second) {
             "播放" -> {
                 if (song == player.currentSong) {
-                    with (player) {
-                        if (isPlaying)
-                            pause()
-                        else
-                            start(true)
-                    }
+                    player.startOrPause(isNoFade = true)
                 } else {
                     player.activePlaylist = mPlaylist
                     player.loadMusicOrStart(song, isNoFade = true)
-                    mAdapter.setPlayingPosition(position)
+                    mAdapter.setPlayingPosition(lastPosition = this.position, position = position)
                     this.position = position
                 }
-                clearItemView()
             }
             "移除" -> {
                 PlaylistManager.removeSong(mPlaylist.name, song)
-                clearItemView()
                 //重新定位当前歌曲
                 val pos = mPlaylist.position(player.currentSong)
-                mAdapter.setPlayingPosition(pos)
+                mAdapter.setPlayingPosition(-1, pos)
                 toast("已移除")
             }
             "信息" -> {
                 val info = Intent(this, MusicInfo2::class.java)
                 info.putExtra(MusicInfo2.EXTRA_MUSIC_ID, song.id)
-                clearItemView()
                 startActivity(info)
             }
             "添加至" -> {
                 addToList(arrayOf(song))
             }
             "多选" -> {
-                clearItemView()
                 mAdapter.isSelectionState = true
                 optionIcon = R.drawable.ic_baseline_close_24
                 backIcon = R.drawable.ic_baseline_radio_button_unchecked_24
@@ -341,11 +352,33 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
     }
 
     private fun clearItemView() {
-        for (song in mPlaylist.songList) {
-            song.isChecked = false
-            song.isPlaying = false
-        }
         mAdapter.notifyItemRangeChanged(0, mAdapter.itemCount)
+    }
+
+    private fun createDialogAndShow(
+        dataList: List<Pair<Int, String>>,
+        onItemClick: ((view: View, position: Int) -> Unit)
+    ) {
+        val adapter = BottomSheetSimpleIconListAdapter(dataList = dataList)
+        adapter.onItemClick = onItemClick
+        val dialog = BottomSheetListDialog(this)
+        dialog.setAdapter(adapter = adapter)
+        dialog.show()
+    }
+
+    private fun initTheme() {
+        val primaryColor = BaseActivity2.primaryColor
+        window.statusBarColor = primaryColor
+        toolbar.setBackgroundColor(primaryColor)
+        mAdapter.primaryColor = primaryColor
+        findViewById<FloatingActionButton>(R.id.play_list_fragment_play_position).apply {
+            backgroundTintList = ColorStateList.valueOf(primaryColor)
+            setColorFilter(Color.WHITE)
+        }
+        findViewById<FloatingActionButton>(R.id.play_list_fragment_to_top).apply {
+            backgroundTintList = ColorStateList.valueOf(primaryColor)
+            setColorFilter(Color.WHITE)
+        }
     }
 
     override fun onDestroy() {
@@ -355,4 +388,14 @@ class PlaylistActivity : BaseActivity(), PlaylistAdapter2.OnItemLongClickListene
         MusicEvent2.unregister(this)
         System.gc()
     }
+
+    override fun onBackPressed() {
+        if (mAdapter.isSelectionState) {
+            cancelSelection()
+        } else {
+            super.onBackPressed()
+        }
+    }
 }
+
+typealias IconWithText = Pair<Int, String>
