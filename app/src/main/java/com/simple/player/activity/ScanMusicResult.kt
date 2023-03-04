@@ -49,12 +49,17 @@ class ScanMusicResult : BaseActivity2() {
     }
 
     private fun initList() {
-        if (selected.isEmpty()) {
-            return
-        }
         ProgressHandler.handle(before = {
             Util.showProgressDialog(this, 10, "正在初始化列表......")
         }, handle = {
+            if (selected.isEmpty()) {
+                return@handle
+            }
+
+            selected.sortBy {
+                it.title
+            }
+
             val database = SQLiteDatabaseHelper.database
             database.beginTransaction()
             database.delete("song_in_list", "list_id = ?", arrayOf(PlaylistManager.localPlaylist.id.toString()))

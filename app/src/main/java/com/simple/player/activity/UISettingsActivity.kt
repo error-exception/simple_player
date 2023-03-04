@@ -14,14 +14,17 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.simple.player.R
 import com.simple.player.constant.PreferencesData
 import com.simple.player.event.MusicEvent2
+import com.simple.player.ext.startActivity
 import com.simple.player.screen.SettingsSingleChoice
 import com.simple.player.screen.SettingsSwitch
+import com.simple.player.screen.SettingsText
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.util.AppConfigure
 
@@ -67,12 +70,15 @@ class UISettingsActivity: BaseActivity2() {
                 )
             }
             item {
+                val list = remember {
+                    mutableStateListOf(
+                        "简略", "详细"
+                    )
+                }
                 SettingsSingleChoice(
                     title = "底部默认播放栏样式",
                     description = "切换底部默认播放栏样式。还可通过长按底部播放栏样式来切换，但不改变默认样式",
-                    list = mutableStateListOf(
-                        "简略", "详细"
-                    ),
+                    list = list,
                     stateIndex = when (AppConfigure.Settings.bottomPlayerBar) {
                         PreferencesData.SETTINGS_VALUE_BUTTON_PLAYER_BAR_SIMPLE -> 0
                         PreferencesData.SETTINGS_VALUE_BUTTON_PLAYER_BAR_DETAIL -> 1
@@ -88,6 +94,11 @@ class UISettingsActivity: BaseActivity2() {
                         MusicEvent2.fireOnBottomPlayerBarStyleChanged(style)
                     }
                 )
+            }
+            item {
+                SettingsText(title = "主题") {
+                    startActivity(ThemeActivity::class.java)
+                }
             }
         }
 

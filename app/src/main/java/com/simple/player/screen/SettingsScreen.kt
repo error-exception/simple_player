@@ -172,7 +172,9 @@ fun SettingsSwitchAndProgress(
     var checked by remember {
         mutableStateOf(switchState)
     }
-    val expandState = mutableStateOf(switchState)
+    val expandState = remember {
+        mutableStateOf(switchState)
+    }
     BaseSettingsItem(
         title = title,
         fixed = true,
@@ -208,7 +210,9 @@ fun <T> SettingsSingleChoice(
     list: SnapshotStateList<T> = mutableStateListOf<T>(),
     onSelected: ((index: Int, element: T) -> Unit)? = null
 ) {
-    val state = mutableStateOf(false)
+    val state = remember {
+        mutableStateOf(false)
+    }
     var selected by remember {
         mutableStateOf(stateIndex)
     }
@@ -218,7 +222,9 @@ fun <T> SettingsSingleChoice(
         expandState = { state },
         extraContent = {
             Column (
-                Modifier.fillMaxWidth().padding(top = 16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 for (index in list.indices) {
@@ -267,7 +273,9 @@ fun SettingsTextField(
     stateText: String,
     onApplyText: ((String) -> Unit)? = null
 ) {
-    val state = mutableStateOf(false)
+    val state = remember {
+        mutableStateOf(false)
+    }
     var text by remember {
         mutableStateOf(stateText)
     }
@@ -277,7 +285,9 @@ fun SettingsTextField(
         expandState = { state },
         extraContent = {
             Column (
-                Modifier.fillMaxWidth().padding(top = 16.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
@@ -315,7 +325,9 @@ fun SettingsProgress(
     stateValue: Float = 0F,
     onProgress: ((Float) -> Unit)? = null
 ) {
-    val state = mutableStateOf(false)
+    val state = remember {
+        mutableStateOf(false)
+    }
     BaseSettingsItem(
         title = title,
         description = description,

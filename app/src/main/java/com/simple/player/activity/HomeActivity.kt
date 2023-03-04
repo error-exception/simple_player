@@ -15,6 +15,7 @@ import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalDrawer
@@ -22,7 +23,10 @@ import androidx.compose.material.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -53,6 +57,7 @@ import com.simple.player.util.ProgressHandler
 import com.simple.player.view.BottomSheetInputDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
 //android:listSelector="@android:color/transparent"
@@ -118,7 +123,7 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
     @Composable
     private fun Splash(navController: () -> NavHostController) {
         val scope = rememberCoroutineScope()
-        splashScreen.composeContent()
+        splashScreen.ComposeContent()
         splashScreen.startInit(
             onSuccess = {
                 scope.launch {
@@ -163,7 +168,19 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
                 },
                 drawerState = slideDrawerState,
                 content = {
+                    val distance = 120.dps
+                    var height = 0
                     ModalDrawer(
+                        modifier = Modifier
+                            .onSizeChanged {
+                                height = it.height
+                            }
+                            .offset {
+                                IntOffset(
+                                    0,
+                                    -(distance * (1 - slideDrawerState.swipeableState.offset.value / height)).toInt()
+                                )
+                            },
                         drawerShape = RectangleShape,
                         drawerState = state,
                         drawerContent = { homeDrawerScreen.ComposeContent() },
@@ -179,19 +196,6 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
                     )
                 }
             )
-
-//            BottomDrawer(
-//                drawerState = bottomDrawerState,
-//                drawerShape = RectangleShape,
-//                gesturesEnabled = bottomDrawerState.isOpen,
-//                drawerContent = {
-//                    playerContentScreen?.ComposeContent { bottomDrawerState }
-//                },
-//                content = {
-//
-//                }
-//            )
-
         }
 
     }

@@ -117,7 +117,7 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
             LaunchedEffect(key1 = slideDrawerState().isOpen) {
                 if (slideDrawerState().isOpen) {
                     isVisible = true
-                    val androidMainColor = ColorUtil.toAndroidColor(mainColor.value).toArgb()
+                    val androidMainColor = ColorUtil.toAndroidColorInt(mainColor.value)
                     activity.window.statusBarColor = androidMainColor
                     activity.setStatusBarStyle(ColorUtils.calculateLuminance(androidMainColor) > 0.5)
                     MusicEvent2.register(this@PlayerContentScreen)
@@ -440,7 +440,7 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
             mainColor.value = Color(color = color)
         }
         activity.setStatusBarStyle(ColorUtils.calculateLuminance(color) > 0.5)
-        activity.window.statusBarColor = ColorUtil.toAndroidColor(mainColor.value).toArgb()
+        activity.window.statusBarColor = ColorUtil.toAndroidColorInt(mainColor.value)
     }
 
     private fun changeSongLikeState() {

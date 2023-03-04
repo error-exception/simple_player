@@ -41,10 +41,6 @@
             android:exported="false"
             android:label="@string/settings" />
         <activity
-            android:name=".web.WebPlayerActivity"
-            android:exported="false"
-            android:label="@string/settings" />
-        <activity
             android:name=".activity.ExcludePathActivity"
             android:exported="false"
             android:label="@string/settings" />
@@ -112,11 +108,6 @@
             android:exported="false"
             android:label="@string/scan_music"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.MusicInfo"
-            android:exported="false"
-            android:label="@string/music_info"
-            android:theme="@style/MD.NoActionBar" />
         <activity
             android:name=".activity.MusicInfo2"
             android:exported="false"

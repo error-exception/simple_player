@@ -5,7 +5,7 @@ import android.os.Looper
 import androidx.annotation.NonNull
 import java.lang.ref.WeakReference
 
-open class SimpleHandler<T>(@NonNull looper: Looper, parent: T): Handler(looper) {
+open class SimpleHandler<T>(looper: Looper, parent: T): Handler(looper) {
 
     private var parentWeak: WeakReference<T> = WeakReference<T>(parent)
 

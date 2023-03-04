@@ -12,16 +12,8 @@ fun Context.toast(any: Any) {
     Toast.makeText(this.applicationContext, StringUtil.toString(any, ""), Toast.LENGTH_LONG).show()
 }
 
-fun Context.checkPermission(permission: String): Boolean {
-    return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-}
-
 fun <T: Activity> Context.startActivity(clazz: Class<T>) {
     val intent = Intent(this, clazz)
     intent.setPackage(packageName)
     startActivity(intent)
-}
-
-fun Context.usePermission(permission: String) {
-
 }

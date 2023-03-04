@@ -4,10 +4,12 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import androidx.core.content.contentValuesOf
 import com.simple.player.playlist.PlaylistManager
+import com.simple.player.util.AppConfigure
 import com.simple.player.util.StringUtil
 
-class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, "mainPlayer.db", null, 9) {
+class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, "mainPlayer.db", null, 11) {
     override fun onCreate(p1: SQLiteDatabase) {
         with(p1) {
             execSQL("""
@@ -44,6 +46,17 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, "mainPlayer.db"
                     valid int default 1
                 );
             """.trimIndent())
+            execSQL("""
+                create table scan_config(
+                    id integer primary key autoincrement not null,
+                    value text not null,
+                    type int not null, --1. extension name 2. exclude path 3. include path
+                    is_valid int not null --1. valid 0. invalid 
+                );
+            """.trimIndent())
+            execSQL("""insert into scan_config (value, type, is_valid) values ("mp3", 1, 1)""")
+            execSQL("""insert into scan_config (value, type, is_valid) values ("flac", 1, 1)""")
+            execSQL("""insert into scan_config (value, type, is_valid) values ("/storage/emulated/0/Android", 2, 1)""")
 //            execSQL("""
 //                create table config(
 //                    _key text not null,
@@ -53,12 +66,50 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, "mainPlayer.db"
         }
     }
     override fun onUpgrade(p1: SQLiteDatabase, p2: Int, p3: Int) {
-//        p1.execSQL("""
-//                create table config(
-//                    _key text not null,
-//                    _value text default ''
-//                );
-//            """.trimIndent())
+        p1.execSQL("""
+                create table scan_config(
+                    id integer primary key autoincrement not null,
+                    value text not null,
+                    type int not null, --1. extension name 2. exclude path 3. include path
+                    is_valid int not null --1. valid 0. invalid 
+                );
+            """.trimIndent())
+        val accessExtension = AppConfigure.Settings.accessExtension
+        val excludePath = AppConfigure.Settings.excludePath
+        val includePath = AppConfigure.Settings.includePath
+        for (extension in accessExtension) {
+            p1.insert(
+                SQLiteDatabaseHelper.TABLE_SCAN_CONFIG,
+                null,
+                contentValuesOf(
+                    ScanConfigDao.VALUE to extension,
+                    ScanConfigDao.TYPE to ScanConfigDao.TYPE_EXTENSION_NAME,
+                    ScanConfigDao.IS_VALID to 1
+                )
+            )
+        }
+        for (path in excludePath) {
+            p1.insert(
+                SQLiteDatabaseHelper.TABLE_SCAN_CONFIG,
+                null,
+                contentValuesOf(
+                    ScanConfigDao.VALUE to path,
+                    ScanConfigDao.TYPE to ScanConfigDao.TYPE_EXCLUDE_PATH,
+                    ScanConfigDao.IS_VALID to 1
+                )
+            )
+        }
+        for (path in includePath) {
+            p1.insert(
+                SQLiteDatabaseHelper.TABLE_SCAN_CONFIG,
+                null,
+                contentValuesOf(
+                    ScanConfigDao.VALUE to path,
+                    ScanConfigDao.TYPE to ScanConfigDao.TYPE_INCLUDE_PATH,
+                    ScanConfigDao.IS_VALID to 1
+                )
+            )
+        }
     }
 
     /**

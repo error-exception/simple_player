@@ -6,6 +6,7 @@ import androidx.compose.material.Colors
 import com.simple.player.event.MusicEvent2
 import com.simple.player.event.MusicEventListener
 import com.simple.player.ui.theme.mainColors
+import com.simple.player.util.AppConfigure
 import com.simple.player.util.ColorUtil
 
 open class BaseActivity2: ComponentActivity(), MusicEventListener {
@@ -17,7 +18,7 @@ open class BaseActivity2: ComponentActivity(), MusicEventListener {
     }
 
     override fun onThemeChanged(newColors: Colors) {
-        primaryColor = ColorUtil.toAndroidColor(newColors.primary).toArgb()
+        primaryColor = ColorUtil.toAndroidColorInt(newColors.primary)
         window.statusBarColor = primaryColor
     }
 
@@ -28,7 +29,16 @@ open class BaseActivity2: ComponentActivity(), MusicEventListener {
 
     companion object {
         @JvmStatic
-        var primaryColor: Int = ColorUtil.toAndroidColor(mainColors.value.primary).toArgb()
+        var primaryColor: Int = AppConfigure.Settings.themeColor
+
+        init {
+            val themeColor = AppConfigure.Settings.themeColor
+            val composeColor = ColorUtil.toComposeColor(themeColor)
+            mainColors.value = mainColors.value.copy(
+                primary = composeColor,
+                secondary = composeColor
+            )
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.ui.res.painterResource
 import androidx.core.graphics.rotationMatrix
+import com.simple.player.database.ScanConfigDao
 import com.simple.player.util.AppConfigure
 import com.simple.player.util.FileUtil
 import java.io.File
@@ -13,10 +14,23 @@ class FileMusicScanner: MusicScanner() {
     private val TAG = "FileMusicScanner"
 
     private val rootDirectory = FileUtil.defaultPath
+
     private var scanDirectories = arrayOf(rootDirectory)
-    private var accessExtensions: MutableSet<String> = AppConfigure.Settings.accessExtension
-    private var excludePaths: MutableSet<String> = AppConfigure.Settings.excludePath
-    private var includePaths: MutableSet<String> = AppConfigure.Settings.includePath
+
+    private var accessExtensions: List<ScanConfigItem> =
+        ScanConfigDao.queryValuesByType(ScanConfigDao.TYPE_EXTENSION_NAME).filter {
+            it.isValid.value
+        }
+
+    private var excludePaths: List<ScanConfigItem> =
+        ScanConfigDao.queryValuesByType(ScanConfigDao.TYPE_EXCLUDE_PATH).filter {
+            it.isValid.value
+        }
+
+    private var includePaths: List<ScanConfigItem> =
+        ScanConfigDao.queryValuesByType(ScanConfigDao.TYPE_INCLUDE_PATH).filter {
+            it.isValid.value
+        }
 
     private var musicDirectories = HashSet<String>()
 
@@ -43,7 +57,7 @@ class FileMusicScanner: MusicScanner() {
     }
 
     override fun scan() {
-
+        // 该循环使用路径过滤
         for (scanDirectory in scanDirectories) {
             if (config.swallowSearch) {
                 swallowSearch(scanDirectory)
@@ -51,13 +65,16 @@ class FileMusicScanner: MusicScanner() {
                 search(scanDirectory)
             }
         }
+        // 不使用路径过滤
         if (config.searchInclude) {
+            Log.e(TAG, "scan: $includePaths")
             for (includePath in includePaths) {
-                if (includePath.isNotEmpty()) {
+                val path = includePath.value.value
+                if (path.isNotEmpty()) {
                     if (config.swallowSearchInclude) {
-                        swallowSearchInclude(File(includePath))
+                        swallowSearchInclude(File(path))
                     } else {
-                        searchInclude(File(includePath))
+                        searchInclude(File(path))
                     }
                 }
             }
@@ -79,6 +96,23 @@ class FileMusicScanner: MusicScanner() {
                 search(f)
             }
             if (f.isFile && f.length() > 1024 && access(f)) {
+                val parent = f.parent
+                if (parent != null) {
+                    musicDirectories.add(parent)
+                }
+                onEachMusic?.invoke(index++, Uri.fromFile(f), null, f.name)
+            }
+        }
+    }
+
+    private fun swallowSearch(file: File) {
+        if (isExcludePath(file.absolutePath)) {
+            return
+        }
+        val listFiles = file.listFiles()
+        listFiles ?: return
+        for (f in listFiles) {
+            if (f.isFile && access(f)) {
                 val parent = f.parent
                 if (parent != null) {
                     musicDirectories.add(parent)
@@ -119,26 +153,9 @@ class FileMusicScanner: MusicScanner() {
         }
     }
 
-    private fun swallowSearch(file: File) {
-        val listFiles = file.listFiles()
-        listFiles ?: return
-        for (f in listFiles) {
-            if (f.isFile && access(f)) {
-                val parent = f.parent
-                if (parent != null) {
-                    musicDirectories.add(parent)
-                }
-                onEachMusic?.invoke(index++, Uri.fromFile(f), null, f.name)
-            }
-        }
-    }
-
-    override val resultCount: Int
-        get() = this.index.toInt()
-
     private fun access(f: File): Boolean {
         for (extension in accessExtensions) {
-            if (f.name.endsWith(".$extension")) {
+            if (f.name.endsWith(".${extension.value.value}")) {
                 return true
             }
         }
@@ -147,12 +164,15 @@ class FileMusicScanner: MusicScanner() {
 
     private fun isExcludePath(path: String): Boolean {
         for (excludePath in excludePaths) {
-            if (path.startsWith(excludePath)) {
+            if (path.startsWith(excludePath.value.value)) {
                 return true
             }
         }
         return false
     }
+
+    override val resultCount: Int
+        get() = this.index.toInt()
 
     override fun onComplete(listener: () -> Unit) {
         onComplete = {

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.simple.player.constant.PreferencesData
 import com.simple.player.playlist.PlaylistManager
+import com.simple.player.ui.theme.NRed
 
 object AppConfigure {
 
@@ -88,6 +89,10 @@ object AppConfigure {
         var enableNewPlaylist: Boolean
             get() = settings.getBoolean(PreferencesData.SETTINGS_ENABLE_NEW_PLAYLIST, false)
             set(value) = settings.edit().putBoolean(PreferencesData.SETTINGS_ENABLE_NEW_PLAYLIST, value).apply()
+
+        var themeColor: Int
+            get() = settings.getInt(PreferencesData.SETTINGS_THEME_COLOR, ColorUtil.toAndroidColorInt(NRed))
+            set(value) = settings.edit().putInt(PreferencesData.SETTINGS_THEME_COLOR, value).apply()
 
     }
 

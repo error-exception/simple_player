@@ -1,6 +1,5 @@
 package com.simple.player.util
 
-import okhttp3.internal.platform.BouncyCastlePlatform
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 import javax.crypto.Cipher

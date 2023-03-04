@@ -9,6 +9,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -48,7 +49,7 @@ class SplashScreen(private val activity: ComponentActivity) {
     private val splashTips = mutableStateOf("")
 
     @Composable
-    fun composeContent() {
+    fun ComposeContent() {
         Splash()
     }
 
@@ -91,6 +92,7 @@ class SplashScreen(private val activity: ComponentActivity) {
     private val readExternalPermission = activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) {
         requestPermissionCallback?.invoke(it)
     }
+    @RequiresApi(Build.VERSION_CODES.R)
     private val manageStorage = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         requestPermissionCallback?.invoke(Environment.isExternalStorageManager())
     }

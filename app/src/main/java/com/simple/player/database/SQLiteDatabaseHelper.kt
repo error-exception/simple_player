@@ -13,6 +13,8 @@ object SQLiteDatabaseHelper {
 
     const val TABLE_PLAY_HISTORY = "play_history"
 
+    const val TABLE_SCAN_CONFIG = "scan_config"
+
     val database: SQLiteDatabase
         get() {
             return helper.writableDatabase

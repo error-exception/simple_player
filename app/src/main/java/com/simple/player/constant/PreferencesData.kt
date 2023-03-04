@@ -2,6 +2,8 @@ package com.simple.player.constant
 
 object PreferencesData {
 
+
+
     /* 播放器的配置文件 */
     const val CONFIG_PLAYER = "player"
     /* 显示在设置界面的配置 */
@@ -66,6 +68,8 @@ object PreferencesData {
     const val SETTINGS_ENABLE_NEW_PLAYLIST = "enable_new_list"
     /* 额外扫描的路径 */
     const val SETTINGS_INCLUDE_PATH = "include_path"
+    /* 主题颜色 */
+    const val SETTINGS_THEME_COLOR = "theme_color"
     /* 网页背景类型 */
     const val WEB_BACKGROUND_TYPE = "background_type"
     /* 显示网页LOGO */

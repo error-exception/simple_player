@@ -23,9 +23,6 @@ open class BaseActivity() : AppCompatActivity(), ServiceConnection {
     private var mOptionIcon = 0
     lateinit var toolbar: Toolbar
 
-    companion object {
-        const val ICON_BACK = "\ue314"
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         mEvents = Events()
         requestWindowFeature(Window.FEATURE_NO_TITLE)

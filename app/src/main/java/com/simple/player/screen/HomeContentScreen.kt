@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +31,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.DrawerState
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
@@ -48,10 +51,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -72,6 +78,8 @@ import com.simple.player.ui.theme.windowBackgroundAlpha
 import com.simple.player.util.AppConfigure
 import com.simple.player.util.ArtworkProvider
 import com.simple.player.util.FileUtil
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class HomeContentScreen(private val context: Context) {
 
@@ -111,14 +119,16 @@ class HomeContentScreen(private val context: Context) {
 
     @Composable
     fun ComposeContent() {
-        HomeCompose()
+        Box(
+            modifier = Modifier.fillMaxSize()
+                .background(Color.White)
+        ) {
+            HomeCompose()
+        }
     }
 
     @Composable
     private fun HomeCompose() {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)) {
             val listState = rememberLazyListState()
 
             Column (modifier = Modifier.fillMaxSize()) {
@@ -145,9 +155,7 @@ class HomeContentScreen(private val context: Context) {
                     .fillMaxWidth()
                     .padding(16.dp)
                 ) {
-                    HeadImage2(
-//                        imageUri = { headImageUri }
-                    )
+                    HeadImage2()
                     val list = remember {
                         customList
                     }
@@ -180,7 +188,6 @@ class HomeContentScreen(private val context: Context) {
                             }
                         }
                         item {
-//                            CustomPlaylistArea()
                             Box(modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
@@ -205,7 +212,6 @@ class HomeContentScreen(private val context: Context) {
                     BottomPlayerBar()
                 }
             }
-        }
     }
 
     @Composable
@@ -279,7 +285,8 @@ class HomeContentScreen(private val context: Context) {
                     }
                     IconButton(modifier = Modifier
                         .weight(1F)
-                        .size(24.dp), onClick = { onPreviousButtonClick?.invoke() }) {
+                        .size(24.dp), onClick = { onPreviousButtonClick?.invoke() }
+                    ) {
                         Icon(
                             modifier = Modifier.size(24.dp),
                             painter = painterResource(id = R.drawable.ic_baseline_skip_previous_24),
@@ -288,12 +295,14 @@ class HomeContentScreen(private val context: Context) {
                     }
                     IconButton(modifier = Modifier
                         .weight(1F)
-                        .size(24.dp), onClick = { onPlayButtonClick?.invoke() }) {
+                        .size(24.dp), onClick = { onPlayButtonClick?.invoke() }
+                    ) {
                         PlayIcon()
                     }
                     IconButton(modifier = Modifier
                         .weight(1F)
-                        .size(24.dp), onClick = { onNextButtonClick?.invoke() }) {
+                        .size(24.dp), onClick = { onNextButtonClick?.invoke() }
+                    ) {
                         Icon(
                             modifier = Modifier.size(24.dp),
                             painter = painterResource(id = R.drawable.ic_skip_next),
@@ -561,29 +570,35 @@ class HomeContentScreen(private val context: Context) {
         applyImageBitmap()
     }
 
+
+    private var imageRequest: ImageRequest? = null
     private fun applyImageBitmap() {
         val imageView = headImageView
         imageView ?: return
-        val imageRequest = ImageRequest.Builder(context = context)
-            .data(headImageUri.value)
-            .allowRgb565(true)
-            .size(
-                width = imageViewWidth,
-                height = imageViewHeight
-            )
-            .listener(
-                onSuccess = { _, result ->
-                    lastHeadImage = currentHeadImage
-                    currentHeadImage = result.drawable.toBitmap(
-                        width = imageViewWidth,
-                        height = imageViewHeight
-                    )
-                    imageView.setImageBitmap(currentHeadImage)
-                    imageView.post(recyclePost)
-                }
-            )
-            .build()
-        Coil.imageLoader(context).enqueue(imageRequest)
+        if (imageRequest == null) {
+            imageRequest = ImageRequest.Builder(context = context)
+                .data(headImageUri.value)
+                .allowRgb565(true)
+                .size(
+                    width = imageViewWidth,
+                    height = imageViewHeight
+                )
+                .listener(
+                    onSuccess = { _, result ->
+                        lastHeadImage = currentHeadImage
+                        currentHeadImage = result.drawable.toBitmap(
+                            width = imageViewWidth,
+                            height = imageViewHeight
+                        )
+                        imageView.setImageBitmap(currentHeadImage)
+                        imageView.post(recyclePost)
+                    }
+                )
+                .build()
+        }
+        imageRequest?.let {
+            Coil.imageLoader(context).enqueue(it)
+        }
     }
 }
 

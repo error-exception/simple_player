@@ -25,6 +25,7 @@ class SimpleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         //System.loadLibrary("native-lib")
+        AppConfigure.setContext(applicationContext)
         SQLiteDatabaseHelper.forContext(this)
         Util.setContext(this)
         Store.iconTypeface = Typeface.createFromAsset(assets, "font/MaterialIcons-Regular.ttf")
@@ -45,7 +46,7 @@ class SimpleApplication : Application() {
 //            path.append("web")
 //            copyToData(path)
 //        }
-        AppConfigure.setContext(applicationContext)
+
     }
 
 //    private fun copyToData(path: Path) {

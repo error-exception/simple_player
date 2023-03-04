@@ -3,6 +3,7 @@ package com.simple.player
 import android.content.ContentValues
 import android.provider.MediaStore
 import android.util.Log
+import androidx.compose.ui.graphics.Color
 import coil.Coil
 import coil.ImageLoader
 import coil.memory.MemoryCache
@@ -11,6 +12,9 @@ import com.simple.player.database.SongDao
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.scan.MediaStoreMusicScanner
 import com.simple.player.scan.MusicScannerProvider
+import com.simple.player.ui.theme.mainColors
+import com.simple.player.util.AppConfigure
+import com.simple.player.util.ColorUtil
 import com.simple.player.util.FileUtil
 import com.simple.player.util.MusicUtil
 import com.simple.player.util.StringUtil
@@ -27,6 +31,7 @@ object ApplicationLoader {
     const val TAG = "ApplicationLoader"
 
     fun load(loadListener: (LoadState) -> Unit) {
+
         loadListener(LoadState.Loading)
         val hasSong = PlaylistManager.load()
         if (!hasSong) {

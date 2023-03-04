@@ -68,9 +68,6 @@ class ExperimentalActivity: BaseActivity2() {
             SettingsText(title = "歌词测试") {
                 startActivity(LyricsActivity::class.java)
             }
-            SettingsText(title = "主题测试") {
-                startActivity(ThemeActivity::class.java)
-            }
             SettingsSwitch(
                 title = "新播放列表测试",
                 state = AppConfigure.Settings.enableNewPlaylist,

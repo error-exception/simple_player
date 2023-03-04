@@ -1,7 +1,9 @@
 package com.simple.player.decode
 
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
+import androidx.annotation.RequiresApi
 import com.simple.player.Util
 import com.simple.player.Util.toHexString
 import com.simple.player.json.JSON
@@ -57,6 +59,7 @@ class KgmConverter(private val song: Song) {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun decryptToMemory() {
         return withContext(Dispatchers.Default) {
             val input = FileUtil.openInputStream(uri = Uri.parse(song.path))
@@ -84,6 +87,7 @@ class KgmConverter(private val song: Song) {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun convert() {
         val info = fetchKgmInfo(song.path)
         if (info == null) {

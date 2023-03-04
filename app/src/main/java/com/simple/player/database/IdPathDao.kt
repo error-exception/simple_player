@@ -4,6 +4,8 @@ import android.content.ContentValues
 
 object IdPathDao {
 
+
+
     private val database = SQLiteDatabaseHelper.database
 
     fun queryIdByPath(uri: String): Long {

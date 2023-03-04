@@ -59,11 +59,11 @@ class ScanMusicActivity : BaseActivity2() {
     }
 
     private fun updateScan() {
-        if (MusicScannerProvider.getScanner() is MediaStoreMusicScanner) {
+        val s = MusicScannerProvider.getScanner()
+        if (s is MediaStoreMusicScanner) {
             return
         }
-        scanner = MusicScannerProvider.getScanner()
-        val s = scanner
+        scanner = s
         if (s is FileMusicScanner) {
             val dirsString = AppConfigure.Player.musicDirectories.toTypedArray()
             val dirs = Array(dirsString.size) { i ->
@@ -72,7 +72,7 @@ class ScanMusicActivity : BaseActivity2() {
             s.setDirectories(dirs)
             s.config(
                 swallowSearch = true,
-                searchInclude = false
+                searchInclude = true
             )
         }
         scanner.onComplete {
@@ -113,14 +113,6 @@ class ScanMusicActivity : BaseActivity2() {
         when (AppConfigure.Settings.musicSource) {
             PreferencesData.SETTINGS_VALUE_MUSIC_SOURCE_MEDIA_STORE -> scanMediaStore()
             PreferencesData.SETTINGS_VALUE_MUSIC_SOURCE_EXTERNAL_STORAGE -> scanFile()
-        }
-    }
-
-    override fun onBackPressed() {
-        if (!screen.isScanOver()) {
-            super.onBackPressed()
-        } else {
-            toast("请等待扫描结束")
         }
     }
 
@@ -188,6 +180,14 @@ class ScanMusicActivity : BaseActivity2() {
     override fun onDestroy() {
         stateHandler.removeCallbacksAndMessages(null)
         super.onDestroy()
+    }
+
+    override fun onBackPressed() {
+        if (!screen.isScanOver()) {
+            super.onBackPressed()
+        } else {
+            toast("请等待扫描结束")
+        }
     }
 
     companion object {
