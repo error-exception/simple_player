@@ -41,6 +41,8 @@ class LyricsActivity: BaseActivity2() {
         start()
     }
 
+    private val lyricsWordList = mutableStateListOf<LyricsWord>()
+
     private var player = MediaPlayer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +77,18 @@ class LyricsActivity: BaseActivity2() {
                 }
             }
         }
+        timeAnimator.setTimeListener { animation, totalTime, deltaTime ->
+                var i = lyricsWordList.size - 1
+                val current = player.currentPosition.toLong()
+                while (i >= 0) {
+                    val lyricsWord = lyricsWordList[i]
+                    if (lyricsWord.startTime < current) {
+                        this@LyricsActivity.activeLine.value = i
+                        break
+                    }
+                    i--
+                }
+        }
     }
 
     @Composable
@@ -86,34 +100,15 @@ class LyricsActivity: BaseActivity2() {
     @Composable
     fun LyricsWord() {
         val state = rememberLazyListState()
-        val list = mutableStateListOf<LyricsWord>()
-        val scope = rememberCoroutineScope()
         val activeLine by remember { activeLine }
         LaunchedEffect(key1 = Unit) {
             val lrc = LyricsProvider.lrc
             lrc ?: return@LaunchedEffect
-            list.addAll(lrc.lrcLineList)
+            lyricsWordList.addAll(lrc.lrcLineList)
         }
-        var elapsedLine = 0
-        timeAnimator.setTimeListener { animation, totalTime, deltaTime ->
-            scope.launch {
-                var i = list.size - 1
-                val current = player.currentPosition.toLong()
-                while (i >= 0) {
-                    val lyricsWord = list[i]
-                    if (lyricsWord.startTime < current) {
-//                        Log.e(this@LyricsActivity.javaClass.simpleName, "LyricsWord: ${lyricsWord.startTime}")
-//                        if (i >= (8 shr 1)) {
-//                            if (this@LyricsActivity.activeLine.value != i) {
-////                                state.animateScrollToItem(i)
-//                                elapsedLine++
-                                this@LyricsActivity.activeLine.value = i
-//                            }
-//                        }
-                        break
-                    }
-                    i--
-                }
+        LaunchedEffect(key1 = activeLine) {
+            if (activeLine - 3 > 0) {
+                state.animateScrollToItem(activeLine - 3)
             }
         }
         LazyColumn(
@@ -123,7 +118,7 @@ class LyricsActivity: BaseActivity2() {
             state = state,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            itemsIndexed(list) { index, item ->
+            itemsIndexed(lyricsWordList) { index, item ->
                 Text(
                     text = item.content,
                     textAlign = TextAlign.Center,
