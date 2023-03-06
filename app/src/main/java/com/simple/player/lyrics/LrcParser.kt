@@ -88,9 +88,8 @@ class LrcParser {
             builder.append(currentChar)
         }
         milliseconds = builder.toString().toInt(10)
-        builder.clear()
 //        Log.e("LrcParser", "handleTimeTag: $minute:$seconds.$milliseconds = ")
-        return (if (milliseconds / 100 == 0) milliseconds * 10 else milliseconds + seconds * 1000 + minute * 60 * 1000).toLong()
+        return (milliseconds + seconds * 1000 + minute * 60 * 1000).toLong()
     }
 
     private fun nextChar(): Boolean {

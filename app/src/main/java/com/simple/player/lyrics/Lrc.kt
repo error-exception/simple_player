@@ -1,5 +1,7 @@
 package com.simple.player.lyrics
 
+import androidx.compose.runtime.mutableStateListOf
+
 class Lrc {
 
     var title: String? = null
@@ -10,7 +12,7 @@ class Lrc {
     var id: String? = null
     var total: Long = 0
 
-    var lrcLineList = ArrayList<LyricsWord>()
+    var lrcLineList = mutableStateListOf<LyricsWord>()
 
     fun addLine(time: Long, content: String) {
         lrcLineList += LyricsWord().apply {

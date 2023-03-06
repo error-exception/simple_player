@@ -5,9 +5,12 @@ import android.content.Intent
 import android.os.Looper
 import android.os.Message
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +22,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -28,9 +33,11 @@ import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.rememberSwipeableState
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.net.toUri
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.palette.graphics.Palette
@@ -66,6 +75,9 @@ import com.simple.player.activity.PlaylistActivity
 import com.simple.player.event.MusicEvent2
 import com.simple.player.event.MusicEventListener
 import com.simple.player.handler.SimpleHandler
+import com.simple.player.lyrics.LyricsBooster
+import com.simple.player.lyrics.LyricsProvider
+import com.simple.player.lyrics.LyricsWord
 import com.simple.player.model.Song
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.service.SimplePlayer
@@ -92,28 +104,23 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
     private val currentSong = mutableStateOf(emptySong)
     private val mainColor = mutableStateOf(Color.White)
     private val current = mutableStateOf(0)
-    private var currentSongId = 0L
+    private var currentSongId = mutableStateOf(0L)
     private val handler = UpdateHandler(Looper.myLooper()!!, this)
     private val artworkModel = mutableStateOf<Any?>(null)
 
-    enum class StateValue {
-        Open,
-        Close
-    }
+
 
     init {
         val lifecycle = activity.lifecycle
         lifecycle.addObserver(this)
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     fun ComposeContent(slideDrawerState: () -> SlideDrawerState) {
-        ComposeTestTheme() {
+        ComposeTestTheme {
             var isVisible by remember {
                 isVisible
             }
-            val swipe = rememberSwipeableState(initialValue = StateValue.Close, animationSpec = TweenSpec(durationMillis = 220))
             LaunchedEffect(key1 = slideDrawerState().isOpen) {
                 if (slideDrawerState().isOpen) {
                     isVisible = true
@@ -122,36 +129,62 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
                     activity.setStatusBarStyle(ColorUtils.calculateLuminance(androidMainColor) > 0.5)
                     MusicEvent2.register(this@PlayerContentScreen)
                     handler.sendEmptyMessage(MSG_UPDATE_PROGRESS)
-                    if (currentSongId != SimplePlayer.currentSong.id) {
+                    if (currentSongId.value != SimplePlayer.currentSong.id) {
                         Log.e(TAG, "ComposeContent: first update info")
-                        currentSongId = SimplePlayer.currentSong.id
+                        currentSongId.value = SimplePlayer.currentSong.id
                         updateInfo()
+                    }
+                    if (showLyrics.value) {
+                        lyricsBooster.start()
                     }
                 } else {
                     isVisible = false
+                    lyricsBooster.pause()
                     activity.window.statusBarColor = BaseActivity2.primaryColor
                     activity.setStatusBarStyle(isDark = false)
                     MusicEvent2.unregister(this@PlayerContentScreen)
                     handler.removeMessages(MSG_UPDATE_PROGRESS)
                 }
             }
-                Box(
-                    modifier = Modifier
-                        .background(mainColor.value)
-                        .background(Brush.verticalGradient(
+            Box(
+                modifier = Modifier
+                    .background(mainColor.value)
+                    .background(
+                        Brush.verticalGradient(
                             0f to mainColor.value,
                             0.6f to Color.White
-                        ))
-                        .fillMaxSize()
-                ) {
-                    PlayerContent()
-                }
+                        )
+                    )
+                    .fillMaxSize()
+            ) {
+                PlayerContent()
+            }
         }
 
     }
 
+    private var oldMainColor = mainColor.value
+    @OptIn(ExperimentalAnimationApi::class)
     @Composable
     private fun PlayerContent() {
+        LaunchedEffect(key1 = showLyrics.value) {
+            if (showLyrics.value) {
+                lyricsBooster.start()
+                oldMainColor = mainColor.value
+                mainColor.value = Color.White
+            } else {
+                lyricsBooster.pause()
+                mainColor.value = oldMainColor
+            }
+            if (isVisible.value) {
+                val androidMainColor = ColorUtil.toAndroidColorInt(mainColor.value)
+                activity.window.statusBarColor = androidMainColor
+                activity.setStatusBarStyle(
+                    ColorUtils.calculateLuminance(androidMainColor) > 0.5
+                )
+            }
+
+        }
         Column (
             modifier = Modifier
                 .fillMaxSize()
@@ -161,16 +194,36 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp)
                     .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember {
+                            MutableInteractionSource()
+                        },
+                        indication = rememberRipple(
+                            radius = .1.dp,
+                            color = Color(0x01000000)
+                        )
+                    ) {
+                        showLyrics.value = !showLyrics.value
+                    }
                     .aspectRatio(1F),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Artwork(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .aspectRatio(1F)
-                        .fillMaxWidth()
-                )
+                AnimatedContent(
+                    targetState = showLyrics.value,
+                    modifier = Modifier.fillMaxSize()
+                ) { showLyrics ->
+                    if (showLyrics) {
+                        Lyrics()
+                    } else {
+                        Artwork(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .aspectRatio(1F)
+                                .fillMaxWidth()
+                        )
+                    }
+                }
             }
             Column(
                 modifier = Modifier
@@ -215,6 +268,70 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
         )
     }
 
+
+    private val activeLine = mutableStateOf(0)
+    private val lyricsBooster = LyricsBooster(activity = activity).apply {
+        setActiveLineTarget(activeLine = activeLine)
+    }
+    private val showLyrics = mutableStateOf(false)
+    @Composable
+    private fun Lyrics() {
+        var height = 60.dp
+        val lyricsList = remember { mutableStateListOf<LyricsWord>() }
+        val activeLine by remember { activeLine }
+        LaunchedEffect(key1 = currentSongId.value) {
+            Log.e(TAG, "Lyrics: loading lrc")
+            val lrc = LyricsProvider.setSongUri(SimplePlayer.currentSong.path.toUri())
+            Log.e(TAG, "Lyrics: loading view")
+            lrc?.let {
+                lyricsList.clear()
+                lyricsList.addAll(it.lrcLineList)
+            }
+            Log.e(TAG, "Lyrics: setting booster ${lrc?.lrcLineList?.toTypedArray().contentToString()}")
+            lyricsBooster.setLyrics(lrc = lrc)
+        }
+        val state = rememberLazyListState()
+        LaunchedEffect(key1 = activeLine) {
+//            state.animateScrollToItem(activeLine)
+            if (activeLine - 3 > 0) {
+                state.animateScrollToItem(activeLine - 3)
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+//                .onSizeChanged { height = it.height }
+        ) {
+            LazyColumn(
+                state = state,
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(height = (height / 2)))
+                }
+                for ((index, lrc) in lyricsList.withIndex()) {
+                    item {
+                        Text(
+                            text = lrc.content,
+                            color = if (index == activeLine) MaterialTheme.colors.primary else Color.Black,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+                item {
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(height = (height / 2)))
+                }
+
+            }
+        }
+    }
+
     @Composable
     private fun AppBar(modifier: Modifier) {
         Column (
@@ -235,7 +352,8 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
             Store.state.songArtist
         }
         Text(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .clickable { ->
                     activity.copyText(text = title)
                 },
@@ -247,7 +365,8 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
             color = Color.Black
         )
         Text(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(top = 16.dp)
                 .clickable { ->
                     activity.copyText(artist)
@@ -535,7 +654,7 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
 
     override fun onSongChanged(newSongId: Long) {
         super.onSongChanged(newSongId)
-        currentSongId = newSongId
+        currentSongId.value = newSongId
         if (isVisible.value) {
             updateInfo()
         }
