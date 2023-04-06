@@ -2,13 +2,10 @@ package com.simple.player.activity
 
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.media.SyncParams
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.os.Message
-import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.simple.player.R
-import com.simple.player.handler.SimpleHandler
+import com.simple.player.util.SimpleHandler
 import com.simple.player.model.Song
 import com.simple.player.service.SimplePlayer
 import com.simple.player.ui.theme.ColumnSpace

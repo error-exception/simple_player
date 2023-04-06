@@ -83,11 +83,11 @@ class JSONObject internal constructor(val map: Map<*, *>) {
         var value: Any? = map
         for (s in parse) {
             value ?: return null
-            if (value is List<*>) {
-                value = value[s.toInt()]
+            value = if (value is List<*>) {
+                value[s.toInt()]
             } else {
                 val t = value as Map<*, *>
-                value = t[s]
+                t[s]
             }
         }
         if (value is String && value == "null") {

@@ -11,6 +11,7 @@ import org.junit.runner.RunWith
 
 import org.junit.Assert.*
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.Arrays
 
 /**
@@ -25,15 +26,18 @@ class ExampleInstrumentedTest {
 
     @Test
     fun useAppContext() {
-        val krcDir = File("/storage/emulated/0/kugou/lyrics/")
-        val cacheDir = File("/storage/emulated/0/Android/data/com.kugou.android.lite/files/kugou/down_c/default")
-        Log.e("a", Arrays.toString(krcDir.list()))
-//        println(Arrays.toString(cacheDir.list()))
-
+        val s = "YWJj".toByteArray()
+        println(android.util.Base64.decode(s, android.util.Base64.DEFAULT).toUTFString())
+        val encoded = java.util.Base64.getDecoder().decode(s)
+        println(encoded.toUTFString())
 
 
 
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.simple.player", appContext.packageName)
+    }
+
+    fun ByteArray.toUTFString(): String {
+        return String(this, 0, this.size, StandardCharsets.UTF_8)
     }
 }

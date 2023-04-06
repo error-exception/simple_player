@@ -1,22 +1,13 @@
 package com.simple.player.util
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
-import androidx.compose.ui.platform.AndroidUiDispatcher
-import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toFile
-import coil.request.ImageRequest
-import coil.size.Size
-import com.simple.player.Store
 import com.simple.player.model.MutablePair
 import com.simple.player.model.Song
 import com.simple.player.util.tree.StringPrefixTree
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.coroutines.EmptyCoroutineContext
 
 object ArtworkProvider {
 
@@ -24,8 +15,6 @@ object ArtworkProvider {
 
     private val artworkCacheDirectory: File = FileUtil.mArtworkDirectory
 
-    private lateinit var cacheArtworkFile: File
-    private val emptyByteArray = ByteArray(0)
     private val imageFormats = StringPrefixTree().apply {
         add("jpg")
         add("png")
@@ -37,54 +26,44 @@ object ArtworkProvider {
      */
     private val currentState = MutablePair<Long, Uri?>(0, null)
 
-//    @Deprecated(level = DeprecationLevel.WARNING, message = "use getArtworkUri(song: Song)")
-//    fun getArtworkBytes(song: Song): ByteArray {
-//        if (AppConfigure.Settings.musicSource == "MediaStore") {
-//            return getArtworkFromUri(song)
-//        }
-//        if (AppConfigure.Settings.musicSource == "ExternalStorage") {
-//            return getArtworkFromFile(song)
-//        }
-//        return emptyByteArray
-//    }
-
     fun getArtworkUri(song: Song): Uri? {
         if (song.id == currentState.first) {
             Log.e(TAG, "getArtworkUri: mem-cache=${currentState.second}-----${song.id}")
             return currentState.second
         }
         currentState.first = song.id
-        if (hasArtworkCache(song)) {
-            currentState.second = Uri.fromFile(cacheArtworkFile)
+        val uri = getArtworkUriFromCache(song.id)
+        if (uri != null) {
+            currentState.second = uri
             Log.e(TAG, "getArtworkUri: cache=${currentState.second}")
             return currentState.second
+        }
+        val target = File(artworkCacheDirectory.absolutePath + "/${song.id}")
+        if (AppConfigure.Settings.musicSource == "MediaStore") {
+            val data = MusicUtils.getArtworkBytes(song.id)
+            if (data == null) {
+                currentState.second = null
+                return null
+            }
+            FileUtil.writeBytes(target, data)
+            currentState.second = Uri.fromFile(target)
         } else {
-            val target = File(artworkCacheDirectory.absolutePath + "/${song.id}.png")
-            if (AppConfigure.Settings.musicSource == "MediaStore") {
-                val data = MusicUtil.getArtworkBytes(song.id)
+            val file = getImageFileInSameDirectory(song)
+            if (file != null) {
+                FileUtil.copy(from = file, to = target)
+                currentState.second = Uri.fromFile(file)
+            } else {
+                val data = MusicUtils.getArtworkBytes(song.id)
                 if (data == null) {
                     currentState.second = null
                     return null
                 }
                 FileUtil.writeBytes(target, data)
                 currentState.second = Uri.fromFile(target)
-            } else {
-                val file = getImageFileInSameDirectory(song)
-                if (file == null) {
-                    val data = MusicUtil.getArtworkBytes(song.id)
-                    if (data == null) {
-                        currentState.second = null
-                        return null
-                    }
-                    FileUtil.writeBytes(target, data)
-                    currentState.second = Uri.fromFile(target)
-                } else {
-                   currentState.second =  Uri.fromFile(file)
-                }
             }
-            Log.e(TAG, "getArtworkUri: ${currentState.second}")
-            return currentState.second
         }
+        Log.e(TAG, "getArtworkUri: ${currentState.second}")
+        return currentState.second
     }
 
     /**
@@ -114,34 +93,6 @@ object ArtworkProvider {
         return isEmpty
     }
 
-    private fun getArtworkFromUri(song: Song): ByteArray {
-        if (hasArtworkCache(song)) {
-            return getArtworkBytesFromCache()
-        } else {
-            val data = MusicUtil.getArtworkBytes(song.id) ?: return emptyByteArray
-            saveToArtworkCache(song, data)
-        }
-        return FileUtil.readBytes(song.path)
-    }
-
-    private fun getArtworkBytesFromCache(): ByteArray {
-        return FileUtil.readBytes(cacheArtworkFile)
-    }
-
-    private fun getArtworkFromFile(song: Song): ByteArray {
-        return if (hasArtworkCache(song)) {
-            getArtworkBytesFromCache()
-        } else {
-            var data = MusicUtil.getArtworkBytes(song.id) ?: emptyByteArray
-            if (data.isEmpty()) {
-                val imageFile = getImageFileInSameDirectory(song) ?: return emptyByteArray
-                data = FileUtil.readBytes(imageFile)
-            }
-            saveToArtworkCache(song, data)
-            data
-        }
-    }
-
     private fun getImageFileInSameDirectory(song: Song): File? {
         val songFile = Uri.parse(song.path).toFile()
         val directory = songFile.parentFile!!
@@ -155,27 +106,13 @@ object ArtworkProvider {
         }
         return if (list != null && list.isNotEmpty()) list[0] else null
     }
-
-    private fun saveToArtworkCache(song: Song, data: ByteArray) {
-        val target = artworkCacheDirectory.absolutePath + "/${song.id}.png"
-        FileUtil.writeBytes(File(target), data)
-    }
-
-    private fun hasArtworkCache(song: Song): Boolean {
-        val list = artworkCacheDirectory.listFiles { _, name ->
-            val list = name.split(".")
-            if (isImageFile(name)) {
-                StringUtil.toLong(list[0], -1) == song.id
-            } else {
-                false
-            }
+    private fun getArtworkUriFromCache(id: Long): Uri? {
+        val cache = artworkCacheDirectory.absolutePath + "/" + id
+        val cacheFile = File(cache)
+        if (cacheFile.exists()) {
+            return Uri.fromFile(cacheFile)
         }
-        return if (list.isNullOrEmpty()) {
-            false
-        } else {
-            cacheArtworkFile = list[0]
-            true
-        }
+        return null
     }
 
     private fun isImageFile(filename: String): Boolean {
@@ -185,18 +122,5 @@ object ArtworkProvider {
         }
         val extension = filename.substring(i + 1)
         return imageFormats.contains(extension)
-    }
-
-    private inline fun resizeImage(data: Any?, targetSize: Size, crossinline onBitmap: (Bitmap) -> Unit) {
-        ImageRequest.Builder(Store.applicationContext)
-            .data(data = data)
-            .size(targetSize)
-            .allowHardware(true)
-            .allowRgb565(true)
-            .target(
-                onSuccess = {
-                    onBitmap(it.toBitmap())
-                }
-            )
     }
 }

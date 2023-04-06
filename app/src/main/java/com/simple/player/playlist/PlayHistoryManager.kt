@@ -5,7 +5,7 @@ import com.simple.player.database.SQLiteDatabaseHelper
 import com.simple.player.model.Song
 import kotlin.collections.ArrayList
 
-internal object HistoryListManager {
+internal object PlayHistoryManager {
 
     private const val TAG = "HistoryListManager"
 
@@ -13,7 +13,7 @@ internal object HistoryListManager {
 
     private const val HISTORY_MAX = 200
 
-    fun queryHistoryList(): ArrayList<Pair<Song, Long>> {
+    fun queryHistory(): ArrayList<Pair<Song, Long>> {
         val cursor = database.rawQuery("SELECT * FROM play_history;", null)
         if (cursor.count == 0) {
             cursor.close()
@@ -25,7 +25,7 @@ internal object HistoryListManager {
             val id = cursor.getLong(0)
             val playtime = cursor.getLong(1)
             val song = PlaylistManager.localPlaylist[id]
-            // TODO: 解决当歌曲移除时，还残留历史记录的问题
+            //TODO: 解决当歌曲移除时，还残留历史记录的问题
             if (song != null) {
                 list.add(Pair(song, playtime))
             }
@@ -39,7 +39,7 @@ internal object HistoryListManager {
         updateOrInsertPlayDatetime(id)
     }
 
-    fun clearHistoryList() {
+    fun clearHistory() {
         database.delete("play_history", null, null)
     }
 

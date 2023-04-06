@@ -2,7 +2,7 @@ package com.simple.player.database
 
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getStringOrNull
-import com.simple.player.util.StringUtil
+import com.simple.player.util.StringUtils
 
 object PlaylistDao {
 
@@ -13,7 +13,7 @@ object PlaylistDao {
 
     fun insertPlaylist(name: String, description: String = ""): Boolean {
         val contentValues = contentValuesOf(
-            NAME_CODE to StringUtil.stringToCode(name),
+            NAME_CODE to StringUtils.stringToCode(name),
             DESCRIPTION to description
         )
         val code = SQLiteDatabaseHelper.database.insert(TABLE_NAME, null, contentValues)
@@ -34,7 +34,7 @@ object PlaylistDao {
         val descriptionIndex = cursor.getColumnIndexOrThrow(DESCRIPTION)
 
         val id = cursor.getLong(idIndex)
-        val name = StringUtil.codeToString(cursor.getString(nameIndex))
+        val name = StringUtils.codeToString(cursor.getString(nameIndex))
         val description = cursor.getStringOrNull(descriptionIndex)
         cursor.close()
 
@@ -50,7 +50,7 @@ object PlaylistDao {
             return false
         }
         val contentValues = contentValuesOf(
-            columnName to if (columnName == NAME_CODE) StringUtil.stringToCode(newValue) else newValue
+            columnName to if (columnName == NAME_CODE) StringUtils.stringToCode(newValue) else newValue
         )
         return SQLiteDatabaseHelper.database.update(
             TABLE_NAME,
@@ -79,7 +79,7 @@ object PlaylistDao {
             val descriptionIndex = cursor.getColumnIndexOrThrow(DESCRIPTION)
 
             val id = cursor.getLong(idIndex)
-            val name = StringUtil.codeToString(cursor.getString(nameIndex))
+            val name = StringUtils.codeToString(cursor.getString(nameIndex))
             val description = cursor.getString(descriptionIndex)
             callback(id, name, description)
         } while (cursor.moveToNext())
@@ -92,7 +92,7 @@ object PlaylistDao {
         val cursor =
             database.rawQuery(
                 "select id from playlist where name_code = ?;",
-                arrayOf(StringUtil.stringToCode(name))
+                arrayOf(StringUtils.stringToCode(name))
             )
         cursor.moveToFirst()
         if (cursor.count <= 0) {

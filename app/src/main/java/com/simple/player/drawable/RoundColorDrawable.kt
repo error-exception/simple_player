@@ -32,6 +32,9 @@ class RoundColorDrawable(val colour: Int, val radius: Float = 1f): Drawable() {
         mPaint.colorFilter = colorFilter
     }
 
+    @Deprecated("Deprecated in Java",
+        ReplaceWith("PixelFormat.TRANSLUCENT", "android.graphics.PixelFormat")
+    )
     override fun getOpacity(): Int {
         return PixelFormat.TRANSLUCENT
     }

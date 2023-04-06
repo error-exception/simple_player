@@ -8,6 +8,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+/**
+ * this class is incomplete or never use it
+ */
 public class NCMDecoder {
 
     public static short[] magicHeader = {

@@ -57,7 +57,7 @@ object ArtworkBuilder {
             getBitmapQuick(context, uri, -1, -1)
         }
         if (blurRadius > 1 && bitmap != null) {
-            bitmap = BlurUtil.blur(bitmap, blurRadius);
+            bitmap = BlurUtils.blur(bitmap, blurRadius);
         }
         addBitmap(id, bitmap)
         return bitmap
@@ -111,7 +111,7 @@ object ArtworkBuilder {
             sBitmapOptionsCache
         )
         if (bitmap != null ) {
-            bitmap = BitmapUtil.cropBitmapAspect(bitmap, 1F, 1F)
+            bitmap = BitmapUtils.cropBitmapAspect(bitmap, 1F, 1F)
             if (width > 0 && height > 0) {
                 if (sBitmapOptionsCache.outWidth != width || sBitmapOptionsCache.outHeight != height) {
                     val tmp = Bitmap.createScaledBitmap(bitmap, width, height, true)

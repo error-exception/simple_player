@@ -2,56 +2,23 @@ package com.simple.player.activity
 
 import android.app.KeyguardManager
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.Window
-import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Indication
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.internal.enableLiveLiterals
-import androidx.compose.runtime.remember
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.viewpager.widget.ViewPager
 import com.simple.player.R
-import com.simple.player.Store
 import com.simple.player.adapter.LockScreenViewPagerAdapter
 import com.simple.player.event.MusicEvent2
 import com.simple.player.event.MusicEventListener
 import com.simple.player.model.LockscreenModel
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.service.SimplePlayer
-import com.simple.player.ui.theme.*
 import com.simple.player.util.AppConfigure
-import java.util.ArrayList
 
 class LockscreenActivity : AppCompatActivity(),
     ViewPager.OnPageChangeListener,

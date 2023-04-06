@@ -35,7 +35,7 @@ internal class JSONObjectParser {
                 isNumber(currentChar) -> {
                     handleNumber()
                 }
-                currentChar.isLetter() -> {
+                currentChar in 'a'..'z' || currentChar in 'A'..'Z' -> {
                     handleLabel()
                 }
                 currentChar == ',' || currentChar == '}' -> {
@@ -43,8 +43,8 @@ internal class JSONObjectParser {
                         val value = tmpStack.pop()
                         val key = tmpStack.pop()
                         result[key.toString()] = value
-                        if (currentChar == '}') return result
                     }
+                    if (currentChar == '}') return result
                 }
                 currentChar == '[' -> {
                     val parser = JSONArrayParser()
@@ -70,6 +70,7 @@ internal class JSONObjectParser {
     private fun handleNumber() {
         val s = StringBuilder()
         do {
+
             s.append(currentChar)
         } while (nextChar() && isNumber(currentChar))
         tmpStack.push(s.toString())
@@ -77,6 +78,7 @@ internal class JSONObjectParser {
     }
 
     private fun handleLabel() {
+
         val s = StringBuilder()
         do {
             s.append(currentChar)
@@ -86,11 +88,26 @@ internal class JSONObjectParser {
     }
 
     private fun handleString() {
-        nextChar()
         val s = StringBuilder()
-        do {
-            s.append(currentChar)
-        } while (nextChar() && currentChar != '"')
+        var isEscapeChar = false
+        while (nextChar() && (isEscapeChar || currentChar != '"')) {
+            if (currentChar == '\\') {
+                isEscapeChar = true
+                continue
+            }
+            if (isEscapeChar) {
+                isEscapeChar = false
+                s.append(when (currentChar) {
+                    'n' -> '\n'
+                    't' -> '\t'
+                    'r' -> '\r'
+                    'b' -> '\b'
+                    else -> currentChar
+                })
+            } else {
+                s.append(currentChar)
+            }
+        }
         tmpStack.push(s.toString())
     }
 

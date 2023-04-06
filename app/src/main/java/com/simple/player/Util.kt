@@ -23,7 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.customview.widget.ViewDragHelper
 import androidx.drawerlayout.widget.DrawerLayout
 import com.simple.player.service.SimpleService
-import com.simple.player.util.BitmapUtil
+import com.simple.player.util.BitmapUtils
 import com.simple.player.drawable.RoundDrawable
 import java.lang.Exception
 import java.lang.StringBuilder
@@ -93,7 +93,7 @@ object Util {
         if (mDefaultArtwork != null) {
             return mDefaultArtwork
         }
-        val m = BitmapUtil.getBitmapQuick(R.drawable.default_artwork, 64, 64)
+        val m = BitmapUtils.getBitmapQuick(R.drawable.default_artwork, 64, 64)
         mDefaultArtwork = RoundDrawable(m!!)
         return mDefaultArtwork
     }

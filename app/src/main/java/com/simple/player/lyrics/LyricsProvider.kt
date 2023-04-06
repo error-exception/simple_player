@@ -46,7 +46,7 @@ object LyricsProvider {
                     true
                 }
                 "krc" -> {
-                    lyricsType = LyricsType.NormalLyrics
+                    lyricsType = LyricsType.KugouLyrics
                     true
                 }
                 "lyric" -> {

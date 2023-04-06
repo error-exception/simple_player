@@ -4,14 +4,13 @@ import android.content.ContentUris
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.compose.material.rememberBottomSheetState
 import com.simple.player.model.Song
 import com.simple.player.Util
 import com.simple.player.playlist.PlaylistManager
 import java.lang.Error
 import java.lang.Exception
 
-object MusicUtil {
+object MusicUtils {
 
     val MP3_TAGGER_HEADER = byteArrayOf(
         0x00, 0x6D, 0x70, 0x33, 0x20,
@@ -55,14 +54,12 @@ object MusicUtil {
             mmr.setDataSource(r?.fileDescriptor)
             val data: ByteArray = mmr.embeddedPicture ?: return null
             fixArtwork(data) ?: data
-//            data
         } catch (e: Exception) {
             null
         } catch (e: Error) {
             null
         } finally {
             mmr?.release()
-            mmr = null
         }
     }
 
@@ -93,14 +90,6 @@ object MusicUtil {
         return ContentUris.withAppendedId(artworkUri, albumId)
     }
 
-//    fun getArtworkBitmap(activity: Activity, songId: Long, rect: Rect): Bitmap? {
-//        val uri = getArtworkUri(songId)
-//        uri ?: return null
-//
-//        val asBitmap = Glide.with(activity).asBitmap()
-//        return asBitmap.load(uri).submit(rect.width(), rect.height()).get()
-//    }
-
     /**
      * 主要解决MP3tagger的问题，类似补丁
      */
@@ -126,6 +115,7 @@ object MusicUtil {
             if (bitrate == null) {
                 return 0
             }
+            r?.close()
             return bitrate.toInt()
         } catch (_: Exception) {
             return 0

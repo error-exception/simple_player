@@ -1,9 +1,7 @@
 package com.simple.player.util
 
-import android.content.ContentUris
 import android.content.Context
 import android.graphics.*
-import android.icu.text.DateTimePatternGenerator
 import android.net.Uri
 import android.widget.ImageView
 import com.simple.player.Util
@@ -12,7 +10,7 @@ import kotlin.math.roundToInt
 /**
  * 包含了一些对 Bitmap 进行简单处理的方法
  */
-object BitmapUtil {
+object BitmapUtils {
 
     /**
      * 此方法可以裁剪图片，裁剪所得的图片源自于图片的中央

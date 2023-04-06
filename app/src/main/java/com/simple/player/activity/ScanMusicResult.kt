@@ -10,8 +10,11 @@ import com.simple.player.model.Song
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.screen.ScanResultScreen
 import com.simple.player.ui.theme.ComposeTestTheme
+import com.simple.player.util.AppConfigure
 import com.simple.player.util.ArtworkProvider
 import com.simple.player.util.ProgressHandler
+import java.lang.Appendable
+
 class ScanMusicResult : BaseActivity2() {
 
     private var addImmediately = false
@@ -55,9 +58,10 @@ class ScanMusicResult : BaseActivity2() {
             if (selected.isEmpty()) {
                 return@handle
             }
-
-            selected.sortBy {
-                it.title
+            if (AppConfigure.Settings.autoSortAfterScan) {
+                selected.sortBy {
+                    it.title
+                }
             }
 
             val database = SQLiteDatabaseHelper.database

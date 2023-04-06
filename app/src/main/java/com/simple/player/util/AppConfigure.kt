@@ -10,12 +10,10 @@ object AppConfigure {
 
     private lateinit var player: SharedPreferences
     private lateinit var settings: SharedPreferences
-    private lateinit var web: SharedPreferences
 
     fun setContext(context: Context) {
         player = context.getSharedPreferences(PreferencesData.CONFIG_PLAYER, Context.MODE_PRIVATE)
         settings = context.getSharedPreferences(PreferencesData.CONFIG_SETTINGS, Context.MODE_PRIVATE)
-        web = context.getSharedPreferences(PreferencesData.CONFIG_WEB, Context.MODE_PRIVATE)
     }
 
     object Settings {
@@ -91,9 +89,12 @@ object AppConfigure {
             set(value) = settings.edit().putBoolean(PreferencesData.SETTINGS_ENABLE_NEW_PLAYLIST, value).apply()
 
         var themeColor: Int
-            get() = settings.getInt(PreferencesData.SETTINGS_THEME_COLOR, ColorUtil.toAndroidColorInt(NRed))
+            get() = settings.getInt(PreferencesData.SETTINGS_THEME_COLOR, ColorUtils.toAndroidColorInt(NRed))
             set(value) = settings.edit().putInt(PreferencesData.SETTINGS_THEME_COLOR, value).apply()
 
+        var autoSortAfterScan: Boolean
+            get() = settings.getBoolean(PreferencesData.SETTINGS_AUTO_SORT, true)
+            set(value) = settings.edit().putBoolean(PreferencesData.SETTINGS_AUTO_SORT, value).apply()
     }
 
     object Player {

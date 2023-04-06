@@ -63,7 +63,7 @@ public class KgmDecoder {
 
     public static byte[] mask;
 
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+//    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Nullable
     public static byte[] decode(@NotNull InputStream inputStream) {
         boolean isKgm = false;
@@ -112,12 +112,11 @@ public class KgmDecoder {
         // for test
         InputStream inputStream = null;
         if (FileUtil.mMaskFile.exists()) {
-//            inputStream = FileUtil.INSTANCE.openInputStream(FileUtil.mMaskFile);
             mask = FileUtil.INSTANCE.readBytes(FileUtil.mMaskFile);
+            return;
         } else {
             inputStream = FileUtil.INSTANCE.getAssetInputStream("mask/kgm.v2.mask");
         }
-//        InputStream inputStream = FileUtil.INSTANCE.openInputStream("C:\\Users\\HP\\Desktop\\unlock_music\\unlock_music\\cli\\algo\\kgm\\kgm.v2.mask");
         if (inputStream == null) {
             return;
         }
@@ -152,11 +151,22 @@ public class KgmDecoder {
     // Test
     public static long calcHeaderSize(byte[] originData) {
         byte[] sizeByte = Arrays.copyOfRange(originData, 0x10, 0x14);
+//        long size = 0;
+//        size = size | sizeByte[3];
+//        size = (size << 8) | sizeByte[2];
+//        size = (size << 8) | sizeByte[1];
+//        size = (size << 8) | sizeByte[0];
+//        return size;
+        return calcHeaderSize(sizeByte, 0);
+    }
+
+    public static long calcHeaderSize(byte[] sizeBytes, int offset) {
+//        byte[] sizeByte = Arrays.copyOfRange(sizeBytes, 0x10, 0x14);
         long size = 0;
-        size = size | sizeByte[3];
-        size = (size << 8) | sizeByte[2];
-        size = (size << 8) | sizeByte[1];
-        size = (size << 8) | sizeByte[0];
+        size = size | sizeBytes[3 + offset];
+        size = (size << 8) | sizeBytes[2 + offset];
+        size = (size << 8) | sizeBytes[1 + offset];
+        size = (size << 8) | sizeBytes[offset];
         return size;
     }
 
@@ -200,6 +210,18 @@ public class KgmDecoder {
                 }
             }
         }
+        return data;
+    }
+
+    public static int readKgm(int decryptIndex, int data, byte[] key) {
+        int med8 = (data ^ key[decryptIndex % 17] ^ KgmDecoder.maskV2PreDef[decryptIndex % (16 * 17)] ^ KgmDecoder.mask[decryptIndex >> 4]);
+        return (med8 ^ (med8 & 0xf) << 4);
+    }
+
+    public static int readVpr(int decryptIndex, int data, byte[] key) {
+        int med8 = (data ^ key[decryptIndex % 17] ^ KgmDecoder.maskV2PreDef[decryptIndex % (16 * 17)] ^ KgmDecoder.mask[decryptIndex >> 4]);
+        data = (med8 ^ (med8 & 0xf) << 4);
+        data ^= KgmDecoder.maskDiffVpr[decryptIndex % 17];
         return data;
     }
 

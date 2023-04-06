@@ -1,6 +1,6 @@
 package com.simple.player.lyrics
 
-import com.simple.player.util.FileUtil
+import com.simple.player.decode.KRCDecoder
 import java.io.InputStream
 
 class SimpleKrcParser {
@@ -11,7 +11,7 @@ class SimpleKrcParser {
     private val lrc = Lrc()
 
     fun parse(input: InputStream): Lrc {
-        content = FileUtil.readTextUTF8(inputStream = input)
+        content = KRCDecoder.INSTANCE.decode(input)
         while (nextChar()) {
             if (currentChar == '[') {
                 if (!nextChar())
@@ -37,6 +37,7 @@ class SimpleKrcParser {
             builder.append(currentChar)
         }
         val duration = builder.toString().toLong(10)
+        builder.clear()
         var skip = false
         while (nextChar() && currentChar != '[') {
             if (currentChar == '<') {
@@ -56,7 +57,7 @@ class SimpleKrcParser {
         val word = LyricsWord()
         word.startTime = startTime
         word.duration = duration
-        word.content = builder.toString()
+        word.content = builder.trim().toString()
         lrc.addLine(word = word)
     }
 

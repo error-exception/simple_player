@@ -1,4 +1,4 @@
-package com.simple.player.animate
+package com.simple.player.util
 
 import android.animation.ValueAnimator
 import android.view.animation.Interpolator

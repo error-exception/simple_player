@@ -8,7 +8,7 @@ import com.simple.player.screen.ThemeScreen
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.ui.theme.mainColors
 import com.simple.player.util.AppConfigure
-import com.simple.player.util.ColorUtil
+import com.simple.player.util.ColorUtils
 
 class ThemeActivity : BaseActivity2() {
 
@@ -34,7 +34,7 @@ class ThemeActivity : BaseActivity2() {
             primary = color,
             secondary = color
         )
-        AppConfigure.Settings.themeColor = ColorUtil.toAndroidColorInt(color)
+        AppConfigure.Settings.themeColor = ColorUtils.toAndroidColorInt(color)
         MusicEvent2.fireOnThemeChanged(mainColors.value)
     }
 }

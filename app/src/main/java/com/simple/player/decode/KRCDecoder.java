@@ -1,22 +1,13 @@
-package com.simple.player.lyrics;
-
-import android.util.Log;
+package com.simple.player.decode;
 
 import com.simple.player.util.FileUtil;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.zip.Deflater;
 import java.util.zip.Inflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import okio.internal.ZipKt;
 
 public class KRCDecoder {
 

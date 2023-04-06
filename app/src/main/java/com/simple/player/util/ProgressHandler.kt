@@ -1,8 +1,6 @@
 package com.simple.player.util
 
-import com.simple.player.handler.SimpleHandler
 import android.os.*
-import android.util.Log
 import java.util.*
 import java.util.concurrent.*
 

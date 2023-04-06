@@ -11,6 +11,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -120,7 +121,8 @@ class HomeContentScreen(private val context: Context) {
     @Composable
     fun ComposeContent() {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .background(Color.White)
         ) {
             HomeCompose()
@@ -131,7 +133,9 @@ class HomeContentScreen(private val context: Context) {
     private fun HomeCompose() {
             val listState = rememberLazyListState()
 
-            Column (modifier = Modifier.fillMaxSize()) {
+            Column (
+                modifier = Modifier.fillMaxSize()
+            ) {
 
                 TopAppBar(
                     title = { Text(text = "Simple Player") },
@@ -153,9 +157,9 @@ class HomeContentScreen(private val context: Context) {
                 Column(modifier = Modifier
                     .weight(1F)
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    HeadImage2()
                     val list = remember {
                         customList
                     }
@@ -165,7 +169,10 @@ class HomeContentScreen(private val context: Context) {
                         state = listState,
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        item {
+                        item(key = -1) {
+                            HeadImage2()
+                        }
+                        item(key = -2) {
                             Row (modifier = Modifier.fillMaxWidth()) {
                                 HomeClickableCard(modifier = Modifier.weight(1F), item = history) {
                                     onHistoryPlaylistClick?.invoke()
@@ -176,7 +183,7 @@ class HomeContentScreen(private val context: Context) {
                                 }
                             }
                         }
-                        item{
+                        item(key = -3) {
                             Row (modifier = Modifier.fillMaxWidth()) {
                                 HomeClickableCard(modifier = Modifier.weight(1F), item = localList) {
                                     onLocalPlaylistClick?.invoke()
@@ -187,26 +194,29 @@ class HomeContentScreen(private val context: Context) {
                                 }
                             }
                         }
-                        item {
+                        // 分隔线
+                        item(key = -4) {
                             Box(modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
                                 .background(windowBackgroundAlpha))
                         }
-                        itemsIndexed(list) { _, item ->
-                            CustomPlaylistItem(
-                                item = item,
-                                onClick = {
-                                    onOpenCustomListClick?.invoke(item)
-                                },
-                                onItemClick = { index ->
-                                    when (index) {
-                                        0 -> onPlayCustomListClick?.invoke(item)
-                                        1 -> onRenameCustomListClick?.invoke(item)
-                                        2 -> onDeleteCustomListClick?.invoke(item)
+                        for (item in list) {
+                            item(key = item.name) {
+                                CustomPlaylistItem(
+                                    item = item,
+                                    onClick = {
+                                        onOpenCustomListClick?.invoke(item)
+                                    },
+                                    onItemClick = { index ->
+                                        when (index) {
+                                            0 -> onPlayCustomListClick?.invoke(item)
+                                            1 -> onRenameCustomListClick?.invoke(item)
+                                            2 -> onDeleteCustomListClick?.invoke(item)
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
                     BottomPlayerBar()
@@ -391,7 +401,6 @@ class HomeContentScreen(private val context: Context) {
                     )
                 }
         )
-        ColumnSpace(height = 16.dp)
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -467,6 +476,7 @@ class HomeContentScreen(private val context: Context) {
                 contentDescription = "",
                 modifier = Modifier
                     .size(64.dp)
+                    .border(2.dp, color = Color.Black, shape = RoundedCornerShape(4.dp))
                     .clip(RoundedCornerShape(4.dp))
             )
             Column(

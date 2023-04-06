@@ -3,13 +3,11 @@ package com.simple.player.ext
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.core.content.ContextCompat
-import com.simple.player.util.StringUtil
+import com.simple.player.util.StringUtils
 
 fun Context.toast(any: Any) {
-    Toast.makeText(this.applicationContext, StringUtil.toString(any, ""), Toast.LENGTH_LONG).show()
+    Toast.makeText(this.applicationContext, StringUtils.toString(any, ""), Toast.LENGTH_LONG).show()
 }
 
 fun <T: Activity> Context.startActivity(clazz: Class<T>) {

@@ -1,7 +1,7 @@
 package com.simple.player.service
 
 import android.media.MediaDataSource
-import com.simple.player.decode.NCMDecoderTest
+import com.simple.player.decode.NCMSimpleDecoder
 import com.simple.player.util.AESUtils
 import java.io.File
 import java.io.IOException
@@ -19,19 +19,19 @@ class NCMMediaDataSource(private val ncmFile: File): MediaDataSource() {
 
     init {
         randomAccessFile.seek(0)
-        val headerBytes = ByteArray(NCMDecoderTest.magicHeader.size + 2)
+        val headerBytes = ByteArray(NCMSimpleDecoder.magicHeader.size + 2)
         randomAccessFile.read(headerBytes)
-        if (!NCMDecoderTest.isNCMFile(headerBytes)) {
+        if (!NCMSimpleDecoder.isNCMFile(headerBytes)) {
             randomAccessFile.close()
             throw IOException("not a ncm file")
         }
         key = readKey()
-        box = NCMDecoderTest.buildKeyBox(key)
+        box = NCMSimpleDecoder.buildKeyBox(key)
         randomAccessFile.read(sizeBytes)
-        val metaLength = NCMDecoderTest.calcSize(sizeBytes, 0)
+        val metaLength = NCMSimpleDecoder.calcSize(sizeBytes, 0)
         randomAccessFile.skipBytes(metaLength.toInt() + 5 + 4)
         randomAccessFile.read(sizeBytes)
-        val coverLength = NCMDecoderTest.calcSize(sizeBytes, 0)
+        val coverLength = NCMSimpleDecoder.calcSize(sizeBytes, 0)
         randomAccessFile.skipBytes(coverLength.toInt())
         audioOffset = randomAccessFile.filePointer
         audioLength = ncmFile.length() - audioOffset
@@ -48,7 +48,7 @@ class NCMMediaDataSource(private val ncmFile: File): MediaDataSource() {
         val length = randomAccessFile.read(buffer, offset, size)
         var i = offset
         while (i < size) {
-            buffer[i] = NCMDecoderTest.decryptByte((position + i).toInt(), box, buffer[i])
+            buffer[i] = NCMSimpleDecoder.decryptByte((position + i).toInt(), box, buffer[i])
             i++
         }
         return length
@@ -60,13 +60,13 @@ class NCMMediaDataSource(private val ncmFile: File): MediaDataSource() {
 
     private fun readKey(): ByteArray {
         randomAccessFile.read(sizeBytes)
-        val keyLength = NCMDecoderTest.calcSize(sizeBytes, 0).toInt()
+        val keyLength = NCMSimpleDecoder.calcSize(sizeBytes, 0).toInt()
         val keyBytes = ByteArray(keyLength)
         randomAccessFile.read(keyBytes)
         for (i in 0 until keyLength) {
             keyBytes[i] = (keyBytes[i] xor 0x64)
         }
-        val decryptedKey = AESUtils.decrypt(keyBytes, NCMDecoderTest.keyCore)
+        val decryptedKey = AESUtils.decrypt(keyBytes, NCMSimpleDecoder.keyCore)
         return decryptedKey.copyOfRange(17, decryptedKey.size)
     }
 }

@@ -86,7 +86,6 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
             if (value != old) {
                 AppConfigure.Player.playMode = value
                 field = value
-//                MusicEventHandler.executeOnPlayModeChangedListener(old, value)
                 MusicEvent2.fireOnPlayModeChanged(old, value)
             }
         }
@@ -225,7 +224,6 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
                             AppConfigure.Player.songId = currentSong.id
                         }
                         start(isNoFade = prepareLock.second, isListener = false)
-//                        MusicEventHandler.executeOnSongChangedListener(currentSong.id)
                         MusicEvent2.fireOnSongChanged(currentSong.id)
                     }
                 }
@@ -233,12 +231,10 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
         }
         musicFader.onStart {
             player.start()
-//            MusicEventHandler.executeOnPlayListener()
             MusicEvent2.fireOnMusicPlay()
         }
         musicFader.onEnd {
             player.pause()
-//            MusicEventHandler.executeOnPauseListener()
             MusicEvent2.fireOnMusicPause()
         }
         // 获取确切的播放列表
@@ -273,6 +269,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
             songUriString.value = currentSong.path
             playState.value = isPlaying
             duration.value = this@SimplePlayer.duration
+            currentPlayMode.value = playMode
         }
 
         MusicEvent2.register(this)
@@ -422,7 +419,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
         }
         val mediaDataSource: MediaDataSource? = try {
             when (song.type) {
-                "kge", "kgm" -> KgmMediaDataSourceTest(uri.toFile())
+                "kge", "kgm" -> KgmMediaDataSource(uri.toFile())
                 "uc", "uc!" -> UCMediaDataSource(uri.toFile())
                 "ncm" -> NCMMediaDataSource(uri.toFile())
                 else -> null

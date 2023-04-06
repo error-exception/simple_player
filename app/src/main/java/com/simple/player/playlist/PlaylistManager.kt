@@ -106,7 +106,7 @@ object PlaylistManager :MusicEventListener {
             name = name,
             description = desc
         )
-        if (success) {
+        if (!success) {
             Log.e(TAG, "create list filed: $name")
             return null
         }
@@ -119,20 +119,20 @@ object PlaylistManager :MusicEventListener {
     }
 
     fun delete(name: String): Boolean {
-        if (name == LOCAL_LIST && name == FAVORITE_LIST) {
+        if (name == LOCAL_LIST || name == FAVORITE_LIST) {
             return false
         }
         val list = listMap[name]
         list ?: return true
         val success = PlaylistDao.deletePlaylist(list.id)
         if (!success) {
-            Log.e(TAG, "delete - the playlist not found in table playlist, name = $name")
+            Log.i(TAG, "delete - the playlist not found in table playlist, name = $name")
             return false
         }
         SongInListDao.delete(listId = list.id)
         val isDone2 = listMap.remove(name)
         if (isDone2 == null) {
-            Log.e(TAG, "delete - the playlist not found in map, name = $name")
+            Log.i(TAG, "delete - the playlist not found in map, name = $name")
             return false
         }
         MusicEvent2.fireOnPlaylistDeleted(name)
@@ -148,12 +148,12 @@ object PlaylistManager :MusicEventListener {
             newValue = newName
         )
         if (!success) {
-            Log.e(TAG, "rename - the playlist not found in table playlist, name = $oldName")
+            Log.i(TAG, "rename - the playlist not found in table playlist, name = $oldName")
             return
         }
         val isDone = listMap.remove(oldName) != null
         if (!isDone) {
-            Log.e(TAG, "rename - the playlist not found in map, name = $oldName")
+            Log.i(TAG, "rename - the playlist not found in map, name = $oldName")
             return
         }
         listMap[newName] = list
@@ -283,7 +283,7 @@ object PlaylistManager :MusicEventListener {
         list -= song
         val success = SongInListDao.delete(listId = list.id, songId = song.id)
         if (!success) {
-            Log.e(TAG, "delete error in table song_in_list, song_id = ${song.id}, list_id = ${list.id}")
+            Log.i(TAG, "delete error in table song_in_list, song_id = ${song.id}, list_id = ${list.id}")
             return
         }
         MusicEvent2.fireOnSongRemovedFromList(song.id, listName)
@@ -295,7 +295,7 @@ object PlaylistManager :MusicEventListener {
         for (song in songArray) {
             val success = SongInListDao.delete(listId = list.id, songId = song.id)
             if (!success) {
-                Log.e(TAG, "delete error in table song_in_list, song_id = ${song.id}, list_id = ${list.id}, list_name = ${list.name}")
+                Log.i(TAG, "delete error in table song_in_list, song_id = ${song.id}, list_id = ${list.id}, list_name = ${list.name}")
                 return
             }
         }
@@ -304,7 +304,7 @@ object PlaylistManager :MusicEventListener {
     }
 
     fun getHistoryList(): AbsPlaylist {
-        val list = HistoryListManager.queryHistoryList()
+        val list = PlayHistoryManager.queryHistory()
         val playlist = Playlist("_history_")
         for (pair in list) {
             playlist += pair.first
@@ -316,7 +316,7 @@ object PlaylistManager :MusicEventListener {
     override fun onSongChanged(newSongId: Long) {
         MainScope().launch {
             withContext(Dispatchers.IO) {
-                HistoryListManager.addHistory(newSongId)
+                PlayHistoryManager.addHistory(newSongId)
                 MusicEvent2.fireOnHistoryChanged(newSongId)
             }
         }

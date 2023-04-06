@@ -7,8 +7,8 @@ import android.os.Message
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -25,14 +25,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
-import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -74,7 +71,7 @@ import com.simple.player.activity.MusicInfo2
 import com.simple.player.activity.PlaylistActivity
 import com.simple.player.event.MusicEvent2
 import com.simple.player.event.MusicEventListener
-import com.simple.player.handler.SimpleHandler
+import com.simple.player.util.SimpleHandler
 import com.simple.player.lyrics.LyricsBooster
 import com.simple.player.lyrics.LyricsProvider
 import com.simple.player.lyrics.LyricsWord
@@ -86,7 +83,6 @@ import com.simple.player.ui.theme.RoundIconButton2
 import com.simple.player.ui.theme.SlideDrawerState
 import com.simple.player.ui.theme.windowBackgroundAlpha
 import com.simple.player.util.ArtworkProvider
-import com.simple.player.util.ColorUtil
 import com.simple.player.util.ProgressHandler
 
 class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleObserver, MusicEventListener {
@@ -124,7 +120,7 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
             LaunchedEffect(key1 = slideDrawerState().isOpen) {
                 if (slideDrawerState().isOpen) {
                     isVisible = true
-                    val androidMainColor = ColorUtil.toAndroidColorInt(mainColor.value)
+                    val androidMainColor = com.simple.player.util.ColorUtils.toAndroidColorInt(mainColor.value)
                     activity.window.statusBarColor = androidMainColor
                     activity.setStatusBarStyle(ColorUtils.calculateLuminance(androidMainColor) > 0.5)
                     MusicEvent2.register(this@PlayerContentScreen)
@@ -177,7 +173,7 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
                 mainColor.value = oldMainColor
             }
             if (isVisible.value) {
-                val androidMainColor = ColorUtil.toAndroidColorInt(mainColor.value)
+                val androidMainColor = com.simple.player.util.ColorUtils.toAndroidColorInt(mainColor.value)
                 activity.window.statusBarColor = androidMainColor
                 activity.setStatusBarStyle(
                     ColorUtils.calculateLuminance(androidMainColor) > 0.5
@@ -219,6 +215,7 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
                         Artwork(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(16.dp))
+                                .border(2.dp, color = Color.Black, shape = RoundedCornerShape(16.dp))
                                 .aspectRatio(1F)
                                 .fillMaxWidth()
                         )
@@ -274,27 +271,33 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
         setActiveLineTarget(activeLine = activeLine)
     }
     private val showLyrics = mutableStateOf(false)
+    private val noLyrics = LyricsWord().apply {
+        startTime = 0
+        content = "没有找到歌词"
+    }
     @Composable
     private fun Lyrics() {
-        var height = 60.dp
+        val height = 120.dp
         val lyricsList = remember { mutableStateListOf<LyricsWord>() }
         val activeLine by remember { activeLine }
+        val state = rememberLazyListState()
         LaunchedEffect(key1 = currentSongId.value) {
+            state.scrollToItem(0)
             Log.e(TAG, "Lyrics: loading lrc")
             val lrc = LyricsProvider.setSongUri(SimplePlayer.currentSong.path.toUri())
             Log.e(TAG, "Lyrics: loading view")
-            lrc?.let {
-                lyricsList.clear()
-                lyricsList.addAll(it.lrcLineList)
+            lyricsList.clear()
+            if (lrc == null) {
+                lyricsList.add(noLyrics)
+            } else {
+                lyricsList.addAll(lrc.lrcLineList)
             }
-            Log.e(TAG, "Lyrics: setting booster ${lrc?.lrcLineList?.toTypedArray().contentToString()}")
             lyricsBooster.setLyrics(lrc = lrc)
         }
-        val state = rememberLazyListState()
         LaunchedEffect(key1 = activeLine) {
 //            state.animateScrollToItem(activeLine)
-            if (activeLine - 3 > 0) {
-                state.animateScrollToItem(activeLine - 3)
+            if (activeLine - 4 > 0) {
+                state.animateScrollToItem(activeLine - 4)
             }
         }
         Box(
@@ -559,7 +562,7 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
             mainColor.value = Color(color = color)
         }
         activity.setStatusBarStyle(ColorUtils.calculateLuminance(color) > 0.5)
-        activity.window.statusBarColor = ColorUtil.toAndroidColorInt(mainColor.value)
+        activity.window.statusBarColor = com.simple.player.util.ColorUtils.toAndroidColorInt(mainColor.value)
     }
 
     private fun changeSongLikeState() {

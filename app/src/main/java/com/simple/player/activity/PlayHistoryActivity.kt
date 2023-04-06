@@ -3,7 +3,6 @@ package com.simple.player.activity
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,10 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.simple.player.R
 import com.simple.player.Util
-import com.simple.player.event.MusicEvent2
-import com.simple.player.event.MusicEventListener
 import com.simple.player.model.Song
-import com.simple.player.playlist.HistoryListManager
+import com.simple.player.playlist.PlayHistoryManager
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.ui.theme.Gary
@@ -97,7 +94,7 @@ class PlayHistoryActivity: BaseActivity2() {
                     Util.showProgressDialog(this@PlayHistoryActivity, 12, "正在清除...")
                 },
                 handle = {
-                    HistoryListManager.clearHistoryList()
+                    PlayHistoryManager.clearHistory()
                 },
                 after = {
                     Util.closeProgressDialog(12)

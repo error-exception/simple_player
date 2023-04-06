@@ -1,8 +1,7 @@
-package com.simple.player.handler
+package com.simple.player.util
 
 import android.os.Handler
 import android.os.Looper
-import androidx.annotation.NonNull
 import java.lang.ref.WeakReference
 
 open class SimpleHandler<T>(looper: Looper, parent: T): Handler(looper) {

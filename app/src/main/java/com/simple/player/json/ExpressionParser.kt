@@ -2,7 +2,7 @@ package com.simple.player.json
 
 internal class ExpressionParser {
 
-    private val list = ArrayList<String>()
+    private val list = ArrayList<String>(8)
     private lateinit var content: String
     private var index = 0
     private var currentChar = ' '
@@ -13,7 +13,6 @@ internal class ExpressionParser {
             when {
                 currentChar.isLetter() -> {
                     handleLabel()
-
                 }
                 isNumber(currentChar) -> {
                     handleNumber()

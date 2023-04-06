@@ -2,7 +2,7 @@ package com.simple.player.util
 
 import java.lang.StringBuilder
 
-object StringUtil {
+object StringUtils {
 
     fun stringToCode(str: String): String {
         val sb = StringBuilder()

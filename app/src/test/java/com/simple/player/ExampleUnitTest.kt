@@ -1,19 +1,13 @@
 package com.simple.player
 
-import androidx.compose.runtime.produceState
 import com.simple.player.decode.KgmDecoder
-import com.simple.player.decode.KgmInputStream
 import com.simple.player.decode.NCMDecoder
 import com.simple.player.decode.UCDecoder
-import com.simple.player.lyrics.KRCDecoder
-import com.simple.player.lyrics.Lrc
-import com.simple.player.lyrics.LrcParser
+import com.simple.player.decode.KRCDecoder
 import com.simple.player.util.FileUtil
 import org.junit.Test
 
-import org.junit.Assert.*
 import java.io.File
-import java.nio.charset.StandardCharsets
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -23,7 +17,10 @@ import java.nio.charset.StandardCharsets
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        ncmTest()
+        val s = "abc".toByteArray()
+        println(android.util.Base64.encodeToString(s, android.util.Base64.DEFAULT))
+        val encoded = java.util.Base64.getDecoder().decode(s)
+        println(String(encoded, 0, encoded.size))
     }
 
     fun ncmTest() {

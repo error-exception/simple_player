@@ -1,10 +1,8 @@
 package com.simple.player.json.generator
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.simple.player.json.annota.JSONAlias
 import com.simple.player.json.annota.JSONIgnore
-import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 
 internal class JSONGenerator {
 
@@ -36,63 +34,38 @@ internal class JSONGenerator {
         return s.deleteAt(s.length - 1).append(']').toString()
     }
 
-
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun generateFromObject(obj: Any): String {
         val s = StringBuilder("{")
         val clazz = obj::class.java
-        val declaredMethods = clazz.declaredMethods
-        for (declaredMethod in declaredMethods) {
-            if (declaredMethod.name.endsWith("\$annotations") || !declaredMethod.name.startsWith("get")) {
+        val declaredFields = clazz.declaredFields
+        for (declaredField in declaredFields) {
+            val jsonIgnore = declaredField.getAnnotation(JSONIgnore::class.java)
+            if (jsonIgnore != null) {
                 continue
             }
-            // 跳过含有 JSONIgnore 注解的属性（对于 kotlin）
-            if (hasAnnotationForNormalGetter(clazz, declaredMethod, JSONIgnore::class.java)) {
+            val jsonAlias = declaredField.getAnnotation(JSONAlias::class.java)
+            val fieldName = declaredField.name
+            val jsonField = jsonAlias?.alias ?: fieldName
+            val getMethodName = StringBuilder("get").append(fieldName)
+            getMethodName.setCharAt("get".length, getMethodName["get".length].uppercaseChar())
+            try {
+                val getter = clazz.getDeclaredMethod(getMethodName.toString())
+                if (!Modifier.isPublic(getter.modifiers)) {
+                    continue
+                }
+                val jsonValue = getter.invoke(obj)
+                s.append('"').append(jsonField).append('"').append(':')
+                    .append(toString(jsonValue)).append(',')
+
+            } catch (e: NoSuchMethodException) {
                 continue
             }
-            val jsonName = if (hasAnnotationForNormalGetter(clazz, declaredMethod, JSONAlias::class.java)) {
-                val annotationForNormalMethod =
-                    getAnnotationForNormalGetter(clazz, declaredMethod, JSONAlias::class.java)!! as JSONAlias
-                val alias = annotationForNormalMethod.alias
-                alias
-            } else {
-                declaredMethod.name.substring(3).lowercase()
-            }
-            val value = declaredMethod.invoke(obj)
-            val jsonValue = toString(value)
-            s.append('"').append(jsonName).append('"').append(':')
-                .append(jsonValue).append(',')
         }
         s.deleteAt(s.length - 1).append('}')
         return s.toString()
     }
 
-    /**
-     * 获取方法中是否有指定类型的注解
-     */
-    private fun <T: Annotation> hasAnnotationForNormalGetter(clazz: Class<*>, method: Method, annotation: Class<T>): Boolean {
-        val withAnnotation = method.name + "\$annotations"
-        return try {
-            val declaredMethod = clazz.getDeclaredMethod(withAnnotation)
-            declaredMethod.isAnnotationPresent(annotation)
-        } catch (e: NoSuchMethodException) {
-            false
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    private fun <T: Annotation> getAnnotationForNormalGetter(clazz: Class<*>, method: Method, annotation: Class<T>): Annotation? {
-        val withAnnotation = method.name + "\$annotations"
-        return try {
-            val declaredMethod = clazz.getDeclaredMethod(withAnnotation)
-            declaredMethod.getDeclaredAnnotation(annotation)
-
-        } catch (e: NoSuchMethodException) {
-            null
-        }
-    }
-
-    private fun isBaseType(e: Any): Boolean {
+    private fun isPrimitiveType(e: Any): Boolean {
         return (e is Int) || (e is Short) || (e is Boolean)
                 || (e is Byte) || (e is Long) || (e is Float) || (e is Double)
     }
@@ -102,7 +75,7 @@ internal class JSONGenerator {
             value == null -> {
                 "null"
             }
-            isBaseType(value) -> {
+            isPrimitiveType(value) -> {
                 value.toString()
             }
             value is List<*> -> {
@@ -115,8 +88,7 @@ internal class JSONGenerator {
                 """"$value""""
             }
             else -> {
-                //generateFromObject(value)
-                ""
+                generateFromObject(value)
             }
         }
     }

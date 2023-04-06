@@ -3,7 +3,6 @@ package com.simple.player
 import android.content.ContentValues
 import android.provider.MediaStore
 import android.util.Log
-import androidx.compose.ui.graphics.Color
 import coil.Coil
 import coil.ImageLoader
 import coil.memory.MemoryCache
@@ -12,12 +11,9 @@ import com.simple.player.database.SongDao
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.scan.MediaStoreMusicScanner
 import com.simple.player.scan.MusicScannerProvider
-import com.simple.player.ui.theme.mainColors
-import com.simple.player.util.AppConfigure
-import com.simple.player.util.ColorUtil
 import com.simple.player.util.FileUtil
-import com.simple.player.util.MusicUtil
-import com.simple.player.util.StringUtil
+import com.simple.player.util.MusicUtils
+import com.simple.player.util.StringUtils
 
 sealed class LoadState {
     object Loading: LoadState()
@@ -50,10 +46,10 @@ object ApplicationLoader {
         val scanner = MusicScannerProvider.getScanner()
         Log.e(TAG, "loadAppData: ")
         scanner.onEach { id, uri, cursor, name ->
-            val title = MusicUtil.getTitle(name)
-            val artist = MusicUtil.getArtist(name)
+            val title = MusicUtils.getTitle(name)
+            val artist = MusicUtils.getArtist(name)
             val type = if (scanner is MediaStoreMusicScanner) {
-                StringUtil.toString(cursor?.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE)))
+                StringUtils.toString(cursor?.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE)))
             } else {
                 FileUtil.getFileType(name)
             }

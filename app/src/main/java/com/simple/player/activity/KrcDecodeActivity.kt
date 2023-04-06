@@ -2,7 +2,6 @@ package com.simple.player.activity
 
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,8 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.simple.player.R
-import com.simple.player.ext.toast
-import com.simple.player.lyrics.KRCDecoder
+import com.simple.player.decode.KRCDecoder
 import com.simple.player.ui.theme.ColumnSpace
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.util.FileUtil

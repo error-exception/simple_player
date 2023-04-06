@@ -4,13 +4,11 @@ package com.simple.player.decode;
 import com.simple.player.util.AESUtils;
 import com.simple.player.util.FileUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-public class NCMDecoderTest {
+public class NCMSimpleDecoder {
 
     public static byte[] magicHeader = {
             0x43, 0x54, 0x45, 0x4E, 0x46, 0x44, 0x41, 0x4D

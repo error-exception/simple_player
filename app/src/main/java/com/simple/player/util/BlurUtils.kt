@@ -3,7 +3,7 @@ package com.simple.player.util
 import android.graphics.Bitmap
 import com.simple.player.util.blur.StackBlurManager
 
-object BlurUtil {
+object BlurUtils {
 
     fun blur(src: Bitmap, radius: Int, recycleOrigin: Boolean = true): Bitmap {
         val mBlurManager = StackBlurManager(src)

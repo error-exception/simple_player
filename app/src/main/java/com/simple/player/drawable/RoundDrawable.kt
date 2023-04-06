@@ -28,6 +28,9 @@ class RoundDrawable(val bitmap: Bitmap) : Drawable() {
         mPaint.colorFilter = cf
     }
 
+    @Deprecated("Deprecated in Java",
+        ReplaceWith("PixelFormat.TRANSLUCENT", "android.graphics.PixelFormat")
+    )
     override fun getOpacity(): Int {
         return PixelFormat.TRANSLUCENT
     }
@@ -50,6 +53,7 @@ class RoundDrawable(val bitmap: Bitmap) : Drawable() {
         invalidateSelf()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setDither(dither: Boolean) {
         mPaint.isDither = dither
         invalidateSelf()

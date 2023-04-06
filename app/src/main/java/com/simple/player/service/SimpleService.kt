@@ -7,7 +7,7 @@ import android.content.*
 import android.os.*
 import android.util.Log
 import com.simple.player.*
-import com.simple.player.handler.SimpleHandler
+import com.simple.player.util.SimpleHandler
 import org.jetbrains.annotations.NotNull
 
 

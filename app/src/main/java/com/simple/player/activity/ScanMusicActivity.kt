@@ -8,7 +8,7 @@ import com.simple.player.constant.PreferencesData
 import com.simple.player.database.IdPathDao
 import com.simple.player.ext.startActivity
 import com.simple.player.ext.toast
-import com.simple.player.handler.SimpleHandler
+import com.simple.player.util.SimpleHandler
 import com.simple.player.model.Song
 import com.simple.player.scan.FileMusicScanner
 import com.simple.player.scan.MediaStoreMusicScanner
@@ -18,7 +18,7 @@ import com.simple.player.screen.ScanMusicScreen
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.util.AppConfigure
 import com.simple.player.util.FileUtil
-import com.simple.player.util.MusicUtil
+import com.simple.player.util.MusicUtils
 import com.simple.player.util.ProgressHandler
 import java.io.File
 import java.util.ArrayList
@@ -84,8 +84,8 @@ class ScanMusicActivity : BaseActivity2() {
             val song = Song(songId).apply {
                 this.path = uriString
                 type = FileUtil.getFileType(name)
-                title = MusicUtil.getTitle(name)
-                artist = MusicUtil.getArtist(name)
+                title = MusicUtils.getTitle(name)
+                artist = MusicUtils.getArtist(name)
                 bitrate = 250
             }
             result.add(song)
@@ -127,8 +127,8 @@ class ScanMusicActivity : BaseActivity2() {
             val song = Song(songId).apply {
                 this.path = uriString
                 type = FileUtil.getFileType(name)
-                title = MusicUtil.getTitle(name)
-                artist = MusicUtil.getArtist(name)
+                title = MusicUtils.getTitle(name)
+                artist = MusicUtils.getArtist(name)
                 bitrate = 250
             }
             result.add(song)
@@ -156,8 +156,8 @@ class ScanMusicActivity : BaseActivity2() {
                 this.path = uriString
                 type =
                     cursor!!.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE))
-                title = MusicUtil.getTitle(name)
-                artist = MusicUtil.getArtist(name)
+                title = MusicUtils.getTitle(name)
+                artist = MusicUtils.getArtist(name)
                 bitrate = 250
             }
             result.add(song)

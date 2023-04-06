@@ -17,8 +17,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.simple.player.R
 import com.simple.player.ext.startActivity
+import com.simple.player.screen.SettingsSwitch
 import com.simple.player.screen.SettingsText
 import com.simple.player.ui.theme.ComposeTestTheme
+import com.simple.player.util.AppConfigure
 
 class ScanMusicSettingsActivity: BaseActivity2() {
 
@@ -72,6 +74,15 @@ class ScanMusicSettingsActivity: BaseActivity2() {
                     description = "扫描时会扫面该路径下的所有文件，建议用于在被排除的路径中，需要扫描的路径"
                 ) {
                     startActivity(IncludePathActivity::class.java)
+                }
+            }
+            item {
+                SettingsSwitch(
+                    title = "自动排序",
+                    description = "扫描完成时自动排序",
+                    state = AppConfigure.Settings.autoSortAfterScan
+                ) {
+                    AppConfigure.Settings.autoSortAfterScan = it
                 }
             }
         }

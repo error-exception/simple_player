@@ -17,7 +17,7 @@
 //import com.simple.player.R
 //import com.simple.player.event.MusicEvent2
 //import com.simple.player.event.MusicEventListener
-//import com.simple.player.handler.SimpleHandler
+//import com.simple.player.util.SimpleHandler
 //import com.simple.player.playlist.PlaylistManager
 //import com.simple.player.screen.PlayerContentScreen
 //import com.simple.player.service.SimplePlayer

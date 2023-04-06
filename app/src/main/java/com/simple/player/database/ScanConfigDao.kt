@@ -83,7 +83,6 @@ object ScanConfigDao {
                 isValid = mutableStateOf(cursor.getInt(cursor.getColumnIndexOrThrow(IS_VALID)) == 1)
             )
         } while (cursor.moveToNext())
-
         return list
     }
 

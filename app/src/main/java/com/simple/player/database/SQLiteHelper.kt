@@ -3,11 +3,10 @@ package com.simple.player.database
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.util.AppConfigure
-import com.simple.player.util.StringUtil
+import com.simple.player.util.StringUtils
 
 class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, "mainPlayer.db", null, 11) {
     override fun onCreate(p1: SQLiteDatabase) {
@@ -27,8 +26,8 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, "mainPlayer.db"
                 description text
                 );"""
             )
-            execSQL("""insert into playlist values (1, "${StringUtil.stringToCode(PlaylistManager.FAVORITE_LIST)}", "")""")
-            execSQL("""insert into playlist values (2, "${StringUtil.stringToCode(PlaylistManager.LOCAL_LIST)}", "")""")
+            execSQL("""insert into playlist values (1, "${StringUtils.stringToCode(PlaylistManager.FAVORITE_LIST)}", "")""")
+            execSQL("""insert into playlist values (2, "${StringUtils.stringToCode(PlaylistManager.LOCAL_LIST)}", "")""")
             execSQL("""create table song_in_list( 
                 list_id int not null,
                 song_id int not null

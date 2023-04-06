@@ -190,12 +190,6 @@ class ThemeScreen(private val activity: ComponentActivity) {
                     hexColor = it.hexCode
                 }
             )
-            AlphaSlider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(24.dp),
-                controller = controller
-            )
             BrightnessSlider(
                 modifier = Modifier
                     .fillMaxWidth()

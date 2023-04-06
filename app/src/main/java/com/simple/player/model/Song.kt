@@ -6,10 +6,8 @@ class Song(songId: Long){
     lateinit var artist: String
     lateinit var type: String
     var bitrate = 0
-//    var isChecked = false
     val id = songId
     lateinit var path: String
-//    var isPlaying = false
 
     constructor() : this(-1)
 
@@ -35,10 +33,8 @@ class Song(songId: Long){
         result = 31 * result + artist.hashCode()
         result = 31 * result + type.hashCode()
         result = 31 * result + bitrate
-//        result = 31 * result + isChecked.hashCode()
         result = 31 * result + id.hashCode()
         result = 31 * result + path.hashCode()
-//        result = 31 * result + isPlaying.hashCode()
         return result
     }
 

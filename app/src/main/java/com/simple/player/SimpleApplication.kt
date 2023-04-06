@@ -1,24 +1,11 @@
 package com.simple.player
 
-import com.simple.player.util.FileUtil.getAssetInputStream
-import com.simple.player.util.FileUtil.openOutputStream
 import android.app.Application
 import android.graphics.Typeface
-import android.os.Environment
-import com.simple.player.util.FileUtil
-import android.util.Log
-import coil.ImageLoader
-import coil.disk.DiskCache
-import coil.memory.MemoryCache
 import com.simple.player.database.SQLiteDatabaseHelper
 import com.simple.player.util.AppConfigure
+import com.simple.player.util.FileUtil
 import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.lang.Exception
-import java.lang.StringBuilder
-import java.util.ArrayList
 
 class SimpleApplication : Application() {
 
