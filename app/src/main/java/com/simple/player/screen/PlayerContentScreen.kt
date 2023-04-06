@@ -10,6 +10,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -190,16 +192,12 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp)
                     .fillMaxWidth()
-                    .clickable(
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        indication = rememberRipple(
-                            radius = .1.dp,
-                            color = Color(0x01000000)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = {
+                                showLyrics.value = !showLyrics.value
+                            }
                         )
-                    ) {
-                        showLyrics.value = !showLyrics.value
                     }
                     .aspectRatio(1F),
                 horizontalAlignment = Alignment.CenterHorizontally,

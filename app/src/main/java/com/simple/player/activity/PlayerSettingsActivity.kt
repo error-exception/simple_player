@@ -12,6 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -89,12 +90,15 @@ class PlayerSettingsActivity: BaseActivity2() {
                 }
             }
             item {
+                val list = remember {
+                    mutableStateListOf(
+                        "无", "暂停", "减小音量"
+                    )
+                }
                 SettingsSingleChoice(
                     title = "媒体播放冲突时",
                     description = "当其他软件播放媒体时，本软件要采取的行为",
-                    list = mutableStateListOf(
-                        "无", "暂停", "减小音量"
-                    ),
+                    list = list,
                     stateIndex = when (AppConfigure.Settings.otherPlaying) {
                         PreferencesData.SETTINGS_VALUE_OTHER_PLAYING_NONE -> 0
                         PreferencesData.SETTINGS_VALUE_OTHER_PLAYING_PAUSE -> 1
@@ -110,12 +114,15 @@ class PlayerSettingsActivity: BaseActivity2() {
                 }
             }
             item {
+                val list = remember {
+                    mutableStateListOf(
+                        "MediaStore", "外置存储"
+                    )
+                }
                 SettingsSingleChoice(
                     title = "切换音乐源",
                     description = "切换后，将自动开始扫描",
-                    list = mutableStateListOf(
-                        "MediaStore", "外置存储"
-                    ),
+                    list = list,
                     stateIndex = when (AppConfigure.Settings.musicSource) {
                         PreferencesData.SETTINGS_VALUE_MUSIC_SOURCE_MEDIA_STORE -> 0
                         PreferencesData.SETTINGS_VALUE_MUSIC_SOURCE_EXTERNAL_STORAGE -> 1
