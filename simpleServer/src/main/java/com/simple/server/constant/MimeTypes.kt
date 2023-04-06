@@ -1,0 +1,33 @@
+package com.simple.server.constant
+
+object MimeTypes {
+
+    const val MT_TEXT_PLAIN = "text/plain"
+    const val MT_TEXT_HTML = "text/html"
+    const val MT_TEXT_CSS = "text/css"
+    const val MT_TEXT_JAVASCRIPT = "text/javascript"
+    const val MT_IMAGE_GIF = "image/gif"
+    const val MT_IMAGE_PNG = "image/png"
+    const val MT_IMAGE_JPEG = "image/jpeg"
+    const val MT_IMAGE_BMP = "image/bmp"
+    const val MT_IMAGE_WEBP = "image/webp"
+    const val MT_IMAGE_X_ICON = "image/x-icon"
+    const val MT_IMAGE_SVG_XML = "image/svg+xml"
+    const val MT_AUDIO_MIDI = "audio/midi"
+    const val MT_AUDIO_MPEG = "audio/mpeg"
+    const val MT_AUDIO_MP3 = "audio/mp3"
+    const val MT_AUDIO_WEBM = "audio/webm"
+    const val MT_AUDIO_OGG = "audio/ogg"
+    const val MT_AUDIO_WAV = "audio/wav"
+    const val MT_VIDEO_WEBM = "video/webm"
+    const val MT_VIDEO_OGG = "video/ogg"
+    const val MT_APPLICATION_OCTET_STREAM = "application/octet-stream"
+    const val MT_APPLICATION_PKCS12 = "application/pkcs12"
+    const val MT_APPLICATION_XHTML_XML = "application/xhtml+xml"
+    const val MT_APPLICATION_XML = "application/xml"
+    const val MT_APPLICATION_PDF = "application/pdf"
+    const val MT_APPLICATION_JSON = "application/json"
+    const val MT_APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded"
+    const val MT_MULTIPART_FORM_DATA = "multipart/form-data"
+    const val MT_MULTIPART_BYTERANGES = "multipart/byteranges"
+}
