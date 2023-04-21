@@ -5,9 +5,9 @@ class Song(songId: Long){
     lateinit var title: String
     lateinit var artist: String
     lateinit var type: String
+    lateinit var uri: String
     var bitrate = 0
     val id = songId
-    lateinit var path: String
 
     constructor() : this(-1)
 
@@ -25,7 +25,7 @@ class Song(songId: Long){
     }
 
     override fun toString(): String {
-        return """{ "title":"$title", "artist":"$artist", "id":$id, "uri":$path }"""
+        return """{ "title":"$title", "artist":"$artist", "id":$id, "uri":$uri }"""
     }
 
     override fun hashCode(): Int {
@@ -34,7 +34,7 @@ class Song(songId: Long){
         result = 31 * result + type.hashCode()
         result = 31 * result + bitrate
         result = 31 * result + id.hashCode()
-        result = 31 * result + path.hashCode()
+        result = 31 * result + uri.hashCode()
         return result
     }
 

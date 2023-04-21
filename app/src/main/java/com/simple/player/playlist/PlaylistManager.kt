@@ -64,7 +64,7 @@ object PlaylistManager :MusicEventListener {
             with (songCursor) {
                 val id = getLong(getColumnIndexOrThrow(SongDao.ID))
                 val song = Song(id).apply {
-                    this.path = getString(getColumnIndexOrThrow(SongDao.PATH))
+                    this.uri = getString(getColumnIndexOrThrow(SongDao.PATH))
                     this.title = getString(getColumnIndexOrThrow(SongDao.TITLE))
                     this.bitrate = getInt(getColumnIndexOrThrow(SongDao.BITRATE))
                     this.type  = getString(getColumnIndexOrThrow(SongDao.TYPE))

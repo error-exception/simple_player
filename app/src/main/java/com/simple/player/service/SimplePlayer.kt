@@ -143,7 +143,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
             isCurrentSongLike.value = SimplePlayer.isCurrentSongLike
             songTitle.value = currentSong.title
             songArtist.value = currentSong.artist
-            songUriString.value = currentSong.path
+            songUriString.value = currentSong.uri
             playState.value = isPlaying
             duration.value = this@SimplePlayer.duration
         }
@@ -266,7 +266,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
             isCurrentSongLike.value = SimplePlayer.isCurrentSongLike
             songTitle.value = currentSong.title
             songArtist.value = currentSong.artist
-            songUriString.value = currentSong.path
+            songUriString.value = currentSong.uri
             playState.value = isPlaying
             duration.value = this@SimplePlayer.duration
             currentPlayMode.value = playMode
@@ -412,7 +412,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
     }
 
     private fun setDataSource(song: Song) {
-        val uri = Uri.parse(song.path)
+        val uri = Uri.parse(song.uri)
         if (AppConfigure.Settings.musicSource == PreferencesData.SETTINGS_VALUE_MUSIC_SOURCE_MEDIA_STORE) {
             player.setDataSource(Util.mContext, uri)
             return

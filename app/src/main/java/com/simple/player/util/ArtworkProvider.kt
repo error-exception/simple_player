@@ -94,7 +94,7 @@ object ArtworkProvider {
     }
 
     private fun getImageFileInSameDirectory(song: Song): File? {
-        val songFile = Uri.parse(song.path).toFile()
+        val songFile = Uri.parse(song.uri).toFile()
         val directory = songFile.parentFile!!
         val list = directory.listFiles { _, name ->
             if (!isImageFile(name)) {

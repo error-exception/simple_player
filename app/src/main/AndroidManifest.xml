@@ -133,7 +133,8 @@
         <activity
             android:name="com.simple.player.activity.KgListActivity"
             android:exported="false"/>
-
+        <activity android:name=".activity.WebPlayerActivity"
+            android:exported="false"/>
         <service
             android:name=".service.SimpleService"
             android:exported="false"

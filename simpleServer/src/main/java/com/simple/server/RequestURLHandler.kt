@@ -18,15 +18,31 @@ class RequestURLHandler {
         set(value) {
             field = value
             value ?: return
-            val parameters = value.parameters
-            for (i in parameters.indices) {
-                mappingParamList += MappingParam().apply {
-                    paramName = parameters[i].name
-                    paramType = parameters[i].type
-                    val requestParam1 = parameters[i].getAnnotation(RequestParam::class.java)
-                    requestParam = requestParam1
+            val params = value.getAnnotation(Param::class.java)
+            if (params != null) {
+                val parameterTypes = value.parameterTypes
+                for ((index, parameterType) in parameterTypes.withIndex()) {
+                    mappingParamList += MappingParam().apply {
+                        paramName = ""
+                        paramType = parameterType
+                        val name = params.names[index]
+                        requestParam = name
+                    }
                 }
             }
+
+
+
+
+//            val parameters = value.parameters
+//            for (i in parameters.indices) {
+//                mappingParamList += MappingParam().apply {
+//                    paramName = parameters[i].name
+//                    paramType = parameters[i].type
+//                    val requestParam1 = parameters[i].getAnnotation(RequestParam::class.java)
+//                    requestParam = requestParam1
+//                }
+//            }
         }
 
     var requestController: RequestController? = null
@@ -45,7 +61,7 @@ class RequestURLHandler {
             if (param.requestParam != null) {
                 val requestUrl = request.requestUrl
                 if (requestUrl != null) {
-                    param.paramValue = requestUrl.parameter[param.requestParam!!.name]
+                    param.paramValue = requestUrl.parameter[param.requestParam!!]
                 }
             }
         }
@@ -100,7 +116,7 @@ class RequestURLHandler {
 
         var paramValue: Any? = null
 
-        var requestParam: RequestParam? = null
+        var requestParam: String? = null
 
         override fun toString(): String {
             return "MappingParam(paramName='$paramName', paramType=$paramType, paramValue=$paramValue, requestParam=$requestParam)"

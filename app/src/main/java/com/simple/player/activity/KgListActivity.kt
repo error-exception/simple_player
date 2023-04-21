@@ -93,7 +93,7 @@ class KgListActivity: BaseActivity2() {
                     artist = "未知艺术家"
                     type = FileUtil.getFileType(filename)
                     bitrate = 250
-                    this.path = Uri.fromFile(file).toString()
+                    this.uri = Uri.fromFile(file).toString()
                 }
                 playlist += song
                 screen.list.add(KgListScreen.KgListItem(

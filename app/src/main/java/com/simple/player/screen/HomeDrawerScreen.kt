@@ -54,6 +54,7 @@ class HomeDrawerScreen {
         Item(R.drawable.ic_baseline_developer_mode_24, "开发者"),
         Item(R.drawable.ic_baseline_bug_report_24, "实验性功能"),
         Item(R.drawable.ic_baseline_settings_24, "设置"),
+        Item(R.drawable.ic_baseline_web_24, "网页播放器"),
         Item(R.drawable.ic_baseline_exit_to_app_24, "退出")
     )
 

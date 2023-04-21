@@ -127,11 +127,11 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
         splashScreen.startInit(
             onSuccess = {
                 scope.launch {
-                    navController().popBackStack()
-                    navController().navigate("main")
-                    delay(200L)
                     Log.e(TAG, "onCreate: LoadMain")
                     loadMain()
+                    delay(200L)
+                    navController().popBackStack()
+                    navController().navigate("main")
                 }
             },
             onFailure = {
@@ -244,7 +244,8 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
                 else toast("仅在调试版本可用")
                 4 -> startActivity(ExperimentalActivity::class.java)
                 5 -> startActivity(NewSettingsActivity::class.java)
-                6 -> exit()
+                6 -> startActivity(WebPlayerActivity::class.java)
+                7 -> exit()
             }
         }
 

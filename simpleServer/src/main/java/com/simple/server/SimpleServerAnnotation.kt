@@ -24,3 +24,9 @@ annotation class RequestParam(
 
 @Retention(AnnotationRetention.SOURCE)
 annotation class Test
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Param(
+    val names: Array<String>
+)

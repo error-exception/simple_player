@@ -82,7 +82,7 @@ class ScanMusicActivity : BaseActivity2() {
             val uriString = uri.toString()
             val songId = IdPathDao.addUri(uriString)
             val song = Song(songId).apply {
-                this.path = uriString
+                this.uri = uriString
                 type = FileUtil.getFileType(name)
                 title = MusicUtils.getTitle(name)
                 artist = MusicUtils.getArtist(name)
@@ -125,7 +125,7 @@ class ScanMusicActivity : BaseActivity2() {
             val uriString = uri.toString()
             val songId = IdPathDao.addUri(uriString)
             val song = Song(songId).apply {
-                this.path = uriString
+                this.uri = uriString
                 type = FileUtil.getFileType(name)
                 title = MusicUtils.getTitle(name)
                 artist = MusicUtils.getArtist(name)
@@ -153,7 +153,7 @@ class ScanMusicActivity : BaseActivity2() {
             val uriString = uri.toString()
             IdPathDao.addUri(id, uriString)
             val song = Song(id).apply {
-                this.path = uriString
+                this.uri = uriString
                 type =
                     cursor!!.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE))
                 title = MusicUtils.getTitle(name)

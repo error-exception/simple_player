@@ -12,6 +12,8 @@ class SimpleHttpServer(val port: Int) {
     internal var webResourcesRoot = ""
     internal val requestControllerList = ArrayList<RequestController>()
     private val executor: ThreadPoolExecutor
+    var isRunning = false
+        private set
 
     init {
         SimpleHttpServerConfig.port = port
@@ -53,11 +55,13 @@ class SimpleHttpServer(val port: Int) {
 
     fun start() {
         listenRunnable.start()
+        isRunning = true
     }
 
     fun close() {
         listenRunnable.close()
         executor.shutdown()
+        isRunning = false
     }
 
     fun setWebResourcesRoot(root: String) {

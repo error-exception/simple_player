@@ -11,7 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +31,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -282,7 +280,7 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
         LaunchedEffect(key1 = currentSongId.value) {
             state.scrollToItem(0)
             Log.e(TAG, "Lyrics: loading lrc")
-            val lrc = LyricsProvider.setSongUri(SimplePlayer.currentSong.path.toUri())
+            val lrc = LyricsProvider.setSongUri(SimplePlayer.currentSong.uri.toUri())
             Log.e(TAG, "Lyrics: loading view")
             lyricsList.clear()
             if (lrc == null) {

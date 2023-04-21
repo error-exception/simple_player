@@ -13,7 +13,6 @@ import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.util.AppConfigure
 import com.simple.player.util.ArtworkProvider
 import com.simple.player.util.ProgressHandler
-import java.lang.Appendable
 
 class ScanMusicResult : BaseActivity2() {
 
@@ -76,7 +75,7 @@ class ScanMusicResult : BaseActivity2() {
                 contentValues.put(SongDao.TITLE, song.title)
                 contentValues.put(SongDao.ARTIST, song.artist)
                 contentValues.put(SongDao.TYPE, song.type)
-                contentValues.put(SongDao.PATH, song.path)
+                contentValues.put(SongDao.PATH, song.uri)
                 contentValues.put(SongDao.BITRATE, song.bitrate)
                 database.insertOrThrow("song", null, contentValues)
                 contentValues.clear()

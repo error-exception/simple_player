@@ -50,7 +50,7 @@ object MusicUtils {
         var mmr: MediaMetadataRetriever? = null
         return try {
             mmr = MediaMetadataRetriever()
-            val r = Util.mContext.contentResolver?.openFileDescriptor(Uri.parse(song.path), "r")
+            val r = Util.mContext.contentResolver?.openFileDescriptor(Uri.parse(song.uri), "r")
             mmr.setDataSource(r?.fileDescriptor)
             val data: ByteArray = mmr.embeddedPicture ?: return null
             fixArtwork(data) ?: data

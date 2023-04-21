@@ -133,7 +133,7 @@ class KGPrettySoundActivity: BaseActivity2() {
         leftPlayer.setAudioAttributes(audioAttributes)
         rightPlayer.setAudioAttributes(audioAttributes)
         song.value = SimplePlayer.currentSong
-        val uri = Uri.parse(song.value!!.path)
+        val uri = Uri.parse(song.value!!.uri)
         leftPlayer.setDataSource(this, uri)
         rightPlayer.setDataSource(this, uri)
         leftPlayer.prepare()

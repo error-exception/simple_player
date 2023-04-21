@@ -3,8 +3,6 @@ package com.simple.player.activity
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,16 +21,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toFile
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.R
 import com.simple.player.Util.copyText
 import com.simple.player.constant.PreferencesData
 import com.simple.player.model.Song
 import com.simple.player.playlist.PlaylistManager
-import com.simple.player.screen.SettingsItem
-import com.simple.player.service.SimplePlayer
-import com.simple.player.ui.theme.windowBackground
 import com.simple.player.ui.theme.windowBackgroundAlpha
 import com.simple.player.util.AppConfigure
 import com.simple.player.util.ArtworkProvider
@@ -192,11 +186,11 @@ class MusicInfo2: BaseActivity2() {
             this += "标题：" to song.title
             this += "艺术家：" to song.artist
             this += "ID：" to song.id.toString(10)
-            this += "Uri：" to Uri.decode(song.path)
+            this += "Uri：" to Uri.decode(song.uri)
             this += "比特率：" to song.bitrate.toString(10)
             this += "类型：" to song.type
             if (AppConfigure.Settings.musicSource == PreferencesData.SETTINGS_VALUE_MUSIC_SOURCE_EXTERNAL_STORAGE) {
-                this += "大小：" to "%.2fMB".format(Uri.parse(song.path).toFile().length() / (1024 * 1024.0))
+                this += "大小：" to "%.2fMB".format(Uri.parse(song.uri).toFile().length() / (1024 * 1024.0))
             }
         }
     }

@@ -36,6 +36,22 @@ object FileUtil {
         closeStream(output)
     }
 
+    fun copy(inputStream: InputStream, outputStream: OutputStream, autoClose: Boolean = true) {
+        try {
+            var len = 0
+            val buffer = ByteArray(2048)
+            while ((inputStream.read(buffer).also { len = it }) != -1) {
+                outputStream.write(buffer, 0, len)
+            }
+            outputStream.flush()
+        } finally {
+            if (autoClose) {
+                closeStream(inputStream)
+                closeStream(outputStream)
+            }
+        }
+    }
+
     fun copy(from: File, to: File) {
         try {
             val inputStream: InputStream = FileInputStream(from)
