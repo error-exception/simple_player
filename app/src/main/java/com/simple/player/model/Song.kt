@@ -1,10 +1,14 @@
 package com.simple.player.model
 
+import com.simple.json.annota.JSONIgnore
+
 class Song(songId: Long){
 
     lateinit var title: String
     lateinit var artist: String
     lateinit var type: String
+
+    @JSONIgnore
     lateinit var uri: String
     var bitrate = 0
     val id = songId

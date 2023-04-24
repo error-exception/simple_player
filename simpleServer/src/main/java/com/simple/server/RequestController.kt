@@ -4,6 +4,8 @@ open class RequestController {
 
     private val map = HashMap<Pair<String /* url */, String /* method */>, RequestURLHandler>()
 
+    protected lateinit var server: SimpleHttpServer
+
     init {
         val methods = this.javaClass.declaredMethods
         for (method in methods) {
@@ -26,10 +28,14 @@ open class RequestController {
         }
     }
 
+    internal fun setSimpleHttpServer(server: SimpleHttpServer) {
+        this.server = server
+    }
+
     internal fun callMethod(url: String, requestMethod: String, request: Request, response: Response): Boolean {
         val method1 = map[Pair(url, requestMethod)]
         method1 ?: return false
-        method1.call(request, response)
+        method1.call(request, response, server)
         return true
     }
 }

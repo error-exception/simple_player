@@ -11,6 +11,7 @@ class SimpleHttpServer(val port: Int) {
     private val serverSocket = ServerSocket(port)
     internal var webResourcesRoot = ""
     internal val requestControllerList = ArrayList<RequestController>()
+    internal var interceptor: Interceptor? = null
     private val executor: ThreadPoolExecutor
     var isRunning = false
         private set
@@ -76,7 +77,12 @@ class SimpleHttpServer(val port: Int) {
     fun registerHTTPServer(vararg requestControllers: RequestController) {
         for (httpServer in requestControllers) {
             requestControllerList += httpServer
+            httpServer.setSimpleHttpServer(this)
         }
+    }
+
+    fun registerInterceptor(interceptor: Interceptor) {
+        this.interceptor = interceptor
     }
 
 }

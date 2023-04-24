@@ -25,6 +25,7 @@ class SimpleApplication : Application() {
             mWebRoot = getExternalFilesDir("web")!!
             mListDirectory = getExternalFilesDir("list")!!
             mMaskFile = File(getExternalFilesDir("mask")!!.absolutePath + "/mask")
+            mTimingDirectory = getExternalFilesDir("timing")!!
         }
 
 //        if (FileUtil.mWebRoot.listFiles().isEmpty()) {

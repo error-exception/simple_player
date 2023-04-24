@@ -39,6 +39,7 @@ class Range(private val request: Request) {
                     }
                     return@run this
                 }.toLong()
+                println("range: start=$start, end=$end")
                 range.setRange(start, end)
                 return range
             } else {

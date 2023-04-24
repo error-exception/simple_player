@@ -2,12 +2,12 @@ package com.simple.player.activity
 
 import android.os.Bundle
 import androidx.appcompat.widget.AppCompatButton
+import com.simple.json.JSON
 import com.simple.player.R
 import com.simple.player.database.IdPathDao
 import com.simple.player.database.SQLiteDatabaseHelper
 import com.simple.player.database.SongDao
 import com.simple.player.ext.toast
-import com.simple.player.json.JSON
 import com.simple.player.util.FileUtil
 import java.io.File
 import java.text.SimpleDateFormat

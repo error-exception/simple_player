@@ -1,20 +1,16 @@
 package com.simple.player.activity
 
-import android.content.res.AssetManager
 import android.os.Bundle
-import android.os.FileUtils
 import android.util.Log
 import androidx.activity.compose.setContent
 import com.simple.player.screen.WebPlayerScreen
 import com.simple.player.ui.theme.ComposeTestTheme
 import com.simple.player.util.FileUtil
 import com.simple.player.util.SimplePath
+import com.simple.player.web.ResponseInterceptor
+import com.simple.player.web.controller.MusicController
 import com.simple.server.SimpleHttpServer
-import com.simple.server.parseQueryString
-import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
-import kotlin.io.path.Path
-import kotlin.io.path.extension
 
 class WebPlayerActivity: BaseActivity2() {
 
@@ -28,15 +24,35 @@ class WebPlayerActivity: BaseActivity2() {
             }
         }
 
+        screen.serverRunningState.value = server?.isRunning ?: false
+
         screen.onSwitchClick = {
-            if (server.isRunning) {
-                server.start()
+            if (server == null || needInitServer) {
+                initServer()
+                needInitServer = false
+            }
+            if (!server!!.isRunning) {
+                server!!.start()
+                Log.e("WebPlayerActivity", "start server")
+                screen.serverRunningState.value = true
             } else {
-                server.close()
+                server!!.close()
+                screen.serverRunningState.value = false
+                Log.e("WebPlayerActivity", "close server")
+                needInitServer = true
             }
         }
 
         loadWebResource()
+    }
+
+    private fun initServer() {
+        server = SimpleHttpServer(port = 8888).apply {
+            setWebResourcesRoot(FileUtil.mWebRoot.absolutePath)
+            setDefaultCharset("UTF-8")
+            registerInterceptor(ResponseInterceptor())
+            registerHTTPServer(MusicController())
+        }
     }
 
     private fun loadWebResource(): Boolean {
@@ -83,12 +99,9 @@ class WebPlayerActivity: BaseActivity2() {
         }
     }
 
-
     companion object {
-        val server = SimpleHttpServer(port = 8888).apply {
-            setWebResourcesRoot(FileUtil.mWebRoot.absolutePath)
-            setDefaultCharset("UTF-8")
-        }
+        var server: SimpleHttpServer? = null
+        var needInitServer = false
     }
 
 }

@@ -6,24 +6,22 @@ import com.simple.json.parser.JSONObjectParser
 
 object JSON {
 
-    fun parseJSONArray(jsonString: String): JSONArray {
+    fun parseJSONArray(jsonString: String): JSONArray? {
         for (c in jsonString) {
             if (c == '[') {
-                val list = JSONArrayParser().parse(jsonString, 0)
-                return JSONArray(list)
+                return JSONArrayParser().parse(jsonString, 0)
             }
         }
-        return JSONArray(ArrayList<Any>())
+        return null
     }
 
-    fun parseJSONObject(jsonString: String): JSONObject {
+    fun parseJSONObject(jsonString: String): JSONObject? {
         for (c in jsonString) {
             if (c == '{') {
-                val map = JSONObjectParser().parse(jsonString, 0)
-                return JSONObject(map)
+                return JSONObjectParser().parse(jsonString, 0)
             }
         }
-        return JSONObject(HashMap<Any, Any>())
+        return null
     }
 
     fun stringify(value: Any): String {

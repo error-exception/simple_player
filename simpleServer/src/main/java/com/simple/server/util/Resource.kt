@@ -11,6 +11,8 @@ import java.lang.Exception
 class Resource {
 
     private var inputStream: InputStream? = null
+    private var isInputStreamSet: Boolean = false
+    private var inputStreamLength: Long = 0
 
     var resourceFile: File? = null
         private set
@@ -30,7 +32,17 @@ class Resource {
         this.mimeType = mimeType
     }
 
+    fun setResource(inputStream: InputStream, mimeType: MimeType, length: Long) {
+        this.inputStream = inputStream
+        this.mimeType = mimeType
+        inputStreamLength = length
+        isInputStreamSet = true
+    }
+
     fun openInputStream(): InputStream {
+        if (isInputStreamSet) {
+            return inputStream!!
+        }
         try {
             inputStream?.close()
         } catch (e: Exception) {
@@ -53,6 +65,9 @@ class Resource {
         }
         if (resourceData != null) {
             return resourceData!!.size.toLong()
+        }
+        if (isInputStreamSet) {
+            return inputStreamLength
         }
         throw FileNotFoundException("no resource found!!")
     }

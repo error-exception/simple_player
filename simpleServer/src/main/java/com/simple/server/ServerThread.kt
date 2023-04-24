@@ -19,7 +19,6 @@ class ServerThread(private val server: SimpleHttpServer, var socket: Socket): Ru
     var tag = threadId++
 
     override fun run() {
-
         val request = Request(socket)
         if (!request.isHttpRequest) {
             Response(socket).responseWithEmptyBody(ResponseState.BAD_REQUEST)
@@ -62,7 +61,7 @@ class ServerThread(private val server: SimpleHttpServer, var socket: Socket): Ru
         val resource = Resource()
         resource.setResource(targetFile, MimeType(ContentTypeHelper.getContentTypeByURL(url, SimpleHttpServerConfig.charset.toString())))
         request.setAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE, resource)
-        response.handleRequest(request, this)
+        response.handleRequest(request, server)
 
         return true
     }

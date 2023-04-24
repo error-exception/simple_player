@@ -40,15 +40,21 @@ internal class JSONGenerator {
         val clazz = obj::class.java
         val declaredFields = clazz.declaredFields
         for (declaredField in declaredFields) {
-            val jsonIgnore = declaredField.getDeclaredAnnotation(JSONIgnore::class.java)
+            val jsonIgnore = declaredField.getAnnotation(JSONIgnore::class.java)
             if (jsonIgnore != null) {
                 continue
             }
-            val jsonAlias = declaredField.getDeclaredAnnotation(JSONAlias::class.java)
+            val jsonAlias = declaredField.getAnnotation(JSONAlias::class.java)
             val fieldName = declaredField.name
             val jsonField = jsonAlias?.alias ?: fieldName
-            val getMethodName = StringBuilder("get").append(fieldName)
-            getMethodName.setCharAt("get".length, getMethodName["get".length].uppercaseChar())
+            val getMethodName = if (jsonField.startsWith("is")) {
+                StringBuilder(jsonField)
+            } else {
+                val builder = StringBuilder("get").append(fieldName)
+                builder.setCharAt("get".length, builder["get".length].uppercaseChar())
+                builder
+            }
+
             try {
                 val getter = clazz.getDeclaredMethod(getMethodName.toString())
                 if (!Modifier.isPublic(getter.modifiers)) {
@@ -59,6 +65,7 @@ internal class JSONGenerator {
                     .append(toString(jsonValue)).append(',')
 
             } catch (e: NoSuchMethodException) {
+                println("method not found -> $getMethodName")
                 continue
             }
         }

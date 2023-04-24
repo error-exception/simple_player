@@ -2,7 +2,9 @@ package com.simple.json
 
 import java.lang.RuntimeException
 
-class JSONObject internal constructor(val map: Map<*, *>) {
+class JSONObject {
+
+    internal val map = HashMap<String, Any?>()
 
     fun getBoolean(propertyExpression: String): Boolean? {
         val value = getValue(propertyExpression)
@@ -59,23 +61,25 @@ class JSONObject internal constructor(val map: Map<*, *>) {
         throw RuntimeException("value is Object or Array")
     }
 
-    fun getObjectMap(propertyExpression: String = ""): JSONObject? {
-        if (propertyExpression.isEmpty()) return JSONObject(map)
-        val value = getValue(propertyExpression)
-        value ?: return null
-        if (value is Map<*, *>) {
-            return JSONObject(value)
+    fun getJsonObject(propertyExpression: String = ""): JSONObject? {
+        if (propertyExpression.isEmpty()) return null
+        val value = getValue(propertyExpression) ?: return null
+        if (value is JSONObject) {
+            return value
         }
         throw RuntimeException("value is not a Object")
     }
 
-    fun getArrayList(propertyExpression: String): JSONArray? {
-        val value = getValue(propertyExpression)
-        value ?: return null
-        if (value is List<*>) {
-            return JSONArray(value)
+    fun getJsonArray(propertyExpression: String): JSONArray? {
+        val value = getValue(propertyExpression) ?: return null
+        if (value is JSONArray) {
+            return value
         }
         throw RuntimeException("value is not a Array")
+    }
+
+    fun put(key: String, value: Any?) {
+        map[key] = value
     }
 
     private fun getValue(property: String): Any? {

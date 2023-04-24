@@ -49,9 +49,7 @@ class Request(socket: Socket) {
         if (len == 0L) {
             return null
         }
-        return RequestBody(input, this).apply {
-            this.length = len
-        }
+        return RequestBody(input, this, len)
     }
 
     private fun processRequestLine(requestLine: String) {
@@ -131,7 +129,8 @@ class Request(socket: Socket) {
 
     class RequestBody(
         private val input: InputStream,
-        private val request2: Request
+        private val request2: Request,
+        val contentLength: Long
     ) {
 
         private var data: ByteArray? = null
@@ -148,6 +147,7 @@ class Request(socket: Socket) {
         init {
             val header = request2.getHttpHeader()
             mimeType = header.getContentType()
+            length = contentLength
             parse()
         }
 
@@ -161,9 +161,10 @@ class Request(socket: Socket) {
         internal fun parse() {
             if (mimeType.isSameType(MimeType.MIME_TYPE_MULTIPART_FORM_DATA)) {
                 parseMultipart()
-            } else if (mimeType.isSameType(MimeType.MIME_TYPE_APPLICATION_X_WWW_FORM_URLENCODED) ||
-                mimeType.isSameType(MimeType.MIME_TYPE_APPLICATION_JSON)
-                ) {
+            } else if (
+                mimeType.isSameType(MimeType.MIME_TYPE_APPLICATION_X_WWW_FORM_URLENCODED)
+                || mimeType.isSameType(MimeType.MIME_TYPE_APPLICATION_JSON)
+            ) {
                 // TODO: use StreamUtils.copy()
                 val output = ByteArrayOutputStream()
                 while (currentLength > 0) {

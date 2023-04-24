@@ -1,5 +1,6 @@
 package com.simple.json.parser
 
+import com.simple.json.JSONArray
 import kotlin.collections.ArrayList
 
 internal class JSONArrayParser {
@@ -13,10 +14,11 @@ internal class JSONArrayParser {
     private var currentChar: Char = ' '
     private lateinit var content: String
     private var isEnter = false
-    private val list = ArrayList<Any>()
+    private val list = JSONArray()
     private var tmp: Any = ""
+    private var elementCount = 0
 
-    fun parse(content: String, startIndex: Int): ArrayList<Any> {
+    fun parse(content: String, startIndex: Int): JSONArray {
         index = startIndex
         this.content = content
         while (nextChar()) {
@@ -34,11 +36,13 @@ internal class JSONArrayParser {
                 isNumber(currentChar) -> {
                     handleNumber()
                 }
-                currentChar.isLetter() -> {
+                currentChar in 'a'..'z' || currentChar in 'A'..'Z' -> {
                     handleLabel()
                 }
                 currentChar == ',' || currentChar == ']' -> {
-                    list.add(tmp)
+                    if (elementCount > 0) {
+                        list.add(tmp)
+                    }
                     if (currentChar == ']') return list
                 }
                 currentChar == '[' -> {
@@ -46,12 +50,14 @@ internal class JSONArrayParser {
                     val list = parser.parse(content, index - 1)
                     index = parser.index
                     tmp = list
+                    elementCount++
                 }
                 currentChar == '{' -> {
                     val parser = JSONObjectParser()
                     val map = parser.parse(content, index - 1)
                     index = parser.index
                     tmp = map
+                    elementCount++
                 }
             }
         }
@@ -69,6 +75,7 @@ internal class JSONArrayParser {
         } while (nextChar() && isNumber(currentChar))
         previousChar()
         tmp = s.toString()
+        elementCount++
     }
 
     private fun handleLabel() {
@@ -78,6 +85,7 @@ internal class JSONArrayParser {
         } while (nextChar() && currentChar.isLetter())
         previousChar()
         tmp = s.toString()
+        elementCount++
     }
 
     private fun handleString() {
@@ -87,6 +95,7 @@ internal class JSONArrayParser {
             s.append(currentChar)
         } while (nextChar() && currentChar != '"')
         tmp = s.toString()
+        elementCount++
     }
 
 

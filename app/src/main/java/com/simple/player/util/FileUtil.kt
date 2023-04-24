@@ -2,6 +2,7 @@ package com.simple.player.util
 
 import android.net.Uri
 import android.provider.MediaStore
+import androidx.core.net.toFile
 import com.simple.player.Util
 import java.io.*
 import java.lang.Exception
@@ -14,6 +15,9 @@ object FileUtil {
         private set
 
     fun writeTextUTF8(file: File, t: String) {
+        if (!file.exists()) {
+            file.createNewFile()
+        }
         var output: FileOutputStream? = null
         var writer: OutputStreamWriter? = null
         try {
@@ -74,6 +78,7 @@ object FileUtil {
     lateinit var mListDirectory: File
     lateinit var mDataDirectory: File
     lateinit var mMaskFile: File
+    lateinit var mTimingDirectory: File
 
     fun getFileType(path: String): String {
         return path.substring(path.lastIndexOf('.') + 1).lowercase()
@@ -192,6 +197,9 @@ object FileUtil {
     }
 
     fun getLength(uri: Uri): Long {
+        if (uri.scheme == "file") {
+            return uri.toFile().length()
+        }
         var length: Long = -1
         val projection = arrayOf(
             MediaStore.Files.FileColumns.SIZE
@@ -320,6 +328,14 @@ object FileUtil {
         try {
             for (stream in outputStream) {
                 stream?.close()
+            }
+        } catch (_: Exception){}
+    }
+
+    fun closeStream(vararg closeable: AutoCloseable?) {
+        try {
+            for (c in closeable) {
+                c?.close()
             }
         } catch (_: Exception){}
     }

@@ -57,7 +57,7 @@ class Response(private val socket: Socket) {
         }
     }
 
-    fun handleRequest(request: Request, @Test serverThread: ServerThread? = null) {
+    fun handleRequest(request: Request, server: SimpleHttpServer) {
         val resource = request.getAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE) as Resource?
         if (resource == null) {
             responseWithEmptyBody(ResponseState.NOT_FOUND)

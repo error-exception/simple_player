@@ -1,5 +1,6 @@
 package com.simple.json.parser
 
+import com.simple.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -14,10 +15,10 @@ internal class JSONObjectParser {
     private var currentChar: Char = ' '
     private lateinit var content: String
     private val tmpStack = Stack<Any>()
-    private val result = HashMap<String, Any>()
+    private val result = JSONObject()
     private var isEnter = false
 
-    fun parse(content: String, startIndex: Int): HashMap<String, Any> {
+    fun parse(content: String, startIndex: Int): JSONObject {
         index = startIndex
         this.content = content
         while (nextChar()) {
@@ -42,7 +43,7 @@ internal class JSONObjectParser {
                     if (tmpStack.isNotEmpty()) {
                         val value = tmpStack.pop()
                         val key = tmpStack.pop()
-                        result[key.toString()] = value
+                        result.put(key.toString(), value)
                     }
                     if (currentChar == '}') return result
                 }

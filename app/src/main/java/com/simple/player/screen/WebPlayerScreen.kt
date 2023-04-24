@@ -13,6 +13,8 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +29,7 @@ import com.simple.server.SimpleHttpServer
 class WebPlayerScreen(private val activity: WebPlayerActivity) {
 
     var onSwitchClick: (() -> Unit)? = null
+    val serverRunningState = mutableStateOf(false)
 
     @Composable
     fun ComposeContent() {
@@ -49,12 +52,16 @@ class WebPlayerScreen(private val activity: WebPlayerActivity) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                val runningState = remember {
+                    serverRunningState
+                }
                 Surface(
                     color = windowBackgroundAlpha,
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
@@ -64,7 +71,7 @@ class WebPlayerScreen(private val activity: WebPlayerActivity) {
                             contentDescription = "",
                             tint = Color.White,
                             contentPadding = 16.dp,
-                            color = MaterialTheme.colors.primary,
+                            color = if (runningState.value) MaterialTheme.colors.primary else Color.Gray,
                             iconSize = 56.dp,
                             onClick = {
                                 onSwitchClick?.invoke()

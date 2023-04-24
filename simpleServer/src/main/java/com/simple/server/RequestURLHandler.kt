@@ -47,7 +47,7 @@ class RequestURLHandler {
 
     var requestController: RequestController? = null
 
-    fun call(request: Request, response: Response) {
+    fun call(request: Request, response: Response, server: SimpleHttpServer) {
         for (i in mappingParamList.indices) {
             val param = mappingParamList[i]
             if (param.paramType.isInstance(request)) {
@@ -61,7 +61,24 @@ class RequestURLHandler {
             if (param.requestParam != null) {
                 val requestUrl = request.requestUrl
                 if (requestUrl != null) {
-                    param.paramValue = requestUrl.parameter[param.requestParam!!]
+                    val value = requestUrl.parameter[param.requestParam!!]
+                    if (param.paramType == Long.Companion::class.java) {
+                        param.paramValue = value?.toLong()
+                    } else if (param.paramType == Int.Companion::class.java) {
+                        param.paramValue = value?.toInt()
+                    } else if (param.paramType == Short.Companion::class.java) {
+                        param.paramValue = value?.toShort()
+                    } else if (param.paramType == Float.Companion::class.java) {
+                        param.paramValue = value?.toFloat()
+                    } else if (param.paramType == Double.Companion::class.java) {
+                        param.paramValue = value?.toDouble()
+                    } else if (param.paramType == Byte.Companion::class.java) {
+                        param.paramValue = value?.toByte()
+                    } else if (param.paramType == Char.Companion::class.java) {
+                        param.paramValue = value?.get(0)
+                    } else {
+                        param.paramValue = value
+                    }
                 }
             }
         }
@@ -70,7 +87,12 @@ class RequestURLHandler {
         for (index in arr.indices) {
             arr[index] = mappingParamList[index].paramValue
         }
-        val returnValue = method?.invoke(requestController, *arr)
+        var returnValue = method?.invoke(requestController, *arr)
+
+        val interceptor = server.interceptor
+        if (interceptor != null) {
+            returnValue = interceptor.afterController(returnValue)
+        }
 
         if (!response.hasResponded) {
             if (returnValue == null) {
@@ -101,7 +123,7 @@ class RequestURLHandler {
                 }
             }
             request.setAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE, resource)
-            response.handleRequest(request)
+            response.handleRequest(request, server)
         }
     }
 

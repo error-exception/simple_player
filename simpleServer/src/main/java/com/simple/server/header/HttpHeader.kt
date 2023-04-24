@@ -26,7 +26,10 @@ class HttpHeader {
     }
 
     private fun get(headerName: String): String? {
-        return headers[headerName]
+        var value = headers[headerName]
+        if (value == null)
+            value = headers[headerName.lowercase()]
+        return value
     }
 
     fun has(headerName: String): Boolean {
@@ -35,6 +38,9 @@ class HttpHeader {
 
     private fun getIfNull(headerName: String, defaultValue: String): String {
         var value = headers[headerName]
+        if (value == null) {
+            value = headers[headerName.lowercase()]
+        }
         if (value == null) {
             headers[headerName] = defaultValue
             value = defaultValue
@@ -65,7 +71,10 @@ class HttpHeader {
     }
 
     fun getRange(): Range? {
-        val range = get(RANGE)
+        println("HttpHeader: ${headers}")
+        var range = get(RANGE)
+        if (range == null)
+            range = get(RANGE.lowercase())
         range ?: return null
         request ?: return null
         return Range.parseRange(request!!, range)
