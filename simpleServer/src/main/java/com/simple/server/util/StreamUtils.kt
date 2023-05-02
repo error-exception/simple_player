@@ -12,7 +12,7 @@ object StreamUtils {
 
     @Throws(FileNotFoundException::class)
     fun copy(resource: Resource, outputStream: OutputStream) {
-        val inputStream = resource.openInputStream()
+        val inputStream = resource.getInputStream()
         try {
             val buffer = ByteArray(BUFFER_SIZE)
             var length: Int
@@ -27,7 +27,7 @@ object StreamUtils {
 
     @Throws(FileNotFoundException::class)
     fun copyToRange(resource: Resource, outputStream: OutputStream, start: Long, count: Long) {
-        val inputStream = resource.openInputStream()
+        val inputStream = resource.getInputStream()
         try {
             var buffer = ByteArray(BUFFER_SIZE)
             var length: Int

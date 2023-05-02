@@ -1,5 +1,6 @@
 package com.simple.server.util
 
+import com.simple.server.ServerConfig
 import com.simple.server.header.MimeType
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -8,68 +9,24 @@ import java.io.FileNotFoundException
 import java.io.InputStream
 import java.lang.Exception
 
-class Resource {
-
-    private var inputStream: InputStream? = null
-    private var isInputStreamSet: Boolean = false
-    private var inputStreamLength: Long = 0
-
-    var resourceFile: File? = null
-        private set
-    var resourceData: ByteArray? = null
-        private set
-    lateinit var mimeType: MimeType
-        private set
-
-
-    fun setResource(resourceFile: File, mimeType: MimeType) {
-        this.resourceFile = resourceFile
-        this.mimeType = mimeType
-    }
-
-    fun setResource(resourceData: ByteArray, mimeType: MimeType) {
-        this.resourceData = resourceData
-        this.mimeType = mimeType
-    }
-
-    fun setResource(inputStream: InputStream, mimeType: MimeType, length: Long) {
-        this.inputStream = inputStream
-        this.mimeType = mimeType
-        inputStreamLength = length
-        isInputStreamSet = true
-    }
-
-    fun openInputStream(): InputStream {
-        if (isInputStreamSet) {
-            return inputStream!!
-        }
-        try {
-            inputStream?.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        if (resourceFile != null) {
-            inputStream = FileInputStream(resourceFile!!)
-            return inputStream!!
-        }
-        if (resourceData != null && resourceData!!.isNotEmpty()) {
-            inputStream = ByteArrayInputStream(resourceData)
-            return inputStream!!
-        }
-        throw FileNotFoundException("no resource found!!")
-    }
+class Resource(
+    private val inputStream: InputStream? = null,
+    private val length: Long = -1,
+    val mimeType: MimeType = MimeType.MIME_TYPE_TEXT_PLAIN
+) {
+    private val log = logger("Resource")
 
     fun getLength(): Long {
-        if (resourceFile != null) {
-            return resourceFile!!.length()
-        }
-        if (resourceData != null) {
-            return resourceData!!.size.toLong()
-        }
-        if (isInputStreamSet) {
-            return inputStreamLength
+        if (length > 0) {
+            return length
         }
         throw FileNotFoundException("no resource found!!")
+    }
+
+    fun getInputStream(): InputStream {
+        val stream = inputStream
+        stream ?: throw FileNotFoundException("no resource found!!")
+        return stream
     }
 
     fun close() {
@@ -77,6 +34,26 @@ class Resource {
             inputStream?.close()
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    companion object {
+
+        fun fromBytes(bytes: ByteArray, mimeType: MimeType): Resource = Resource(
+            inputStream = ByteArrayInputStream(bytes),
+            length = bytes.size.toLong(),
+            mimeType = mimeType
+        )
+
+        fun fromFile(file: File, mimeType: MimeType): Resource = Resource(
+            inputStream = FileInputStream(file),
+            length = file.length(),
+            mimeType = mimeType
+        )
+
+        fun fromString(s: String, mimeType: MimeType): Resource {
+            val bytes = s.toByteArray(mimeType.charset ?: ServerConfig.charset)
+            return fromBytes(bytes, mimeType)
         }
     }
 

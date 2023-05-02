@@ -124,7 +124,7 @@ object AppConfigure {
             set(value) = player.edit().putStringSet(PreferencesData.PLAYER_MUSIC_DIRECTORIES, value).apply()
 
         var maxSongSize: Long
-            get() = player.getLong(PreferencesData.PLAYER_MAX_SONG_SIZE, 1024 * 1024 * 100)!!
+            get() = player.getLong(PreferencesData.PLAYER_MAX_SONG_SIZE, 1024 * 1024 * 100)
             set(value) = player.edit().putLong(PreferencesData.PLAYER_MAX_SONG_SIZE, value).apply()
     }
 }

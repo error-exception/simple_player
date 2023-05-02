@@ -9,7 +9,7 @@ import com.simple.player.util.FileUtil
 import com.simple.player.util.SimplePath
 import com.simple.player.web.ResponseInterceptor
 import com.simple.player.web.controller.MusicController
-import com.simple.server.SimpleHttpServer
+import com.simple.server.Server
 import java.io.File
 
 class WebPlayerActivity: BaseActivity2() {
@@ -47,11 +47,11 @@ class WebPlayerActivity: BaseActivity2() {
     }
 
     private fun initServer() {
-        server = SimpleHttpServer(port = 8888).apply {
+        server = Server(port = 8888).apply {
             setWebResourcesRoot(FileUtil.mWebRoot.absolutePath)
             setDefaultCharset("UTF-8")
             registerInterceptor(ResponseInterceptor())
-            registerHTTPServer(MusicController())
+            addControllers(MusicController())
         }
     }
 
@@ -100,7 +100,7 @@ class WebPlayerActivity: BaseActivity2() {
     }
 
     companion object {
-        var server: SimpleHttpServer? = null
+        var server: Server? = null
         var needInitServer = false
     }
 

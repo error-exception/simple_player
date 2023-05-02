@@ -24,7 +24,6 @@ import com.simple.player.R
 import com.simple.player.activity.WebPlayerActivity
 import com.simple.player.ui.theme.RoundIconButton2
 import com.simple.player.ui.theme.windowBackgroundAlpha
-import com.simple.server.SimpleHttpServer
 
 class WebPlayerScreen(private val activity: WebPlayerActivity) {
 

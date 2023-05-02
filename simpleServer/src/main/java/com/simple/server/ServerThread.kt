@@ -5,63 +5,60 @@ import com.simple.server.constant.ResponseState
 import com.simple.server.header.MimeType
 import com.simple.server.util.ContentTypeHelper
 import com.simple.server.util.Resource
-import com.simple.server.util.logger
-import java.io.ByteArrayOutputStream
+import com.simple.server.request.Request
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileReader
-import java.net.Socket
 import java.net.URLDecoder
-import java.nio.charset.Charset
 
-class ServerThread(private val server: SimpleHttpServer, var socket: Socket): Runnable {
+class ServerThread(private val server: Server, private var connection: Connection): Runnable {
 
     var tag = threadId++
 
     override fun run() {
-        val request = Request(socket)
-        if (!request.isHttpRequest) {
-            Response(socket).responseWithEmptyBody(ResponseState.BAD_REQUEST)
-            return
-        }
-        val isStatic = handleStaticResource(request)
-        var success = false
+        val request = connection.getRequest()
+        val response = connection.getResponse()
+//        if (!request.isHttpRequest) {
+//            connection.getResponse().responseWithEmptyBody(ResponseState.BAD_REQUEST)
+//            return
+//        }
+        val isStatic = handleStaticResource(request, response)
         if (!isStatic) {
+            var success = false
             for (httpServer in server.requestControllerList) {
-                success = httpServer.callMethod(request.requestUrl!!.url, request.method!!, request, Response(socket))
+                success = httpServer.callMethod(request, response)
                 if (success) {
                     break
                 }
             }
-        }
-        if (!success) {
-            Response(socket).responseWithEmptyBody(ResponseState.NOT_FOUND)
+            if (!success) {
+                response.responseWithEmptyBody(ResponseState.NOT_FOUND)
+            }
         }
     }
 
     /**
      * 如果不是静态资源请求，返回 false， 否则处理该请求并返回 true
      */
-    private fun handleStaticResource(request: Request): Boolean {
+    private fun handleStaticResource(request: Request, response: Response): Boolean {
         if (request.isAjaxRequest()) {
             return false
         }
         val url =
-            if (request.requestUrl!!.url == "/") {
+            if (request.getPath() == "/") {
                 "/index.html"
             } else {
-                URLDecoder.decode(request.requestUrl!!.url, SimpleHttpServerConfig.charset.toString())
+                URLDecoder.decode(request.getPath(), ServerConfig.charset.toString())
             }
-        val path = File(server.webResourcesRoot).absolutePath + url
+        val path = File(ServerConfig.resourceDirectory).absolutePath + url
         val targetFile = File(path)
         if (!targetFile.exists()) {
             return false
         }
-        val response = Response(socket)
-        val resource = Resource()
-        resource.setResource(targetFile, MimeType(ContentTypeHelper.getContentTypeByURL(url, SimpleHttpServerConfig.charset.toString())))
+        val resource = Resource.fromFile(
+            file = targetFile,
+            mimeType = MimeType(ContentTypeHelper.getContentTypeByURL(url), ServerConfig.charset)
+        )
         request.setAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE, resource)
-        response.handleRequest(request, server)
+        response.handleRequest(request)
 
         return true
     }

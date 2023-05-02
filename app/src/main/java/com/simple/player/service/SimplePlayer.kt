@@ -239,10 +239,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
         }
         // 获取确切的播放列表
         var playlist = PlaylistManager.getList(AppConfigure.Player.playlist)
-        if (playlist == null) {
-            playlist = PlaylistManager.localPlaylist
-        }
-        if (playlist.count == 0) {
+        if (playlist == null || playlist.count == 0) {
             playlist = PlaylistManager.localPlaylist
         }
         activePlaylist = playlist

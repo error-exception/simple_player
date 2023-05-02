@@ -1,6 +1,5 @@
 package com.simple.server
 
-import com.simple.server.header.HttpHeader
 import com.simple.server.header.MimeType
 import com.simple.server.util.logger
 import com.simple.server.util.tokenizer
@@ -61,7 +60,7 @@ class Request(socket: Socket) {
     }
 
     private fun readLineAsString(): String {
-        return readLineBytes(true).toString(SimpleHttpServerConfig.charset)
+        return readLineBytes(true).toString(ServerConfig.charset)
     }
 
     private fun readLineBytes(skipCRLF: Boolean = true): ByteArray {
@@ -85,7 +84,7 @@ class Request(socket: Socket) {
 
     fun getHttpHeader(): HttpHeader {
         if (header == null) {
-            header = HttpHeader(this)
+            header = HttpHeader()
         }
         return header as HttpHeader
     }
@@ -103,7 +102,8 @@ class Request(socket: Socket) {
     }
 
     fun isAjaxRequest(): Boolean {
-        return getHttpHeader().getXRequestedWith() == "XMLHttpRequest"
+//        return getHttpHeader().getXRequestedWith() == "XMLHttpRequest"
+        return true
     }
 
     class RequestUrl(requestUrl: String) {
@@ -192,7 +192,7 @@ class Request(socket: Socket) {
         }
 
         internal fun readLineAsString(): String {
-            return readLineBytes(true).toString(SimpleHttpServerConfig.charset)
+            return readLineBytes(true).toString(ServerConfig.charset)
         }
 
         internal fun readLineBytes(skipCRLF: Boolean = true): ByteArray {

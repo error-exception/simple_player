@@ -1,10 +1,12 @@
 package com.simple.server
 
+import com.simple.server.request.Request
+
 open class RequestController {
 
     private val map = HashMap<Pair<String /* url */, String /* method */>, RequestURLHandler>()
 
-    protected lateinit var server: SimpleHttpServer
+    protected lateinit var server: Server
 
     init {
         val methods = this.javaClass.declaredMethods
@@ -28,12 +30,12 @@ open class RequestController {
         }
     }
 
-    internal fun setSimpleHttpServer(server: SimpleHttpServer) {
+    internal fun setSimpleHttpServer(server: Server) {
         this.server = server
     }
 
-    internal fun callMethod(url: String, requestMethod: String, request: Request, response: Response): Boolean {
-        val method1 = map[Pair(url, requestMethod)]
+    internal fun callMethod(request: Request, response: Response): Boolean {
+        val method1 = map[request.getPath() to request.getMethod()]
         method1 ?: return false
         method1.call(request, response, server)
         return true

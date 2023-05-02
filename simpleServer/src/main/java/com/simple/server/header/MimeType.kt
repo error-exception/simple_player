@@ -3,14 +3,14 @@ package com.simple.server.header
 import com.simple.server.util.tokenizer
 import java.nio.charset.Charset
 
-class MimeType(contentType: String) {
+class MimeType {
 
     lateinit var genericType: String
     lateinit var subType: String
     var charset: Charset? = null
     var boundary: String? = null
 
-    init {
+    constructor(contentType: String) {
         val tokens = contentType.tokenizer(";")
         for (token in tokens) {
             if (token.contains('/')) {
@@ -25,8 +25,19 @@ class MimeType(contentType: String) {
         }
     }
 
+    constructor(mimeType: String, charset: Charset) {
+        val list = mimeType.split("/")
+        genericType = list[0].lowercase()
+        subType = list[1].lowercase()
+        this.charset = charset
+    }
+
     fun isText(): Boolean {
         return genericType == "text"
+    }
+
+    fun isJson(): Boolean {
+        return isSameType(MIME_TYPE_APPLICATION_JSON)
     }
 
     fun isSameType(mimeType: MimeType): Boolean {

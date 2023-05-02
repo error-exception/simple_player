@@ -2,10 +2,10 @@ package com.simple.server
 
 import com.simple.server.constant.AttributeConstant
 import com.simple.server.constant.ResponseState
-import com.simple.server.header.HttpHeader
 import com.simple.server.header.MimeType
 import com.simple.server.util.Resource
 import com.simple.server.util.StreamUtils
+import com.simple.server.request.Request
 import com.simple.server.util.logger
 import java.io.FileNotFoundException
 import java.io.PrintStream
@@ -17,30 +17,19 @@ import java.net.Socket
  */
 class Response(private val socket: Socket) {
 
-    private var header: HttpHeader? = null
+    private var header: HttpHeader = HttpHeader()
     private val outputStream = PrintStream(socket.getOutputStream())
+    private val log = logger("Response")
     var hasResponded = false
         internal set
 
     var responseCode = 200
 
     init {
-        val httpHeader = getHttpHeader()
-        with(httpHeader) {
+        with(header) {
             setContentLength(0)
             setContentType(MimeType.MIME_TYPE_TEXT_PLAIN)
         }
-    }
-
-    fun setHttpHeader(header: HttpHeader) {
-        this.header = header
-    }
-
-    fun getHttpHeader(): HttpHeader {
-        if (header == null) {
-            header = HttpHeader(this)
-        }
-        return header as HttpHeader
     }
 
     /**
@@ -49,34 +38,35 @@ class Response(private val socket: Socket) {
     private fun writeHeader(header: HttpHeader) {
         outputStream.apply {
             write("HTTP/1.1 $responseCode ${ResponseState.getStateInfo(responseCode)}\r\n".toByteArray())
-            val list = header.getHeaderList()
+            val list = header.hashMap
             for (pair in list) {
-                write("${pair.first}: ${pair.second}\r\n".toByteArray())
+                write("${pair.key}: ${pair.value}\r\n".toByteArray())
             }
             write("\r\n".toByteArray())
         }
     }
 
-    fun handleRequest(request: Request, server: SimpleHttpServer) {
+    fun handleRequest(request: Request) {
         val resource = request.getAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE) as Resource?
         if (resource == null) {
             responseWithEmptyBody(ResponseState.NOT_FOUND)
             return
         }
-        val requestHeader = request.getHttpHeader()
-        val range = requestHeader.getRange()
-        if (range != null && SimpleHttpServerConfig.enablePartial) {
+        val requestHeader = request.httpHeader
+        val range = requestHeader.getRange(resource.getLength())
+        if (range != null && ServerConfig.enablePartial) {
             try {
                 hasResponded = true
                 responseCode = ResponseState.PARTIAL_CONTENT
                 val contentLength = range.end - range.start + 1
-                getHttpHeader().apply {
+                header.apply {
                     setContentRange("bytes ${range.start}-${range.end}/${resource.getLength()}")
                     setContentType(resource.mimeType)
                     setContentLength(contentLength)
                     setConnection("Close")
                 }
                 StreamUtils.copyToRange(resource, getBody(), range.start, contentLength)
+                closeSocket()
             } catch (e: FileNotFoundException) {
                 responseWithEmptyBody(ResponseState.NOT_FOUND)
             } catch (e: IllegalArgumentException) {
@@ -84,7 +74,7 @@ class Response(private val socket: Socket) {
             }
         } else {
             responseCode = ResponseState.OK
-            getHttpHeader().apply {
+            header.apply {
                 setContentType(resource.mimeType)
                 setContentLength(resource.getLength())
                 setConnection("Close")
@@ -94,6 +84,7 @@ class Response(private val socket: Socket) {
             try {
                 hasResponded = true
                 StreamUtils.copy(resource, body)
+                closeSocket()
             } catch (e: FileNotFoundException) {
                 responseWithEmptyBody(ResponseState.NOT_FOUND)
             }
@@ -103,14 +94,21 @@ class Response(private val socket: Socket) {
     fun responseWithEmptyBody(stateCode: Int) {
         hasResponded = true
         responseCode = stateCode
-        writeHeader(getHttpHeader().apply {
-            setConnection("Close")
-        })
+        header.setConnection("Close")
+        writeHeader(header)
         outputStream.flush()
+        closeSocket()
+
     }
 
     fun getBody(): PrintStream {
-        writeHeader(getHttpHeader())
+        writeHeader(header)
         return outputStream
+    }
+
+    private fun closeSocket() {
+        log("responsed close socket")
+        socket.shutdownOutput()
+        socket.close()
     }
 }

@@ -6,6 +6,8 @@ import com.simple.server.constant.MimeTypes
 import com.simple.server.constant.ResponseState
 import com.simple.server.header.MimeType
 import com.simple.server.util.Resource
+import com.simple.server.request.Request
+import java.lang.Exception
 import java.lang.reflect.Method
 
 class RequestURLHandler {
@@ -30,24 +32,11 @@ class RequestURLHandler {
                     }
                 }
             }
-
-
-
-
-//            val parameters = value.parameters
-//            for (i in parameters.indices) {
-//                mappingParamList += MappingParam().apply {
-//                    paramName = parameters[i].name
-//                    paramType = parameters[i].type
-//                    val requestParam1 = parameters[i].getAnnotation(RequestParam::class.java)
-//                    requestParam = requestParam1
-//                }
-//            }
         }
 
     var requestController: RequestController? = null
 
-    fun call(request: Request, response: Response, server: SimpleHttpServer) {
+    fun call(request: Request, response: Response, server: Server) {
         for (i in mappingParamList.indices) {
             val param = mappingParamList[i]
             if (param.paramType.isInstance(request)) {
@@ -59,33 +48,29 @@ class RequestURLHandler {
                 continue
             }
             if (param.requestParam != null) {
-                val requestUrl = request.requestUrl
-                if (requestUrl != null) {
-                    val value = requestUrl.parameter[param.requestParam!!]
-                    if (param.paramType == Long.Companion::class.java) {
-                        param.paramValue = value?.toLong()
-                    } else if (param.paramType == Int.Companion::class.java) {
-                        param.paramValue = value?.toInt()
-                    } else if (param.paramType == Short.Companion::class.java) {
-                        param.paramValue = value?.toShort()
-                    } else if (param.paramType == Float.Companion::class.java) {
-                        param.paramValue = value?.toFloat()
-                    } else if (param.paramType == Double.Companion::class.java) {
-                        param.paramValue = value?.toDouble()
-                    } else if (param.paramType == Byte.Companion::class.java) {
-                        param.paramValue = value?.toByte()
-                    } else if (param.paramType == Char.Companion::class.java) {
-                        param.paramValue = value?.get(0)
-                    } else {
-                        param.paramValue = value
+                val requestUrl = request.getHttpUrl()
+                val value = requestUrl.queryMap[param.requestParam!!]
+                println(param.paramType.name)
+                try {
+                    when (param.paramType.name) {
+                        "long"   -> param.paramValue = value?.toLong()
+                        "int"    -> param.paramValue = value?.toInt()
+                        "short"  -> param.paramValue = value?.toShort()
+                        "float"  -> param.paramValue = value?.toFloat()
+                        "double" -> param.paramValue = value?.toDouble()
+                        "byte"   -> param.paramValue = value?.toByte()
+                        "boolean"   -> param.paramValue = value?.toBoolean()
+                        "char"   -> param.paramValue = value?.get(0)
+                        else     -> param.paramValue = value
                     }
+                } catch (e: Exception) {
+                    param.paramValue = value
                 }
             }
         }
         // 构造函数的实参数组，用于传参
-        val arr = arrayOfNulls<Any>(mappingParamList.size)
-        for (index in arr.indices) {
-            arr[index] = mappingParamList[index].paramValue
+        val arr = Array(mappingParamList.size) {
+            mappingParamList[it].paramValue
         }
         var returnValue = method?.invoke(requestController, *arr)
 
@@ -99,31 +84,29 @@ class RequestURLHandler {
                 response.responseWithEmptyBody(ResponseState.OK)
                 return
             }
-            val resource = Resource()
+            var resource: Resource? = null
+            var mimeType: MimeType? = null
             when (returnValue) {
                 is CharSequence -> {
-                    val mimeType = MimeType("text/html; charset=${SimpleHttpServerConfig.charset}")
-                    resource.setResource(returnValue.toString().toByteArray(SimpleHttpServerConfig.charset), mimeType)
+                    mimeType = MimeType(MimeTypes.MT_TEXT_HTML, ServerConfig.charset)
+                    resource = Resource.fromString(returnValue.toString(), mimeType)
                 }
 
-                is Map<*, *> -> {
-                    val mimeType = MimeType("${MimeTypes.MT_APPLICATION_JSON}; charset=${SimpleHttpServerConfig.charset}")
-                    resource.setResource(JSON.stringify(returnValue).toByteArray(SimpleHttpServerConfig.charset), mimeType)
-                }
-
-                is List<*> -> {
-                    val mimeType = MimeType("${MimeTypes.MT_APPLICATION_JSON}; charset=${SimpleHttpServerConfig.charset}")
-                    resource.setResource(JSON.stringify(returnValue).toByteArray(SimpleHttpServerConfig.charset), mimeType)
+                is Map<*, *>, is List<*> -> {
+                    mimeType = MimeType(MimeTypes.MT_APPLICATION_JSON, ServerConfig.charset)
+                    resource = Resource.fromString(JSON.stringify(returnValue), mimeType)
                 }
                 else -> {
                     if (responseContentType != null && returnValue is ByteArray) {
-                        val mimeType = MimeType("$responseContentType; charset=${SimpleHttpServerConfig.charset}")
-                        resource.setResource(returnValue, mimeType)
+                        mimeType = MimeType(responseContentType!!, ServerConfig.charset)
+                        resource = Resource.fromBytes(returnValue, mimeType)
                     }
                 }
             }
-            request.setAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE, resource)
-            response.handleRequest(request, server)
+            if (resource != null) {
+                request.setAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE, resource)
+            }
+            response.handleRequest(request)
         }
     }
 

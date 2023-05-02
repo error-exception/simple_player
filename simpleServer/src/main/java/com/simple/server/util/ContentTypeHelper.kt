@@ -5,7 +5,7 @@ import com.simple.server.constant.MimeTypes
 object ContentTypeHelper {
 
 
-    fun getContentTypeByExtensionName(extension: String, charset: String = "UTF-8"): String {
+    fun getContentTypeByExtensionName(extension: String): String {
         val type =  when (extension) {
             "html" -> MimeTypes.MT_TEXT_HTML
             "css" -> MimeTypes.MT_TEXT_CSS
@@ -21,11 +21,11 @@ object ContentTypeHelper {
             "json" -> MimeTypes.MT_APPLICATION_JSON
             else -> MimeTypes.MT_APPLICATION_OCTET_STREAM
         }
-        return "$type; charset=$charset"
+        return type
     }
 
-    fun getContentTypeByURL(url: String, charset: String = "UTF-8"): String {
-        return getContentTypeByExtensionName(getExtensionName(url), charset)
+    fun getContentTypeByURL(url: String): String {
+        return getContentTypeByExtensionName(getExtensionName(url))
     }
 
     fun isTextType(type: String): Boolean {
