@@ -22,6 +22,7 @@ import com.simple.server.constant.MimeTypes
 import com.simple.server.constant.ResponseState
 import com.simple.server.header.MimeType
 import com.simple.server.util.Resource
+import java.lang.Exception
 
 const val CODE_NO_TIMING_FOUND = 10001
 const val CODE_EMPTY_TIMING = 10002
@@ -53,8 +54,12 @@ class MusicController: RequestController() {
             return
         }
         val mimeType = MimeType(MimeTypes.MT_APPLICATION_OCTET_STREAM)
+        var length = -1L
         inputStream = when (song.type) {
-            "kge", "kgm" -> KgmInputStream(inputStream)
+            "kge", "kgm" -> {
+                length = FileUtil.getLength(uri = uri) - 1024
+                KgmInputStream(inputStream)
+            }
 //            "uc", "uc!" -> UCMediaDataSource(uri.toFile())
 //            "ncm" -> NCMMediaDataSource(uri.toFile())
             else -> inputStream
@@ -62,7 +67,7 @@ class MusicController: RequestController() {
         val resource = Resource(
             inputStream = inputStream,
             mimeType = mimeType,
-            length = FileUtil.getLength(uri = uri)
+            length = if (length > 0L) length else FileUtil.getLength(uri = uri)
         )
         request.setAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE, resource)
         response.handleRequest(request = request)

@@ -42,4 +42,8 @@ class Connection(socket: Socket) {
 
     fun getResponse(): Response = response
 
+    fun close() {
+        TODO("当一个请求到达最大执行时间时，关闭连接，中断线程")
+    }
+
 }

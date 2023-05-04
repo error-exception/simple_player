@@ -19,13 +19,15 @@ object StreamUtils {
             while (inputStream.read(buffer).also { length = it } != -1) {
                 outputStream.write(buffer, 0, length)
             }
+        } catch (e: FileNotFoundException) {
+            throw e
         } finally {
             inputStream.close()
             outputStream.flush()
         }
     }
 
-    @Throws(FileNotFoundException::class)
+    @Throws(FileNotFoundException::class, IllegalArgumentException::class)
     fun copyToRange(resource: Resource, outputStream: OutputStream, start: Long, count: Long) {
         val inputStream = resource.getInputStream()
         try {
@@ -49,8 +51,9 @@ object StreamUtils {
                 length = inputStream.read(buffer)
                 outputStream.write(buffer, 0, length)
             }
-        } catch (_ : Exception) {
+        } catch (e : Exception) {
             println("Error")
+            throw e
         } finally {
             inputStream.close()
             outputStream.flush()

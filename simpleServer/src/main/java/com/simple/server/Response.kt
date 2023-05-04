@@ -56,7 +56,6 @@ class Response(private val socket: Socket) {
         val range = requestHeader.getRange(resource.getLength())
         if (range != null && ServerConfig.enablePartial) {
             try {
-                hasResponded = true
                 responseCode = ResponseState.PARTIAL_CONTENT
                 val contentLength = range.end - range.start + 1
                 header.apply {
@@ -65,6 +64,7 @@ class Response(private val socket: Socket) {
                     setContentLength(contentLength)
                     setConnection("Close")
                 }
+                hasResponded = true
                 StreamUtils.copyToRange(resource, getBody(), range.start, contentLength)
                 closeSocket()
             } catch (e: FileNotFoundException) {
@@ -80,10 +80,9 @@ class Response(private val socket: Socket) {
                 setConnection("Close")
             }
 
-            val body = getBody()
             try {
                 hasResponded = true
-                StreamUtils.copy(resource, body)
+                StreamUtils.copy(resource, getBody())
                 closeSocket()
             } catch (e: FileNotFoundException) {
                 responseWithEmptyBody(ResponseState.NOT_FOUND)
@@ -108,7 +107,11 @@ class Response(private val socket: Socket) {
 
     private fun closeSocket() {
         log("responsed close socket")
-        socket.shutdownOutput()
-        socket.close()
+        if (socket.isConnected) {
+            socket.shutdownOutput()
+        }
+        if (!socket.isClosed) {
+            socket.close()
+        }
     }
 }

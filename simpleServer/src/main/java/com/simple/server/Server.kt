@@ -26,7 +26,7 @@ class Server(val port: Int) {
             processors shl 2,
             10,
             TimeUnit.SECONDS,
-            ArrayBlockingQueue(processors shl 2),
+            ArrayBlockingQueue(1024),
             ThreadPoolExecutor.CallerRunsPolicy()
         )
     }
@@ -44,12 +44,16 @@ class Server(val port: Int) {
                     socket = serverSocket.accept()
                     log("accept: ${socket.inetAddress}")
                     val connection = Connection(socket)
-                    executor.execute(
-                        ServerThread(this@Server, connection)
-                    )
+//                    executor.execute(
+                    Thread(ServerThread(this@Server, connection)).start()
+//                    )
                     socket = null
                 } catch (e: Exception) {
-                    socket?.close()
+                    socket?.let {
+                        if (!it.isClosed) {
+                            it.close()
+                        }
+                    }
                     e.printStackTrace()
                 }
             }

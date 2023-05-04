@@ -7,9 +7,10 @@ import com.simple.server.util.ContentTypeHelper
 import com.simple.server.util.Resource
 import com.simple.server.request.Request
 import java.io.File
+import java.net.Socket
 import java.net.URLDecoder
 
-class ServerThread(private val server: Server, private var connection: Connection): Runnable {
+class ServerThread(private val server: Server, private val connection: Connection): Runnable {
 
     var tag = threadId++
 
@@ -50,7 +51,7 @@ class ServerThread(private val server: Server, private var connection: Connectio
             }
         val path = File(ServerConfig.resourceDirectory).absolutePath + url
         val targetFile = File(path)
-        if (!targetFile.exists()) {
+        if (!targetFile.exists() || targetFile.isDirectory) {
             return false
         }
         val resource = Resource.fromFile(

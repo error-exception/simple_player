@@ -59,7 +59,7 @@ class RequestURLHandler {
                         "float"  -> param.paramValue = value?.toFloat()
                         "double" -> param.paramValue = value?.toDouble()
                         "byte"   -> param.paramValue = value?.toByte()
-                        "boolean"   -> param.paramValue = value?.toBoolean()
+                        "boolean"-> param.paramValue = value?.toBoolean()
                         "char"   -> param.paramValue = value?.get(0)
                         else     -> param.paramValue = value
                     }
@@ -72,13 +72,16 @@ class RequestURLHandler {
         val arr = Array(mappingParamList.size) {
             mappingParamList[it].paramValue
         }
-        var returnValue = method?.invoke(requestController, *arr)
-
-        val interceptor = server.interceptor
-        if (interceptor != null) {
-            returnValue = interceptor.afterController(returnValue)
+        var returnValue: Any? = null
+        try {
+            returnValue = method?.invoke(requestController, *arr)
+            val interceptor = server.interceptor
+            if (interceptor != null) {
+                returnValue = interceptor.afterController(returnValue)
+            }
+        } catch (e: Exception) {
+            response.responseWithEmptyBody(ResponseState.INTERNAL_SERVER_ERROR)
         }
-
         if (!response.hasResponded) {
             if (returnValue == null) {
                 response.responseWithEmptyBody(ResponseState.OK)
