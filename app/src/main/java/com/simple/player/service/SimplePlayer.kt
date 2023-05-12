@@ -20,6 +20,7 @@ import com.simple.player.model.MutablePair
 import com.simple.player.model.Song
 import com.simple.player.playlist.AbsPlaylist
 import com.simple.player.playlist.PlaylistManager
+import com.simple.player.playlist.SongList
 import com.simple.player.util.AppConfigure
 import java.io.Closeable
 import java.lang.Exception
@@ -57,26 +58,25 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
     var isPlayerAvailable = false
         private set
 
-    var activePlaylist: AbsPlaylist = PlaylistManager.localPlaylist
+    var activePlaylist: SongList = PlaylistManager.getLocalList()
         set(value) {
             if (value.name != field.name) {
                 field = value
-                if (KgListActivity.LIST_NAME != value.name) {
-                    AppConfigure.Player.playlist = activePlaylist.name
+                if (!value.isTemple) {
+                    AppConfigure.Player.songListId = activePlaylist.getId()
                 }
-                MusicEvent2.fireOnPlayingPlaylistChanged(value.id)
+//                if (KgListActivity.LIST_NAME != value.name) {
+//                    AppConfigure.Player.playlist = activePlaylist.name
+//                }
+                MusicEvent2.fireOnPlayingPlaylistChanged(value.getId())
             }
         }
 
     var fadeDuration: Long = 1000L
-        set(value) {
-            field = value
-            // TODO: set fade duration in SettingsActivity
-        }
 
     @Deprecated(level = DeprecationLevel.WARNING, message = "未来将在 Song 对象上或 favoriteList 上实现同操作的方法")
     var isCurrentSongLike = false
-        get() = PlaylistManager.favoriteList.hasSong(currentSong)
+        get() = PlaylistManager.getFavoriteList().getSong(currentSong.id) != null
         private set
 
     var playMode = PLAY_MODE_NONE
@@ -112,19 +112,19 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
      * 该方法仅为启动 SimplePlayer
      */
     fun launch() {
-        if (PlaylistManager.hasInitialed && PlaylistManager.localPlaylist.count != 0) {
+        if (PlaylistManager.hasInitialed && PlaylistManager.getLocalList().isNotEmpty()) {
             initPlayer()
         }
     }
 
-    override fun onPlaylistDeleted(listName: String) {
-        if (activePlaylist.name == listName) {
-            activePlaylist = PlaylistManager.localPlaylist
+    override fun onPlaylistDeleted(listId: Long) {
+        if (activePlaylist.getId() == listId) {
+            activePlaylist = PlaylistManager.getLocalList()
         }
     }
 
     override fun onPlaylistInitialized() {
-        if (PlaylistManager.localPlaylist.count == 0) {
+        if (PlaylistManager.getLocalList().count() == 0) {
             return
         }
         initPlayer()
@@ -153,24 +153,24 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
         Store.state.currentPlayMode.value = newMode
     }
 
-    override fun onSongAddToList(songId: Long, listName: String) {
-        if (listName == PlaylistManager.FAVORITE_LIST) {
+    override fun onSongAddToList(songId: Long, listId: Long) {
+        if (listId == PlaylistManager.FAVORITE_LIST_ID) {
             if (songId == currentSong.id) {
                 Store.state.isCurrentSongLike.value = true
             }
         }
     }
 
-    override fun onSongRemovedFromList(songId: Long, listName: String) {
-        if (listName == PlaylistManager.FAVORITE_LIST) {
+    override fun onSongRemovedFromList(songId: Long, listId: Long) {
+        if (listId == PlaylistManager.FAVORITE_LIST_ID) {
             if (songId == currentSong.id) {
                 Store.state.isCurrentSongLike.value = false
             }
         }
     }
 
-    override fun onSongsAddToList(songIds: LongArray, listName: String) {
-        if (listName == PlaylistManager.FAVORITE_LIST) {
+    override fun onSongsAddToList(songIds: LongArray, listId: Long) {
+        if (listId == PlaylistManager.FAVORITE_LIST_ID) {
             for (songId in songIds) {
                 if (songId == currentSong.id) {
                     Store.state.isCurrentSongLike.value = true
@@ -180,8 +180,8 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
         }
     }
 
-    override fun onSongsRemovedFromList(songIds: LongArray, listName: String) {
-        if (listName == PlaylistManager.FAVORITE_LIST) {
+    override fun onSongsRemovedFromList(songIds: LongArray, listId: Long) {
+        if (listId == PlaylistManager.FAVORITE_LIST_ID) {
             for (songId in songIds) {
                 if (songId == currentSong.id) {
                     Store.state.isCurrentSongLike.value = false
@@ -238,20 +238,19 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
             MusicEvent2.fireOnMusicPause()
         }
         // 获取确切的播放列表
-        var playlist = PlaylistManager.getList(AppConfigure.Player.playlist)
-        if (playlist == null || playlist.count == 0) {
-            playlist = PlaylistManager.localPlaylist
+        val playlist = PlaylistManager.getSongList(AppConfigure.Player.songListId).run {
+            if (this == null || isEmpty()) PlaylistManager.getLocalList() else this
         }
         activePlaylist = playlist
         // 获取当前确切的歌曲
-        var song = activePlaylist[AppConfigure.Player.songId]
+        var song = activePlaylist.getSong(AppConfigure.Player.songId)
         currentIndex = if (song == null) {
-            song = activePlaylist[0]
+            song = activePlaylist.getSongAt(0)
             0
         } else {
-            activePlaylist.position(song)
+            activePlaylist.indexOf(song)
         }
-        currentSong = song!!
+        currentSong = song
         initAudioFocus()
         isPlayerAvailable = true
         loadMusicOrStart(currentSong, isStart = false)
@@ -363,8 +362,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
         if (!isPlayerAvailable) {
             return
         }
-        val song = getNextSong(playMode = playMode)
-        song ?: return
+        val song = getNextSong(playMode = playMode) ?: return
         if (AppConfigure.Settings.playFade) {
             volume = 1F
         }
@@ -375,8 +373,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
         if (!isPlayerAvailable) {
             return
         }
-        val song = getPreviousSong(playMode = playMode)
-        song ?: return
+        val song = getPreviousSong(playMode = playMode) ?: return
         if (AppConfigure.Settings.playFade) {
             volume = 1F
         }
@@ -388,7 +385,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
             return
         }
         currentSong = song
-        currentIndex = activePlaylist.position(song)
+        currentIndex = activePlaylist.indexOf(song)
         try {
             player.reset()
             setDataSource(song)
@@ -399,9 +396,11 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
                     player.prepareAsync()
                 } else {
                     player.prepare()
-                    if (activePlaylist.name != KgListActivity.LIST_NAME) {
+                    if (!song.isTemple()) {
                         AppConfigure.Player.songId = song.id
                     }
+//                    if (activePlaylist.name != KgListActivity.LIST_NAME) {
+//                    }
                     MusicEvent2.fireOnSongChanged(song.id)
                 }
             }
@@ -443,29 +442,29 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
         if (!isPlayerAvailable) {
             return null
         }
-        val totalCount = activePlaylist.count
-        if (playMode == PLAY_MODE_RANDOM) {
-            currentIndex = (Math.random() * totalCount).toInt()
-            return activePlaylist[currentIndex]
+        val totalCount = activePlaylist.count()
+        currentIndex = if (playMode == PLAY_MODE_RANDOM) {
+            (Math.random() * totalCount).toInt()
+        } else {
+            (currentIndex + 1) % totalCount
         }
-        currentIndex = (currentIndex + 1) % totalCount
-        return activePlaylist[currentIndex]
+        return activePlaylist.getSongAt(currentIndex)
     }
 
     private fun getPreviousSong(playMode: Int = PLAY_MODE_NONE): Song? {
         if (!isPlayerAvailable) {
             return null
         }
-        val totalCount = activePlaylist.count
+        val totalCount = activePlaylist.count()
         if (playMode == PLAY_MODE_RANDOM) {
             currentIndex = (Math.random() * totalCount).toInt()
-            return activePlaylist[currentIndex]
+            return activePlaylist.getSongAt(currentIndex)
         }
         currentIndex--
         if (currentIndex < 0) {
             currentIndex = totalCount - 1
         }
-        return activePlaylist[currentIndex]
+        return activePlaylist.getSongAt(currentIndex)
     }
 
     private var audioFocusDelayed = false

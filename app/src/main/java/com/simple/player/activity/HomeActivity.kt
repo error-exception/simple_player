@@ -54,6 +54,7 @@ import com.simple.player.util.ArtworkProvider
 import com.simple.player.util.DialogUtil
 import com.simple.player.util.FileUtil
 import com.simple.player.util.ProgressHandler
+import com.simple.player.view.BottomSheetConfirmDialog
 import com.simple.player.view.BottomSheetInputDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -201,15 +202,15 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
     }
 
     private fun loadMain() {
-        val customLists = PlaylistManager.allCustomLists()
+        val customLists = PlaylistManager.getAllExternalSongLists()
         for (customList in customLists) {
-            val song = if (customList.count <= 0) null else customList[customList.count - 1]
+            val song = if (customList.isEmpty()) null else customList.last()
             val item = HomeContentScreen.PlayListItem(
-                id = mutableStateOf(customList.id),
+                id = mutableStateOf(customList.getId()),
                 artwork = mutableStateOf(if (song == null) null else ArtworkProvider.getArtworkDataForCoil(song)),
                 name = mutableStateOf(customList.name),
-                songCount = mutableStateOf(customList.count),
-                isPlaying = mutableStateOf(customList.id == SimplePlayer.activePlaylist.id)
+                songCount = mutableStateOf(customList.count()),
+                isPlaying = mutableStateOf(customList == SimplePlayer.activePlaylist)
             )
             homeContentScreen.customList.add(item)
         }
@@ -265,23 +266,31 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
             onOpenCustomListClick = {
                 val intent = Intent(this@HomeActivity, PlaylistActivity::class.java)
                 intent.setPackage(packageName)
-                intent.putExtra(PlaylistActivity.EXTRA_LIST_NAME, it.name.value)
+                intent.putExtra(PlaylistActivity.EXTRA_LIST_ID, it.id.value)
                 startActivity(intent)
             }
             onDeleteCustomListClick = {
-                DialogUtil.confirm(
+                BottomSheetConfirmDialog.showDialog(
                     context = this@HomeActivity,
                     title = "提示",
                     message = "是否删除播放列表 ${it.name.value} ?",
-                    positive = { _, _ -> PlaylistManager.delete(it.name.value) }
+                    onPositive = {
+                        PlaylistManager.delete(it.id.value)
+                    }
                 )
+//                DialogUtil.confirm(
+//                    context = this@HomeActivity,
+//                    title = "提示",
+//                    message = "是否删除播放列表 ${it.name.value} ?",
+//                    positive = { _, _ -> PlaylistManager.delete(it.id.value) }
+//                )
             }
             onPlayCustomListClick = {
-                val playlist = PlaylistManager.getList(it.name.value)
+                val playlist = PlaylistManager.getSongList(it.id.value)
                 if (playlist != null) {
                     SimplePlayer.activePlaylist = playlist
-                    if (playlist.count > 0) {
-                        SimplePlayer.loadMusicOrStart(playlist[0]!!, isNoFade = true)
+                    if (playlist.isNotEmpty()) {
+                        SimplePlayer.loadMusicOrStart(playlist.first(), isNoFade = true)
                     }
                 }
             }
@@ -323,10 +332,10 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
             onLikeButtonClick = {
                 with(PlaylistManager) {
                     val song = SimplePlayer.currentSong
-                    if (favoriteList.hasSong(song)) {
-                        removeSong(FAVORITE_LIST, song)
+                    if (getFavoriteList().hasSong(song.id)) {
+                        removeSong(FAVORITE_LIST_ID, song)
                     } else {
-                        addSong(FAVORITE_LIST, song)
+                        addSong(FAVORITE_LIST_ID, song)
                     }
                 }
             }
@@ -336,19 +345,19 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
             onFavoritePlaylistClick = {
                 val intent = Intent(this@HomeActivity, PlaylistActivity::class.java)
                 intent.putExtra(
-                    PlaylistActivity.EXTRA_LIST_NAME,
-                    PlaylistManager.FAVORITE_LIST)
+                    PlaylistActivity.EXTRA_LIST_ID,
+                    PlaylistManager.FAVORITE_LIST_ID)
                 intent.setPackage(this@HomeActivity.packageName)
                 startActivity(intent)
             }
             onLocalPlaylistClick = {
                 if (AppConfigure.Settings.enableNewPlaylist) {
                     val intent = Intent(this@HomeActivity, NewPlaylistActivity::class.java)
-                    intent.putExtra(NewPlaylistActivity.EXTRA_LIST_NAME, PlaylistManager.LOCAL_LIST)
+                    intent.putExtra(NewPlaylistActivity.EXTRA_LIST_ID, PlaylistManager.LOCAL_LIST_ID)
                     startActivity(intent)
                 } else {
                     val intent = Intent(this@HomeActivity, PlaylistActivity::class.java)
-                    intent.putExtra(PlaylistActivity.EXTRA_LIST_NAME, PlaylistManager.LOCAL_LIST)
+                    intent.putExtra(PlaylistActivity.EXTRA_LIST_ID, PlaylistManager.LOCAL_LIST_ID)
                     startActivity(intent)
                 }
 
@@ -372,43 +381,35 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
         val click: (() -> Unit)? = null
     )
 
-    override fun onSongAddToList(songId: Long, listName: String) {
-        if (listName != PlaylistManager.FAVORITE_LIST) {
-            val list = PlaylistManager.getList(listName)
-            list ?: return
-            val song = list[list.count - 1]
-            song ?: return
+    override fun onSongAddToList(songId: Long, listId: Long) {
+        if (listId != PlaylistManager.FAVORITE_LIST_ID) {
+            val list = PlaylistManager.getSongList(listId) ?: return
             for (listItem in homeContentScreen.customList) {
-                if (listItem.name.value == listName) {
-                    listItem.songCount.value = list.count
+                if (listItem.id.value == listId) {
+                    listItem.songCount.value = list.count()
                 }
             }
         }
     }
 
-    override fun onSongsAddToList(songIds: LongArray, listName: String) {
-        val playlist = PlaylistManager.getList(listName)
-        playlist ?: return
-        val song = playlist[songIds.last()]
-        song ?: return
+    override fun onSongsAddToList(songIds: LongArray, listId: Long) {
+        val playlist = PlaylistManager.getSongList(listId) ?: return
+        val song = playlist.getSong(songIds.last()) ?: return
         for (listItem in homeContentScreen.customList) {
-            if (listItem.name.value == listName) {
-                listItem.songCount.value = playlist.count
+            if (listItem.id.value == listId) {
+                listItem.songCount.value = playlist.count()
                 listItem.artwork.value = ArtworkProvider.getArtworkDataForCoil(song)
                 break
             }
         }
     }
 
-    override fun onSongRemovedFromList(songId: Long, listName: String) {
-        if (listName != PlaylistManager.FAVORITE_LIST) {
-            val list = PlaylistManager.getList(listName)
-            list ?: return
-            val song = list[list.count - 1]
-            song ?: return
+    override fun onSongRemovedFromList(songId: Long, listId: Long) {
+        if (listId != PlaylistManager.FAVORITE_LIST_ID) {
+            val list = PlaylistManager.getSongList(listId) ?: return
             for (listItem in homeContentScreen.customList) {
-                if (listItem.name.value == listName) {
-                    listItem.songCount.value = list.count
+                if (listItem.id.value == listId) {
+                    listItem.songCount.value = list.count()
                 }
             }
         }
@@ -422,38 +423,37 @@ class HomeActivity : BaseActivity2(), ServiceConnection {
         homeContentScreen.setBottomPlayerBarStyle(style = style)
     }
 
-    override fun onPlaylistCreated(listName: String) {
-        val list = PlaylistManager.getList(listName)
-        list ?: return
+    override fun onPlaylistCreated(listId: Long) {
+        val list = PlaylistManager.getSongList(listId) ?: return
         val item = HomeContentScreen.PlayListItem(
-            id = mutableStateOf(list.id),
+            id = mutableStateOf(list.getId()),
             artwork = mutableStateOf(null),
             name = mutableStateOf(list.name),
-            songCount = mutableStateOf(list.count)
+            songCount = mutableStateOf(list.count())
         )
         homeContentScreen.customList.add(item)
     }
 
-    override fun onPlaylistRenamed(oldName: String, newName: String) {
+    override fun onPlaylistRenamed(listId: Long, newName: String) {
         for (listItem in homeContentScreen.customList) {
-            if (listItem.name.value == oldName) {
+            if (listItem.id.value == listId) {
                 listItem.name.value = newName
                 break
             }
         }
     }
 
-    override fun onPlaylistDeleted(listName: String) {
-        val allList = PlaylistManager.allCustomLists()
+    override fun onPlaylistDeleted(listId: Long) {
+        val allList = PlaylistManager.getAllExternalSongLists()
         homeContentScreen.customList.clear()
         for (playlist in allList) {
-            val song = if (playlist.count == 0) null else playlist[playlist.count - 1]
+            val song = if (playlist.isEmpty()) null else playlist.last()
             homeContentScreen.customList += HomeContentScreen.PlayListItem(
-                id = mutableStateOf(playlist.id),
+                id = mutableStateOf(playlist.getId()),
                 artwork = mutableStateOf(if (song == null) null else ArtworkProvider.getArtworkDataForCoil(song)),
                 name = mutableStateOf(playlist.name),
                 isPlaying = mutableStateOf(false),
-                songCount = mutableStateOf(playlist.count)
+                songCount = mutableStateOf(playlist.count())
             )
         }
     }

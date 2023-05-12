@@ -56,7 +56,7 @@ class AudioOpenActivity: BaseActivity2() {
         val dataString = intent.dataString ?: return
         val uri = Uri.parse(dataString)
         testText.value = """
-            ${dataString}
+            $dataString
             ${UriUtils.getRealFilePath(this, uri)}
         """.trimIndent()
     }

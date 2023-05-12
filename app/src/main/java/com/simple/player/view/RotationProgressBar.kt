@@ -22,7 +22,7 @@ class RotationProgressBar : View {
     }
 
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet) {
-        var ta = context.obtainStyledAttributes(attributeSet, R.styleable.RotationProgressBar)
+        val ta = context.obtainStyledAttributes(attributeSet, R.styleable.RotationProgressBar)
         mBarColor = ta.getColor(R.styleable.RotationProgressBar_bar_color, -0x23d3e1)
         strokeWidth = ta.getDimension(R.styleable.RotationProgressBar_bar_width, Util.dpToPx(4f).toFloat())
         ta.recycle()
@@ -35,7 +35,7 @@ class RotationProgressBar : View {
 
     private fun init() {
         paint = Paint()
-        paint.setColor(Color.BLUE)
+        paint.color = Color.BLUE
         paint.isAntiAlias = true
         paint.isDither = true
         paint.strokeWidth = strokeWidth
@@ -51,8 +51,8 @@ class RotationProgressBar : View {
     }
 
     override fun onDraw(canvas: Canvas?) {
-        var height = this.height
-        var width = this.width
+        val height = this.height
+        val width = this.width
         paint.color = mBarColor
         f.set(strokeWidth, strokeWidth, height - strokeWidth, width - strokeWidth)
         canvas?.drawArc(f, 0f, 90f, false, paint)

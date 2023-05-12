@@ -17,12 +17,13 @@ import com.simple.player.activity.BaseActivity2
 import com.simple.player.model.Song
 import com.simple.player.playlist.AbsPlaylist
 import com.simple.player.playlist.PlaylistManager
+import com.simple.player.playlist.SongList
 
 
-
-class PlaylistAdapter2(private val list: AbsPlaylist):
+class PlaylistAdapter2(private val list: SongList):
     RecyclerView.Adapter<PlaylistAdapter2.ViewHolder>(),
-    View.OnClickListener, View.OnLongClickListener {
+    View.OnClickListener, View.OnLongClickListener
+{
 
     private val selectMap = LongSparseArray<Boolean>()
     private var playPosition = -1
@@ -89,7 +90,7 @@ class PlaylistAdapter2(private val list: AbsPlaylist):
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val data = list.songList
+        val data = list.rawList()
         val song = data[position]
         with (holder) {
             parent.tag = position
@@ -115,7 +116,7 @@ class PlaylistAdapter2(private val list: AbsPlaylist):
     }
 
     override fun getItemCount(): Int {
-        return list.count
+        return list.count()
     }
 
     fun select(position: Int) {
@@ -128,7 +129,7 @@ class PlaylistAdapter2(private val list: AbsPlaylist):
     }
 
     fun getItem(position: Int): Song {
-        return list[position]!!
+        return list.getSongAt(position)
     }
 
     override fun getItemId(position: Int): Long {
@@ -138,11 +139,11 @@ class PlaylistAdapter2(private val list: AbsPlaylist):
     fun getSelectedSongList(): ArrayList<Song> {
         val selectedList = ArrayList<Song>()
         if (isSelectAll) {
-            val songList = list.songList
+            val songList = list.rawList()
             selectedList.addAll(songList)
         } else {
             selectMap.forEach { key, value ->
-                val song = list[key]
+                val song = list.getSong(key)
                 if (song == null || !value) {
                     return@forEach
                 }
@@ -162,17 +163,17 @@ class PlaylistAdapter2(private val list: AbsPlaylist):
     }
 
     fun remove(song: Song) {
-        val position = list.position(song)
-        PlaylistManager.removeSong(list.name, song)
+        val position = list.indexOf(song)
+        PlaylistManager.removeSong(list.getId(), song)
         notifyItemRemoved(position)
     }
 
     fun remove(songArray: ArrayList<Song>) {
         for (song in songArray) {
-            val position = list.position(song)
+            val position = list.indexOf(song)
             notifyItemRemoved(position)
         }
-        PlaylistManager.removeSongs(list.name, songArray.toTypedArray())
+        PlaylistManager.removeSongs(list.getId(), songArray.toTypedArray())
     }
 
     fun selectAll() {

@@ -8,19 +8,19 @@ interface MusicEventListener {
 
     fun onMusicPause() {}
 
-    fun onSongRemovedFromList(songId: Long, listName: String) {}
+    fun onSongRemovedFromList(songId: Long, listId: Long) {}
 
-    fun onSongAddToList(songId: Long, listName: String) {}
+    fun onSongAddToList(songId: Long, listId: Long) {}
 
     fun onSongChanged(newSongId: Long) {}
 
     fun onPlayModeChanged(oldMode: Int, newMode: Int) {}
 
-    fun onPlaylistCreated(listName: String) {}
+    fun onPlaylistCreated(listId: Long) {}
 
-    fun onPlaylistRenamed(oldName: String, newName: String) {}
+    fun onPlaylistRenamed(listId: Long, newName: String) {}
 
-    fun onPlaylistDeleted(listName: String) {}
+    fun onPlaylistDeleted(listId: Long) {}
 
     fun onHistoryChanged(newSongId: Long) {}
 
@@ -28,9 +28,9 @@ interface MusicEventListener {
 
     fun onBottomPlayerBarStyleChanged(style: String) {}
 
-    fun onSongsAddToList(songIds: LongArray, listName: String) {}
+    fun onSongsAddToList(songIds: LongArray, listId: Long) {}
 
-    fun onSongsRemovedFromList(songIds: LongArray, listName: String) {}
+    fun onSongsRemovedFromList(songIds: LongArray, listId: Long) {}
 
     fun onPlaylistInitialized() {}
 

@@ -6,7 +6,8 @@ import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.ui.graphics.Color
 import com.simple.player.model.Song
-import com.simple.player.playlist.Playlist
+import com.simple.player.playlist.SongList
+import com.simple.player.playlist.TempleId
 import com.simple.player.screen.KgListScreen
 import com.simple.player.service.SimplePlayer
 import com.simple.player.ui.theme.ComposeTestTheme
@@ -53,14 +54,14 @@ class KgListActivity: BaseActivity2() {
             delay(300)
             loadKgeFile()
             if (SimplePlayer.activePlaylist.name == LIST_NAME) {
-                screen.playPosition.value = playlist.position(SimplePlayer.currentSong)
+                screen.playPosition.value = playlist.indexOf(SimplePlayer.currentSong)
             }
         }
     }
 
     override fun onSongChanged(newSongId: Long) {
         if (SimplePlayer.activePlaylist.name == LIST_NAME) {
-            screen.playPosition.value = playlist.position(SimplePlayer.currentSong)
+            screen.playPosition.value = playlist.indexOf(SimplePlayer.currentSong)
         }
     }
 
@@ -71,7 +72,6 @@ class KgListActivity: BaseActivity2() {
 
     private fun initKgePlaylist() {
         screen.list.clear()
-        var id = 0L
         for ((index, path) in paths.withIndex()) {
             if (!path.exists()) {
                 Log.e(TAG, "initKgePlaylist: path not found")
@@ -88,14 +88,14 @@ class KgListActivity: BaseActivity2() {
                     continue
                 }
                 val filename = file.name
-                val song = Song(--id).apply {
+                val song = Song(TempleId.nextTempleSongId()).apply {
                     title = filename
                     artist = "未知艺术家"
                     type = FileUtil.getFileType(filename)
                     bitrate = 250
                     this.uri = Uri.fromFile(file).toString()
                 }
-                playlist += song
+                playlist.addSong(song)
                 screen.list.add(KgListScreen.KgListItem(
                     song = song,
                     tag = tags[index]
@@ -108,7 +108,7 @@ class KgListActivity: BaseActivity2() {
         const val TAG = "KgListActivity"
         const val KGE_EXTENSION = "kge"
         const val LIST_NAME = "_KG_LIST_"
-        val playlist = Playlist(LIST_NAME)
+        val playlist = SongList(TempleId.nextTempleListId())
     }
 
 }

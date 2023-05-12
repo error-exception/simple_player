@@ -15,6 +15,8 @@ class Song(songId: Long){
 
     constructor() : this(-1)
 
+    fun isTemple(): Boolean = id < 0
+
     override fun equals(other: Any?): Boolean {
         if (other == null) {
             return false

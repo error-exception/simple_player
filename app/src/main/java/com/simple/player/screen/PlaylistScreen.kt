@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import com.simple.player.R
 import com.simple.player.activity.NewPlaylistActivity
 import com.simple.player.playlist.AbsPlaylist
+import com.simple.player.playlist.SongList
 import com.simple.player.service.SimplePlayer
 import com.simple.player.ui.theme.ColumnSpace
 import com.simple.player.ui.theme.windowBackgroundAlpha
@@ -471,8 +472,8 @@ class PlaylistScreen(private val activity: NewPlaylistActivity) {
         playPosition.value = position
     }
 
-    fun setListSource(playlist: AbsPlaylist) {
-        val songList = playlist.songList
+    fun setListSource(playlist: SongList) {
+        val songList = playlist.rawList()
         for (song in songList) {
             val item = PlaylistItem(
                 title = song.title,
@@ -493,7 +494,7 @@ class PlaylistScreen(private val activity: NewPlaylistActivity) {
 
     fun remove(listIndex: Int) {
         list.removeAt(listIndex)
-        playPosition.value = activity.playlist.position(SimplePlayer.currentSong)
+        playPosition.value = activity.playlist.indexOf(SimplePlayer.currentSong)
     }
 
     fun openPlaylistNameList(names: Array<String>) {

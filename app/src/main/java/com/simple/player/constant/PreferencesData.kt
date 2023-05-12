@@ -12,6 +12,8 @@ object PreferencesData {
     const val PLAYER_PLAY_MODE = "play_mode"
     /* 当前播放的播放列表 */
     const val PLAYER_PLAYLIST = "playlist"
+    /* 当前播放的播放列表 ID */
+    const val PLAYER_SONG_LIST_ID = "song_list_id"
     /* 记住上次播放进度，默认值为 0 */
     const val PLAYER_REMEMBER_PROGRESS = "remember_progress"
     /* 记住上次播放歌曲ID，默认值为 -1， 表示无记录 */

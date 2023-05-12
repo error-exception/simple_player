@@ -524,8 +524,8 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
         }
         val intent = Intent(activity, PlaylistActivity::class.java)
         intent.putExtra(
-            PlaylistActivity.EXTRA_LIST_NAME,
-            SimplePlayer.activePlaylist.name
+            PlaylistActivity.EXTRA_LIST_ID,
+            SimplePlayer.activePlaylist.getId()
         )
         activity.startActivity(intent)
     }
@@ -564,10 +564,10 @@ class PlayerContentScreen(private val activity: HomeActivity): DefaultLifecycleO
     private fun changeSongLikeState() {
         with (PlaylistManager) {
             val song = SimplePlayer.currentSong
-            if (favoriteList.hasSong(song)) {
-                removeSong(FAVORITE_LIST, song)
+            if (getFavoriteList().hasSong(song.id)) {
+                removeSong(FAVORITE_LIST_ID, song)
             } else {
-                addSong(FAVORITE_LIST, song)
+                addSong(FAVORITE_LIST_ID, song)
             }
         }
     }

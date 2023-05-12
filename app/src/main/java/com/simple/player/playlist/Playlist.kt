@@ -23,7 +23,7 @@ class Playlist(listName: String): AbsPlaylist() {
     }
 
     override operator fun plusAssign(id: Long) {
-        this += PlaylistManager.localPlaylist[id]!!
+        this += PlaylistManager.getLocalList().getSong(id)!!
     }
 
     override operator fun plusAssign(song: Array<Song>) {

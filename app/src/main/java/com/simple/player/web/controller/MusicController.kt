@@ -3,11 +3,14 @@ package com.simple.player.web.controller
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toFile
+import coil.request.ImageRequest
+import com.simple.player.Util
 import com.simple.player.decode.KgmInputStream
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.service.KgmMediaDataSource
 import com.simple.player.service.NCMMediaDataSource
 import com.simple.player.service.UCMediaDataSource
+import com.simple.player.util.ArtworkProvider
 import com.simple.player.util.FileUtil
 import com.simple.player.web.ResponseUtils
 import com.simple.player.web.service.MusicService
@@ -32,7 +35,7 @@ class MusicController: RequestController() {
 
     @GetMapping("/musicList")
     fun musicList(): HashMap<String, Any?> {
-        val musicList = PlaylistManager.localPlaylist.list
+        val musicList = PlaylistManager.getLocalList().rawList()
         return ResponseUtils.ok(musicList)
     }
 
@@ -40,7 +43,7 @@ class MusicController: RequestController() {
     @GetMapping("/music")
     @Param(["id", ":response", ":request"])
     fun getMusic(id: String, response: Response, request: Request) {
-        val song = PlaylistManager.localPlaylist[id.toLong()]
+        val song = PlaylistManager.getLocalList().getSong(id.toLong())
         println(song)
         if (song == null) {
             response.responseWithEmptyBody(ResponseState.NOT_FOUND)
@@ -60,8 +63,6 @@ class MusicController: RequestController() {
                 length = FileUtil.getLength(uri = uri) - 1024
                 KgmInputStream(inputStream)
             }
-//            "uc", "uc!" -> UCMediaDataSource(uri.toFile())
-//            "ncm" -> NCMMediaDataSource(uri.toFile())
             else -> inputStream
         }
         val resource = Resource(
@@ -87,7 +88,6 @@ class MusicController: RequestController() {
     @PostMapping("/uploadTiming")
     @Param([":request"])
     fun saveTiming(request: Request): HashMap<String, Any?> {
-//        println("uploadTiming: Content-Length: ${request.getHttpHeader().getContentLength()}")
         val requestBody = request.requestBody
         if (requestBody.isEmpty()) {
             return ResponseUtils.responseEmpty(
@@ -104,6 +104,33 @@ class MusicController: RequestController() {
             )
         }
         return ResponseUtils.ok()
+    }
+
+    @GetMapping("/artwork")
+    @Param(["id", ":request", ":response"])
+    fun getArtwork(id: String, request: Request, response: Response) {
+        val song = PlaylistManager.getLocalList().getSong(id.toLong())
+        if (song == null) {
+            response.responseWithEmptyBody(ResponseState.NOT_FOUND)
+            return
+        }
+        val uri = ArtworkProvider.getArtworkUri(song)
+        if (uri == null) {
+            response.responseWithEmptyBody(ResponseState.NOT_FOUND)
+            return
+        }
+        val inputStream = FileUtil.openInputStream(uri = uri)
+        if (inputStream == null) {
+            response.responseWithEmptyBody(ResponseState.NOT_FOUND)
+            return
+        }
+        val resource = Resource(
+            inputStream = inputStream,
+            mimeType = MimeType(MimeTypes.MT_IMAGE_PNG),
+            length = FileUtil.getLength(uri)
+        )
+        request.setAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE, resource)
+        response.handleRequest(request = request)
     }
 
 }

@@ -24,7 +24,7 @@ internal object PlayHistoryManager {
         do {
             val id = cursor.getLong(0)
             val playtime = cursor.getLong(1)
-            val song = PlaylistManager.localPlaylist[id]
+            val song = PlaylistManager.getLocalList().getSong(id)
             //TODO: 解决当歌曲移除时，还残留历史记录的问题
             if (song != null) {
                 list.add(Pair(song, playtime))

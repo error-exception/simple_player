@@ -126,7 +126,7 @@ class MP3TagEditor : BaseActivity(),
                 openNext!!.isEnabled = true
             }
         }
-        currentSong = PlaylistManager.localPlaylist[idList!![index].toLong()]
+        currentSong = PlaylistManager.getLocalList().getSong(idList!![index].toLong())
         if (currentSong!!.type != "mp3") {
             alert("提示", "当前文件为" + currentSong!!.type + "文件，暂不支持")
             viewsEnabled(false)
@@ -328,7 +328,7 @@ class MP3TagEditor : BaseActivity(),
         idList = intent.getIntegerArrayListExtra(EXTRA_ID_LIST)
         isSingle = idList!!.size == 1
         if (!isSingle) {
-            currentSong = PlaylistManager.localPlaylist[idList!![index].toLong()]
+            currentSong = PlaylistManager.getLocalList().getSong(idList!![index].toLong())
         }
     }
 

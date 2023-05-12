@@ -6,18 +6,22 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.os.Looper
+import android.os.Message
 import android.os.Parcelable
 import android.view.KeyEvent
 import com.simple.player.SimpleBroadcastReceiver
 import com.simple.player.Store
 import com.simple.player.activity.LockscreenActivity
 import com.simple.player.util.AppConfigure
+import com.simple.player.util.SimpleHandler
 
 internal class PlayActionReceiver(private val service: SimpleService): BroadcastReceiver() {
 
     private var isScreenOn = true
     internal var isNeverPlayed = true
     private var lastVolume: Int
+    private var headsetHandler = HeadsetHandler(this)
 
     init {
         val audioManager = service.getSystemService(Service.AUDIO_SERVICE) as AudioManager
@@ -61,10 +65,6 @@ internal class PlayActionReceiver(private val service: SimpleService): Broadcast
             service.applicationContext.startActivity(intent)
         }
         isScreenOn = false
-    }
-
-    private fun handleAudioBecomingNoisy() {
-        SimplePlayer.pause(isNoFade = true)
     }
 
     private fun handleMediaButton(p2: Intent) {
@@ -113,7 +113,11 @@ internal class PlayActionReceiver(private val service: SimpleService): Broadcast
         }
     }
 
+    private var headsetState = false
+    private var waitingForHandleHeadset = false
+
     private fun handleHeadsetPlug(p2: Intent) {
+
         if (!SimplePlayer.hasBeenStarted) {
             return
         }
@@ -122,9 +126,42 @@ internal class PlayActionReceiver(private val service: SimpleService): Broadcast
 
         SimplePlayer.volume = 1F
         if (state == 1 && isOn) {
-            if (!SimplePlayer.isPlaying) {
-                SimplePlayer.start(false)
+            if (!SimplePlayer.isPlaying && !waitingForHandleHeadset) {
+                waitingForHandleHeadset = true
+                headsetState = true
+                headsetHandler.sendEmptyMessageDelayed(HeadsetHandler.MSG_HEADSET, 1000)
             }
         }
+    }
+
+    private fun handleAudioBecomingNoisy() {
+        if (!waitingForHandleHeadset) {
+            waitingForHandleHeadset = true
+            headsetState = false
+            SimplePlayer.pause(isNoFade = true)
+            headsetHandler.sendEmptyMessageDelayed(HeadsetHandler.MSG_HEADSET, 1000)
+        }
+    }
+    class HeadsetHandler(playActionReceiver: PlayActionReceiver): SimpleHandler<PlayActionReceiver>(parent = playActionReceiver, looper = Looper.getMainLooper()) {
+
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+            val parent = parent ?: return
+            when (msg.what) {
+                MSG_HEADSET -> {
+                    if (parent.headsetState) {
+                        SimplePlayer.start(false)
+                    } else if (SimplePlayer.isPlaying) {
+                        SimplePlayer.pause(true)
+                    }
+                    parent.waitingForHandleHeadset = false
+                }
+            }
+        }
+
+        companion object {
+            const val MSG_HEADSET = 12
+        }
+
     }
 }

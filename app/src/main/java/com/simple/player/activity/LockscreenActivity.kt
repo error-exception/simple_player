@@ -67,8 +67,8 @@ class LockscreenActivity : AppCompatActivity(),
     }
 
     override fun onSongChanged(newSongId: Long) {
-        val playlist = PlaylistManager.getList(AppConfigure.Player.playlist)!!
-        val song = playlist[newSongId]!!
+        val playlist = PlaylistManager.getSongList(AppConfigure.Player.songListId) ?: return
+        val song = playlist.getSong(newSongId) ?: return
         model.title = song.title
         model.artist = song.artist
     }

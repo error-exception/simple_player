@@ -51,48 +51,51 @@ class ScanMusicResult : BaseActivity2() {
     }
 
     private fun initList() {
-        ProgressHandler.handle(before = {
-            Util.showProgressDialog(this, 10, "正在初始化列表......")
-        }, handle = {
-            if (selected.isEmpty()) {
-                return@handle
-            }
-            if (AppConfigure.Settings.autoSortAfterScan) {
-                selected.sortBy {
-                    it.title
+        Util.showProgressDialog(
+            context = this,
+            id = 10,
+            message = "正在初始化列表......",
+            handle = {
+                if (selected.isEmpty()) {
+                    return@showProgressDialog
                 }
-            }
+                if (AppConfigure.Settings.autoSortAfterScan) {
+                    selected.sortBy {
+                        it.title
+                    }
+                }
 
-            val database = SQLiteDatabaseHelper.database
-            database.beginTransaction()
-            database.delete("song_in_list", "list_id = ?", arrayOf(PlaylistManager.localPlaylist.id.toString()))
-            database.delete("song", null, null)
-            val contentValues = ContentValues()
-            val localPlaylist = PlaylistManager.localPlaylist
-            localPlaylist.clear()
-            for (song in selected) {
-                contentValues.put(SongDao.ID, song.id)
-                contentValues.put(SongDao.TITLE, song.title)
-                contentValues.put(SongDao.ARTIST, song.artist)
-                contentValues.put(SongDao.TYPE, song.type)
-                contentValues.put(SongDao.PATH, song.uri)
-                contentValues.put(SongDao.BITRATE, song.bitrate)
-                database.insertOrThrow("song", null, contentValues)
-                contentValues.clear()
-                contentValues.put("list_id", localPlaylist.id)
-                contentValues.put("song_id", song.id)
-                database.insertOrThrow("song_in_list", null, contentValues)
-                contentValues.clear()
-                localPlaylist += song
+                val database = SQLiteDatabaseHelper.database
+                database.beginTransaction()
+                database.delete("song_in_list", "list_id = ?", arrayOf(PlaylistManager.getLocalList().getId().toString()))
+                database.delete("song", null, null)
+                val contentValues = ContentValues()
+                val localPlaylist = PlaylistManager.getLocalList()
+                localPlaylist.clear()
+                for (song in selected) {
+                    contentValues.put(SongDao.ID, song.id)
+                    contentValues.put(SongDao.TITLE, song.title)
+                    contentValues.put(SongDao.ARTIST, song.artist)
+                    contentValues.put(SongDao.TYPE, song.type)
+                    contentValues.put(SongDao.PATH, song.uri)
+                    contentValues.put(SongDao.BITRATE, song.bitrate)
+                    database.insertOrThrow("song", null, contentValues)
+                    contentValues.clear()
+                    contentValues.put("list_id", localPlaylist.getId())
+                    contentValues.put("song_id", song.id)
+                    database.insertOrThrow("song_in_list", null, contentValues)
+                    contentValues.clear()
+                    localPlaylist.addSong(song)
+                }
+                database.setTransactionSuccessful()
+                database.endTransaction()
+                ArtworkProvider.clearArtworkCache(this)
+            },
+            after = {
+                Util.toast("初始化完成")
+                finish()
             }
-            database.setTransactionSuccessful()
-            database.endTransaction()
-            ArtworkProvider.clearArtworkCache(this)
-        }, after = {
-            Util.closeProgressDialog(10)
-            Util.toast("初始化完成")
-            finish()
-        })
+        )
     }
 
     companion object {

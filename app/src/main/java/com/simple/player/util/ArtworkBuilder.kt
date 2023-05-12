@@ -49,7 +49,7 @@ object ArtworkBuilder {
                 return pair.second
             }
         }
-        val uri = ArtworkProvider.getArtworkUri(PlaylistManager.localPlaylist[id]!!)
+        val uri = ArtworkProvider.getArtworkUri(PlaylistManager.getLocalList().getSong(id)!!)
         uri ?: return null
         var bitmap = if (size == 0) {
             getBitmapQuick(context, uri, size, size)

@@ -107,9 +107,13 @@ object AppConfigure {
             get() = player.getInt(PreferencesData.PLAYER_PLAY_MODE, 2)
             set(value) = player.edit().putInt(PreferencesData.PLAYER_PLAY_MODE, value).apply()
 
-        var playlist: String
-            get() = player.getString(PreferencesData.PLAYER_PLAYLIST, PlaylistManager.LOCAL_LIST)!!
-            set(value) = player.edit().putString(PreferencesData.PLAYER_PLAYLIST, value).apply()
+//        var playlist: String
+//            get() = player.getString(PreferencesData.PLAYER_PLAYLIST, PlaylistManager.LOCAL_LIST)!!
+//            set(value) = player.edit().putString(PreferencesData.PLAYER_PLAYLIST, value).apply()
+
+        var songListId: Long
+            get() = player.getLong(PreferencesData.PLAYER_SONG_LIST_ID, PlaylistManager.LOCAL_LIST_ID)
+            set(value) = player.edit().putLong(PreferencesData.PLAYER_PLAYLIST, value).apply()
 
         var rememberProgress: Long
             get() = player.getLong(PreferencesData.PLAYER_REMEMBER_PROGRESS, 0L)

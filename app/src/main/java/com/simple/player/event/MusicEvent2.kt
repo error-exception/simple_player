@@ -39,15 +39,15 @@ object MusicEvent2 {
         }
     }
 
-    fun fireOnSongRemovedFromList(songId: Long, listName: String) {
+    fun fireOnSongRemovedFromList(songId: Long, listId: Long) {
         loopList {
-            it.onSongRemovedFromList(songId, listName)
+            it.onSongRemovedFromList(songId, listId)
         }
     }
 
-    fun fireOnSongAddToList(songId: Long, listName: String) {
+    fun fireOnSongAddToList(songId: Long, listId: Long) {
         loopList {
-            it.onSongAddToList(songId, listName)
+            it.onSongAddToList(songId, listId)
         }
     }
 
@@ -63,21 +63,21 @@ object MusicEvent2 {
         }
     }
 
-    fun fireOnPlaylistCreated(listName: String) {
+    fun fireOnPlaylistCreated(listId: Long) {
         loopList {
-            it.onPlaylistCreated(listName)
+            it.onPlaylistCreated(listId)
         }
     }
 
-    fun fireOnPlaylistRenamed(oldName: String, newName: String) {
+    fun fireOnPlaylistRenamed(listId: Long, newName: String) {
         loopList {
-            it.onPlaylistRenamed(oldName, newName)
+            it.onPlaylistRenamed(listId, newName)
         }
     }
 
-    fun fireOnPlaylistDeleted(listName: String) {
+    fun fireOnPlaylistDeleted(listId: Long) {
         loopList {
-            it.onPlaylistDeleted(listName)
+            it.onPlaylistDeleted(listId)
         }
     }
 
@@ -99,15 +99,15 @@ object MusicEvent2 {
         }
     }
 
-    fun fireOnSongsAddToList(songIds: LongArray, listName: String) {
+    fun fireOnSongsAddToList(songIds: LongArray, listId: Long) {
         loopList {
-            it.onSongsAddToList(songIds, listName)
+            it.onSongsAddToList(songIds, listId)
         }
     }
 
-    fun fireOnSongsRemovedFromList(songIds: LongArray, listName: String) {
+    fun fireOnSongsRemovedFromList(songIds: LongArray, listId: Long) {
         loopList {
-            it.onSongsRemovedFromList(songIds, listName)
+            it.onSongsRemovedFromList(songIds, listId)
         }
     }
 

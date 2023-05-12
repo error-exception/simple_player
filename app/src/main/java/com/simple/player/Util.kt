@@ -25,6 +25,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.simple.player.service.SimpleService
 import com.simple.player.util.BitmapUtils
 import com.simple.player.drawable.RoundDrawable
+import com.simple.player.util.ProgressHandler
 import java.lang.Exception
 import java.lang.StringBuilder
 import java.lang.reflect.Field
@@ -174,6 +175,17 @@ object Util {
     fun closeProgressDialog(id: Int) {
         mProgressDialogMap[id]!!.dismiss()
         mProgressDialogMap.remove(id)
+    }
+
+    fun showProgressDialog(context: Context, id: Int, message: String, after: (() -> Unit)? = null, handle: () -> Unit) {
+        ProgressHandler.handle(
+            before = { showProgressDialog(context, id, message) },
+            handle = handle,
+            after = {
+                closeProgressDialog(id)
+                after?.invoke()
+            }
+        )
     }
 
     fun release() {

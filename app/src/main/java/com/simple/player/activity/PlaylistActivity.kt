@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,12 +15,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.simple.player.*
 import com.simple.player.Util.toast
 import com.simple.player.adapter.PlaylistAdapter2
-import com.simple.player.constant.IconCode
 import com.simple.player.event.MusicEvent2
 import com.simple.player.event.MusicEventListener
 import com.simple.player.model.Song
 import com.simple.player.playlist.AbsPlaylist
 import com.simple.player.playlist.PlaylistManager
+import com.simple.player.playlist.SongList
 import com.simple.player.service.SimplePlayer
 import com.simple.player.util.DialogUtil
 import com.simple.player.view.BottomSheetConfirmDialog
@@ -37,14 +36,14 @@ class PlaylistActivity : BaseActivity(),
     private val TAG = "PlaylistActivity"
 
     private lateinit var mList: RecyclerView
-    private lateinit var mPlaylist: AbsPlaylist
+    private lateinit var mPlaylist: SongList
     private lateinit var mAdapter: PlaylistAdapter2
     private val player = SimplePlayer
 
     private var position = 0
 
     companion object {
-        const val EXTRA_LIST_NAME = "list_name"
+        const val EXTRA_LIST_ID = "list_id"
         val MULTI_SELECT_MENU_IN_FAVORITE = arrayListOf(
             IconWithText(R.drawable.baseline_remove_circle_24, "移除"),
             IconWithText(R.drawable.ic_baseline_add_24, "添加至")
@@ -77,7 +76,7 @@ class PlaylistActivity : BaseActivity(),
         if (isInitialed) {
             return
         }
-        position = mPlaylist.position(player.currentSong)
+        position = mPlaylist.indexOf(player.currentSong)
         mList.adapter = mAdapter
         setListListener()
         if (player.activePlaylist == mPlaylist) {
@@ -96,8 +95,8 @@ class PlaylistActivity : BaseActivity(),
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val name = intent.getStringExtra(EXTRA_LIST_NAME)
-        mPlaylist = PlaylistManager.getList(name!!)!!
+        val listId = intent.getLongExtra(EXTRA_LIST_ID, PlaylistManager.LOCAL_LIST_ID)
+        mPlaylist = PlaylistManager.getSongList(listId)!!
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_list)
@@ -154,17 +153,17 @@ class PlaylistActivity : BaseActivity(),
             isNewSong = true
             return
         }
-        if (mPlaylist.id != SimplePlayer.activePlaylist.id) {
+        if (mPlaylist != SimplePlayer.activePlaylist) {
             return
         }
-        val newPosition = mPlaylist.position(mPlaylist[newSongId]!!)
+        val newPosition = mPlaylist.indexOf(newSongId)
         mAdapter.setPlayingPosition(position, newPosition)
         position = newPosition
     }
 
     private fun setListListener() {
         mAdapter.onItemClick = {
-            val s = mPlaylist[it]!!
+            val s = mPlaylist.getSongAt(it)
             if (mAdapter.isSelectionState) {
                 mAdapter.select(it)
             } else {
@@ -243,7 +242,7 @@ class PlaylistActivity : BaseActivity(),
                         toast("无已选择的歌曲")
                     } else {
                         PlaylistManager.addSongs(
-                            PlaylistManager.FAVORITE_LIST,
+                            PlaylistManager.FAVORITE_LIST_ID,
                             selectedList.toTypedArray()
                         )
                         toast("已添加")
@@ -267,7 +266,7 @@ class PlaylistActivity : BaseActivity(),
         // 重新定位歌曲
         if (isNewSong) {
             isNewSong = false
-            val position = mPlaylist.position(player.currentSong)
+            val position = mPlaylist.indexOf(player.currentSong)
             mAdapter.setPlayingPosition(lastPosition = -1, position)
         }
     }
@@ -303,9 +302,9 @@ class PlaylistActivity : BaseActivity(),
                 }
             }
             "移除" -> {
-                PlaylistManager.removeSong(mPlaylist.name, song)
+                PlaylistManager.removeSong(mPlaylist.getId(), song)
                 //重新定位当前歌曲
-                val pos = mPlaylist.position(player.currentSong)
+                val pos = mPlaylist.indexOf(player.currentSong)
                 mAdapter.setPlayingPosition(-1, pos)
                 toast("已移除")
             }
@@ -324,12 +323,12 @@ class PlaylistActivity : BaseActivity(),
                 actionTitle = "全选"
             }
             "添加到我喜欢" -> {
-                with(PlaylistManager.favoriteList) {
-                    if (hasSong(song)) {
+                with(PlaylistManager.getFavoriteList()) {
+                    if (hasSong(song.id)) {
                         toast("该歌曲已存在")
                         return@with
                     }
-                    PlaylistManager.addSong(PlaylistManager.FAVORITE_LIST, song)
+                    PlaylistManager.addSong(PlaylistManager.FAVORITE_LIST_ID, song)
                     toast("已添加")
                 }
             }
@@ -337,13 +336,14 @@ class PlaylistActivity : BaseActivity(),
     }
 
     private fun addToList(song: Array<Song>) {
-        val playlist = PlaylistManager.allCustomLists()
+        val playlist = PlaylistManager.getAllExternalSongLists()
         val names = Array(playlist.size) { index ->
             playlist[index].name
         }
         DialogUtil.simpleList(this, names) { _, p2 ->
             val name = names[p2]
-            PlaylistManager.addSongs(name, song)
+            val list = PlaylistManager.getAllExternalSongLists().find { it.name == name } ?: return@simpleList
+            PlaylistManager.addSongs(list.getId(), song)
             toast("添加完成")
             if (mAdapter.isSelectionState) {
                 onOptionPressed()

@@ -64,7 +64,7 @@ object MusicUtils {
     }
 
     fun getArtworkBytes(songId: Long): ByteArray? {
-        val song: Song? = PlaylistManager.localPlaylist[songId]
+        val song: Song? = PlaylistManager.getLocalList().getSong(songId)
         return if (song != null) getArtworkBytes(song) else null
     }
 

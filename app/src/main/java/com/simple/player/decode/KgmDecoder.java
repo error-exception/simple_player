@@ -1,10 +1,13 @@
 package com.simple.player.decode;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.simple.player.model.Song;
 import com.simple.player.util.AppConfigure;
 import com.simple.player.util.FileUtil;
 import com.simple.player.util.ProgressHandler;

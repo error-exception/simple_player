@@ -64,6 +64,9 @@ object PlaylistDao {
         return SQLiteDatabaseHelper.database.delete(TABLE_NAME, "id = ?", arrayOf(listId.toString())) != 0
     }
 
+    /**
+     * 查询所有记录，若不存在记录，则返回 false
+     */
     fun queryAll(callback: (id: Long, nameCode: String, description: String) -> Unit): Boolean {
         val database = SQLiteDatabaseHelper.database
         val cursor =

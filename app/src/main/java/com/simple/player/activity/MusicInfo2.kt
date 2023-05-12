@@ -181,7 +181,7 @@ class MusicInfo2: BaseActivity2() {
 
     private fun initData() {
         val songId = intent.getLongExtra(EXTRA_MUSIC_ID, -1)
-        song = PlaylistManager.localPlaylist[songId]!!
+        song = PlaylistManager.getLocalList().getSong(songId)!!
         info.apply {
             this += "标题：" to song.title
             this += "艺术家：" to song.artist

@@ -26,10 +26,6 @@ object SQLiteDatabaseHelper {
         helper = SQLiteHelper(context)
     }
 
-    fun executeSQL(sql: String) {
-        database.execSQL(sql)
-    }
-
     fun close() {
         helper.close()
         SQLiteDatabase.releaseMemory()
