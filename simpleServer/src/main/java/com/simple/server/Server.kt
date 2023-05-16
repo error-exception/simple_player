@@ -10,25 +10,26 @@ import java.util.concurrent.TimeUnit
 
 class Server(val port: Int) {
 
-    private val serverSocket = ServerSocket(port)
+    private val serverSocket: ServerSocket
     internal val requestControllerList = ArrayList<RequestController>()
     internal var interceptor: Interceptor? = null
-    private val executor: ThreadPoolExecutor
+//    private val executor: ThreadPoolExecutor
     private val log = logger("Server")
     var isRunning = false
         private set
 
     init {
+        serverSocket = ServerSocket(port)
         ServerConfig.port = port
         val processors = Runtime.getRuntime().availableProcessors()
-        executor = ThreadPoolExecutor(
-            processors,
-            processors shl 2,
-            10,
-            TimeUnit.SECONDS,
-            ArrayBlockingQueue(1024),
-            ThreadPoolExecutor.CallerRunsPolicy()
-        )
+//        executor = ThreadPoolExecutor(
+//            processors,
+//            processors shl 2,
+//            10,
+//            TimeUnit.SECONDS,
+//            ArrayBlockingQueue(1024),
+//            ThreadPoolExecutor.CallerRunsPolicy()
+//        )
     }
 
     private val listenRunnable = object: Thread() {
@@ -74,7 +75,7 @@ class Server(val port: Int) {
 
     fun close() {
         listenRunnable.close()
-        executor.shutdown()
+//        executor.shutdown()
         isRunning = false
     }
 

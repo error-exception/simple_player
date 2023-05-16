@@ -65,6 +65,9 @@ class NewSettingsActivity: BaseActivity2() {
             SettingsText(title = "界面设置") {
                 startActivity(UISettingsActivity::class.java)
             }
+            SettingsText(title = "网页播放器") {
+                startActivity(WebSettingsActivity::class.java)
+            }
             SettingsText(title = "更新日志") {
                 startActivity(ChangeLogActivity::class.java)
             }

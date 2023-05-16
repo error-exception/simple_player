@@ -6,6 +6,8 @@ object PreferencesData {
     const val CONFIG_PLAYER = "player"
     /* 显示在设置界面的配置 */
     const val CONFIG_SETTINGS = "com.simple.player_preferences"
+    /* 网页相关设置 */
+    const val CONFIG_WEB = "web_player"
     /* 播放歌曲的ID */
     const val PLAYER_SONG_ID = "song_id"
     /* 播放器的播放模式 */
@@ -70,4 +72,11 @@ object PreferencesData {
     const val SETTINGS_THEME_COLOR = "theme_color"
     /* 扫描后自动排序 */
     const val SETTINGS_AUTO_SORT = "auto_sort"
+
+    /* 网页资源路径 */
+    const val WEB_RESOURCE_PATH = "res_path"
+    /* 网页所需的背景图片路径 */
+    const val WEB_BACKGROUND_PATH = "bg_path"
+    /* 服务器端口 */
+    const val WEB_PORT = "port"
 }

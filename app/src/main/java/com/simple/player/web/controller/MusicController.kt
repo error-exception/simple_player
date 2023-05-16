@@ -6,6 +6,7 @@ import androidx.core.net.toFile
 import coil.request.ImageRequest
 import com.simple.player.Util
 import com.simple.player.decode.KgmInputStream
+import com.simple.player.model.TimingInfo
 import com.simple.player.playlist.PlaylistManager
 import com.simple.player.service.KgmMediaDataSource
 import com.simple.player.service.NCMMediaDataSource
@@ -72,6 +73,11 @@ class MusicController: RequestController() {
         )
         request.setAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE, resource)
         response.handleRequest(request = request)
+    }
+
+    @GetMapping("/allTimingList")
+    fun getAllTimingList(): HashMap<String, Any?>{
+        return ResponseUtils.ok(MusicService.getAllTimingList())
     }
 
     @GetMapping("/timing")

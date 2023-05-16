@@ -7,6 +7,7 @@ import com.simple.server.util.ContentTypeHelper
 import com.simple.server.util.Resource
 import com.simple.server.request.Request
 import java.io.File
+import java.lang.Exception
 import java.net.Socket
 import java.net.URLDecoder
 
@@ -15,7 +16,13 @@ class ServerThread(private val server: Server, private val connection: Connectio
     var tag = threadId++
 
     override fun run() {
-        val request = connection.getRequest()
+        var request: Request? = null
+        try {
+            request = connection.getRequest()
+        } catch (e: Exception) {
+            return
+        }
+        request ?: return
         val response = connection.getResponse()
 //        if (!request.isHttpRequest) {
 //            connection.getResponse().responseWithEmptyBody(ResponseState.BAD_REQUEST)

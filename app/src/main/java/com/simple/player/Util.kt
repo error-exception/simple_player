@@ -225,29 +225,34 @@ object Util {
         return s.toString()
     }
 
-    fun getInetAddress(): String? {
-        val manager = mContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        if (manager.isWifiEnabled) {
-            val info = manager.connectionInfo
-            val ipAddress = info.ipAddress
-            return int2Ip(ipAddress)
-        }
+    fun getInetAddress(): ArrayList<String> {
+//        val manager = mContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+//        if (manager.isWifiEnabled) {
+//            val info = manager.connectionInfo
+//            val ipAddress = info.ipAddress
+//            return arrayListOf(int2Ip(ipAddress))
+//        }
         try {
+            val list = ArrayList<String>()
             val networkInterfaces = NetworkInterface.getNetworkInterfaces()
             while (networkInterfaces.hasMoreElements()) {
                 val networkInterface = networkInterfaces.nextElement()
                 val addresses = networkInterface.inetAddresses
                 while (addresses.hasMoreElements()) {
                     val inetAddress = addresses.nextElement()
-                    if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
-                        return inetAddress.getHostAddress()
+                    if (/*!inetAddress.isLoopbackAddress && */inetAddress is Inet4Address) {
+                        val ipAddress = inetAddress.getHostAddress()
+                        if (ipAddress != null) {
+                            list.add(ipAddress)
+                        }
                     }
                 }
             }
+            return list
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return null
+        return ArrayList()
     }
 
     var Int.dps: Int

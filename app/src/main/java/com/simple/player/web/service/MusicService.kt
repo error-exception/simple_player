@@ -4,6 +4,7 @@ import com.simple.json.JSON
 import com.simple.json.JSONObject
 import com.simple.player.model.TimingInfo
 import com.simple.player.model.TimingItem
+import com.simple.player.playlist.PlaylistManager
 import com.simple.player.util.FileUtil
 import com.simple.player.util.TimingFileParser
 import kotlinx.coroutines.CoroutineScope
@@ -59,6 +60,19 @@ object MusicService {
         val file = File(FileUtil.mTimingDirectory.absolutePath + "/" + id)
         FileUtil.writeTextUTF8(file = file, timingFileContent.toString())
         return true
+    }
+
+    fun getAllTimingList(): ArrayList<TimingInfo> {
+        val list = ArrayList<TimingInfo>()
+        val songList = PlaylistManager.getLocalList()
+        for (i in 0 until songList.count()) {
+            val song = songList.getSongAt(i)
+            val timingInfo = getTimingInfo(song.id)
+            if (timingInfo != null) {
+                list.add(timingInfo)
+            }
+        }
+        return list
     }
 
 }

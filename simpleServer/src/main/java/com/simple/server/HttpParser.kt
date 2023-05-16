@@ -95,6 +95,7 @@ object HttpParser {
             url = HttpUrlParser.parse(url.toString()),
             version = httpVersion.toString()
         )
+        log("request url $url")
     }
 
     private fun parseHttpField() {

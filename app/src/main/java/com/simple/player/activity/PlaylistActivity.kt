@@ -101,9 +101,9 @@ class PlaylistActivity : BaseActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.play_list)
 
-        val titleName = when (mPlaylist.name) {
-            PlaylistManager.LOCAL_LIST -> "播放列表"
-            PlaylistManager.FAVORITE_LIST -> "我喜欢"
+        val titleName = when (mPlaylist.getId()) {
+            PlaylistManager.LOCAL_LIST_ID -> "播放列表"
+            PlaylistManager.FAVORITE_LIST_ID -> "我喜欢"
             else -> mPlaylist.name
         }
         actionTitle = titleName

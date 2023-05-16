@@ -60,7 +60,7 @@ object SimplePlayer: Closeable, AudioManager.OnAudioFocusChangeListener, MusicEv
 
     var activePlaylist: SongList = PlaylistManager.getLocalList()
         set(value) {
-            if (value.name != field.name) {
+            if (value.getId() != field.getId()) {
                 field = value
                 if (!value.isTemple) {
                     AppConfigure.Player.songListId = activePlaylist.getId()

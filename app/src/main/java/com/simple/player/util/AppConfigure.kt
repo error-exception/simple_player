@@ -10,10 +10,12 @@ object AppConfigure {
 
     private lateinit var player: SharedPreferences
     private lateinit var settings: SharedPreferences
+    private lateinit var web: SharedPreferences
 
     fun setContext(context: Context) {
         player = context.getSharedPreferences(PreferencesData.CONFIG_PLAYER, Context.MODE_PRIVATE)
         settings = context.getSharedPreferences(PreferencesData.CONFIG_SETTINGS, Context.MODE_PRIVATE)
+        web = context.getSharedPreferences(PreferencesData.CONFIG_WEB, Context.MODE_PRIVATE)
     }
 
     object Settings {
@@ -130,5 +132,20 @@ object AppConfigure {
         var maxSongSize: Long
             get() = player.getLong(PreferencesData.PLAYER_MAX_SONG_SIZE, 1024 * 1024 * 100)
             set(value) = player.edit().putLong(PreferencesData.PLAYER_MAX_SONG_SIZE, value).apply()
+    }
+
+    object Web {
+
+        var resourceRoot: String
+            get() = web.getString(PreferencesData.WEB_RESOURCE_PATH, "")!!
+            set(value) = web.edit().putString(PreferencesData.WEB_RESOURCE_PATH, value).apply()
+
+        var backgroundPath: String
+            get() = web.getString(PreferencesData.WEB_BACKGROUND_PATH, "")!!
+            set(value) = web.edit().putString(PreferencesData.WEB_BACKGROUND_PATH, value).apply()
+
+        var port: Int
+            get() = web.getInt(PreferencesData.WEB_PORT, 8888)
+            set(value) = web.edit().putInt(PreferencesData.WEB_PORT, value).apply()
     }
 }

@@ -10,8 +10,8 @@ android {
         applicationId "com.simple.player"
         minSdk 23
         targetSdk 33
-        versionCode 1400
-        versionName "1.4 alpha"
+        versionCode 1450
+        versionName "1.4.5 alpha"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

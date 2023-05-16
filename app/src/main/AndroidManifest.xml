@@ -134,6 +134,8 @@
         <activity
             android:name="com.simple.player.activity.KgListActivity"
             android:exported="false"/>
+        <activity android:name=".activity.WebSettingsActivity"
+            android:exported="false"/>
         <activity android:name=".activity.WebPlayerActivity"
             android:exported="false"/>
         <activity android:name=".activity.AudioOpenActivity"
