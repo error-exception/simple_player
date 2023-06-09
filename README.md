@@ -1,6 +1,6 @@
 # Simple Player
 
-本地音乐播放器（not stable），内置一个简单的 HTTP 服务器，可与()[https://github.com/error-exception/Simple-Player-Web]
+本地音乐播放器（not stable），内置一个简单的 HTTP 服务器，可与 https://github.com/error-exception/Simple-Player-Web 配合使用，也可根据 API 自行开发（具体查看`com.simple.player.web.controller`包下的类）
 
 初次扫描完成且授予存储权限后，到设置 -> 播放器 -> 切换音乐源 -> 选择”External Storage“，体验完整功能。
 
@@ -23,7 +23,7 @@ release 目录中为非最新版
 ## 不足
 
 1. 不支持夜间模式（强开会导致 UI 配色异常）
-2. 某些按钮不起作用
+2. 某些按钮不起作用（未添加处理事件）
 3. 锁屏界面未完成
 4. 某些地方会出现主题颜色应用不完全
 5. 音量键切歌采用非标准接口实现，其他安卓版本的安卓机型不一定可用
