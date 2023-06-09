@@ -7,6 +7,8 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +25,7 @@ import com.simple.player.playlist.PlaylistManager
 import com.simple.player.playlist.SongList
 import com.simple.player.service.SimplePlayer
 import com.simple.player.util.DialogUtil
+import com.simple.player.util.FileUtil
 import com.simple.player.view.BottomSheetConfirmDialog
 import com.simple.player.view.BottomSheetListDialog
 import com.simple.player.view.BottomSheetSimpleIconListAdapter
@@ -59,8 +62,12 @@ class PlaylistActivity : BaseActivity(),
             IconWithText(R.drawable.ic_outline_info_24, "信息"),
             IconWithText(R.drawable.ic_baseline_check_24, "多选"),
             IconWithText(R.drawable.ic_baseline_favorite_24, "添加到我喜欢"),
-            IconWithText(R.drawable.ic_baseline_add_24, "添加至"),
-        )
+            IconWithText(R.drawable.ic_baseline_add_24, "添加至")
+        ).apply {
+            if (BuildConfig.DEBUG) {
+                add(IconWithText(R.drawable.baseline_download_24, "导出"))
+            }
+        }
 
         val MENU_IN_FAVORITE = ArrayList<IconWithText>().apply {
             addAll(MENU)
@@ -331,6 +338,12 @@ class PlaylistActivity : BaseActivity(),
                     PlaylistManager.addSong(PlaylistManager.FAVORITE_LIST_ID, song)
                     toast("已添加")
                 }
+            }
+            "导出" -> {
+                val outDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
+
+                Log.e(TAG, outDir?.absolutePath.toString())
+                //TODO: decode music
             }
         }
     }

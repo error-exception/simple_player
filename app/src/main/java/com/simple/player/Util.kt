@@ -12,9 +12,9 @@ import android.content.ServiceConnection
 import android.content.res.Resources
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
-import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.DisplayMetrics
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.WindowInsetsController
@@ -383,4 +383,10 @@ object Util {
         clipboardManager.setPrimaryClip(clipData)
         toast("复制成功")
     }
+}
+
+inline fun runtime(exec: () -> Unit) {
+    val a = System.currentTimeMillis()
+    exec()
+    Log.i("Utils", "run cost ${System.currentTimeMillis() - a} ms")
 }

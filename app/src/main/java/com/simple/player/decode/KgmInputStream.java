@@ -70,7 +70,7 @@ public class KgmInputStream extends InputStream {
         }
         byte b = 0;
         if (isKgm) {
-            b = (byte) KgmDecoder.readKgm(decryptIndex++, data, key);
+            b = (byte) KgmDecoder.readKgm1(decryptIndex++, data, key);
         } else {
             b = (byte) KgmDecoder.readVpr(decryptIndex++, data, key);
         }

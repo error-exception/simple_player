@@ -5,9 +5,11 @@ import android.util.Log
 import androidx.core.net.toFile
 import coil.request.ImageRequest
 import com.simple.player.Util
+import com.simple.player.decode.KgmDecoder
 import com.simple.player.decode.KgmInputStream
 import com.simple.player.model.TimingInfo
 import com.simple.player.playlist.PlaylistManager
+import com.simple.player.runtime
 import com.simple.player.service.KgmMediaDataSource
 import com.simple.player.service.NCMMediaDataSource
 import com.simple.player.service.UCMediaDataSource
@@ -58,21 +60,24 @@ class MusicController: RequestController() {
             return
         }
         val mimeType = MimeType(MimeTypes.MT_APPLICATION_OCTET_STREAM)
-        var length = -1L
-        inputStream = when (song.type) {
-            "kge", "kgm" -> {
-                length = FileUtil.getLength(uri = uri) - 1024
-                KgmInputStream(inputStream)
+
+        var bytes: ByteArray? = null
+
+        runtime {
+            bytes = when (song.type) {
+                "kge", "kgm" -> {
+                    KgmDecoder.decode(inputStream)!!
+                }
+                else -> FileUtil.readBytes(inputStream = inputStream)
             }
-            else -> inputStream
         }
-        val resource = Resource(
-            inputStream = inputStream,
-            mimeType = mimeType,
-            length = if (length > 0L) length else FileUtil.getLength(uri = uri)
+        val resource = Resource.fromBytes(
+            bytes = bytes!!,
+            mimeType = mimeType
         )
         request.setAttribute(AttributeConstant.ATTR_REQUEST_RESOURCE, resource)
         response.handleRequest(request = request)
+
     }
 
     @GetMapping("/allTimingList")

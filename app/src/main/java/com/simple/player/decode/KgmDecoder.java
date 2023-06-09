@@ -95,8 +95,8 @@ public class KgmDecoder {
             return null;
         }
         if (mask.length < encryptedData.length) {
-            Log.e(TAG, "decode: The file is too large and the processed audio is incomplete");
-            dataLength = mask.length;
+            //Log.e(TAG, "decode: The file is too large and the processed audio is incomplete");
+            //dataLength = mask.length;
         }
         byte[] audio = new byte[dataLength];
         for (int i = 0; i < dataLength; i++) {
@@ -221,11 +221,20 @@ public class KgmDecoder {
         return (med8 ^ (med8 & 0xf) << 4);
     }
 
+    public static int readKgm1(int decryptIndex, int data, byte[] key) {
+        int med8 = (data ^ key[fitRange(decryptIndex, 17)] ^ KgmDecoder.maskV2PreDef[fitRange(decryptIndex, 272)] ^ KgmDecoder.mask[decryptIndex >> 4]);
+        return (med8 ^ (med8 & 0xf) << 4);
+    }
+
     public static int readVpr(int decryptIndex, int data, byte[] key) {
         int med8 = (data ^ key[decryptIndex % 17] ^ KgmDecoder.maskV2PreDef[decryptIndex % (16 * 17)] ^ KgmDecoder.mask[decryptIndex >> 4]);
         data = (med8 ^ (med8 & 0xf) << 4);
         data ^= KgmDecoder.maskDiffVpr[decryptIndex % 17];
         return data;
+    }
+
+    public static int fitRange(int target, int max) {
+        return target - max * (target / max);
     }
 
 }

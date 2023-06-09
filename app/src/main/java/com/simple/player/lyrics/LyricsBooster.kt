@@ -10,11 +10,11 @@ import com.simple.player.service.SimplePlayer
 class LyricsBooster(private val activity: ComponentActivity): DefaultLifecycleObserver {
 
     private val timeAnimator = TimeAnimator().apply {
-        setTimeListener { animation, totalTime, deltaTime ->
+        setTimeListener { _, _, _ ->
             lrc?.let {
                 val list = it.lrcLineList
                 var i = list.size - 1
-                val current = com.simple.player.service.SimplePlayer.current.toLong()
+                val current = SimplePlayer.current.toLong()
                 while (i >= 0) {
                     val lyricsWord = list[i]
                     if (lyricsWord.startTime < current) {
