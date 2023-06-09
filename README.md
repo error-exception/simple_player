@@ -1,6 +1,6 @@
 # Simple Player
 
-本地音乐播放器（not stable）
+本地音乐播放器（not stable），内置一个简单的 HTTP 服务器，可与
 
 初次扫描完成且授予存储权限后，到设置 -> 播放器 -> 切换音乐源 -> 选择”External Storage“，体验完整功能。
 
@@ -10,7 +10,7 @@ release 目录中为非最新版
 
 最低支持安卓6.0（SDK 23），测试机型 Redmi note 8 MIUI11 Android 9.0
 
-不保证高版本安卓可用
+不保证高版本能够正常使用
 
 ## 功能
 
